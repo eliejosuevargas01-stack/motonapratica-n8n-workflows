@@ -1,0 +1,33 @@
+{
+  "name": "Moto Na Pratica - Midia Generator",
+  "nodes": [
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://aiplatform.googleapis.com/v1/projects/project-a4e884a2-8b32-4e15-878/locations/global/publishers/google/models/gemini-3.6-flash:generateContent",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "googleApi",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({\n  \"contents\": [\n    {\n      \"role\": \"user\",\n      \"parts\": [\n        {\n          \"text\": \"Você é o Diretor de Arte Fotográfica...\"\n        }\n      ]\n    }\n  ],\n  \"generationConfig\": {\n    \"temperature\": 0.5,\n    \"responseMimeType\": \"application/json\"\n  }\n}) }}"
+      },
+      "id": "4cea7343-e3e3-4eed-af24-4f2cbe94080d",
+      "name": "Vertex AI (Passo 4) - Diretor De Artes",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [-1632, 128],
+      "credentials": {
+        "googleApi": {
+          "id": "LHBHRLlwptta0XHn",
+          "name": "Google Service Account account"
+        }
+      }
+    }
+  ],
+  "connections": {},
+  "settings": {
+    "executionOrder": "v1",
+    "callerPolicy": "workflowsFromSameOwner"
+  },
+  "tags": [{"name": "Moto-Na-Pratica"}]
+}
