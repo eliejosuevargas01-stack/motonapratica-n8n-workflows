@@ -1,0 +1,1033 @@
+{
+  "id": "op3gvAdtkYjO9ydV",
+  "name": "Deep Research - Planner",
+  "description": "planeja a pesquisa profunda e chama scrapper",
+  "active": false,
+  "activeVersionId": null,
+  "createdAt": "2026-09-23T19:59:48.778Z",
+  "updatedAt": "2026-09-23T20:01:03.061Z",
+  "isArchived": false,
+  "versionId": "e1d494d0-fc5d-45a9-a54d-58dcf8d341be",
+  "versionCounter": 2,
+  "sourceWorkflowId": null,
+  "triggerCount": 0,
+  "nodes": [
+    {
+      "parameters": {
+        "model": "nvidia/nemotron-3-ultra-550b-a55b:free",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenRouter",
+      "typeVersion": 1,
+      "position": [
+        -832,
+        384
+      ],
+      "id": "465dcb31-499a-4cf4-b98e-7f4aff2c6bd9",
+      "name": "OpenRouter Chat Model",
+      "credentials": {
+        "openRouterApi": {
+          "id": "HSdnSXTZr0ZDrfG2",
+          "name": "EJVG"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=response format:\n[\n  {\n    \"topico principal\": \"Step 1: Technical Architecture and System Integration - Analyze the technical architectures...\",\n    \"passo\": \"1a\",\n    \"descricao_subtopico\": \"Map technical specifications...\"\n  },\n  {\n    \"topico principal\": \"Step 1: Technical Architecture and System Integration - Analyze the technical architectures...\",\n    \"passo\": \"1b\",\n    \"descricao_subtopico\": \"Examine current manual and...\"\n  },\n  {\n    \"topico principal\": \"Step 2: Time Efficiency and Productivity Metrics - Evaluate time savings...\",\n    \"passo\": \"2a\",\n    \"descricao_subtopico\": \"Search data about execution time...\"\n  }\n]\n\n\ntema do momento:\n{{ $json.asssunto }}\n\n\nExemplos corretos de passo_id:\n1a\n1b\n1c\netc...\nPASSO ID DEVE SER ESTRICTAMENTE [NUMERO DO PASSO][LETRA DO SUBTOPICO]\n\nidioma da pesquisa:\n{{ $json.lang }}\nExemplos corretos de passo_id:\n1a\n1b\n1c\netc...\nPASSO ID DEVE SER ESTRICTAMENTE [NUMERO DO PASSO][LETRA DO SUBTOPICO]",
+        "hasOutputParser": true,
+        "needsFallback": true,
+        "options": {
+          "systemMessage": "Response format:\n[\n  {\n    \"topico principal\": \"Step 1: Technical Architecture and System Integration - Analyze the technical architectures...\",\n    \"passo\": \"1a\",\n    \"descricao_subtopico\": \"Map technical specifications...\"\n  },\n  {\n    \"topico principal\": \"Step 1: Technical Architecture and System Integration - Analyze the technical architectures...\",\n    \"passo\": \"1b\",\n    \"descricao_subtopico\": \"Examine current manual and...\"\n  },\n  {\n    \"topico principal\": \"Step 2: Time Efficiency and Productivity Metrics - Evaluate time savings...\",\n    \"passo\": \"2a\",\n    \"descricao_subtopico\": \"Search data about execution time...\"\n  }\n]\n\n\nYou are a Senior Research Engineer using the STORM (Multi-perspective Question Asking) methodology. Your mission is to create a structured Deep Research plan.\n\nSilently analyze the topic through 5 to 6 different PERSPECTIVES (e.g., Technical, Economic, Practical/End-user, Historical). These perspectives will become your Main Topics.\n\n⚠️ QUANTITY AND LOGIC RULES (CRITICAL):\n- You HAVE the freedom and the obligation to generate exactly 5 to 6 Main Topics (Perspectives).\n- For EACH Main Topic, analyze its depth and generate exactly 2 or 3 action steps (subtopics). \n- Your final goal is to generate a total of 10 to 18 individual steps, depending entirely on your complexity assessment.\n\n\nExemplos corretos de passo_id:\n1a\n1b\n1c\netc...\nPASSO ID DEVE SER ESTRICTAMENTE [NUMERO DO PASSO][LETRA DO SUBTOPICO]\n\n🏆 GOLDEN RULES FOR CONTENT (STORM METHOD):\n- SINGLE FOCUS: Each subtopic must focus on seeking specific information that supports the step's perspective.\n- DIRECTED ACTION: Use research verbs (Map, Analyze, Search data about, Extract specifications).\n- PRACTICAL LANGUAGE: Focus on real, web-searchable aspects.\n\n\nExemplos corretos de passo_id:\n1a\n1b\n1c\netc...\nPASSO ID DEVE SER ESTRICTAMENTE [NUMERO DO PASSO][LETRA DO SUBTOPICO]\n\n📋 FIELD FORMATTING INSTRUCTIONS:\nYou are generating data to populate a structured system. Format the text for the requested fields exactly as follows:\n- For \"topico_principal\": Write the Step number and the Perspective Title (e.g., \"Step 1: Consumer View and Cost-Benefit\").\n- For \"passo_id\": Write only the step number followed by a lowercase letter without a period (e.g., \"1a\", \"1b\", \"1c\", \"2a\").\n- For \"descricao_subtopico\": Start immediately with an Action Verb followed by the specific research focus (e.g., \"Analyze the average cost...\").\n\nFocus ONLY on generating the best research content according to these rules. The system will handle the data formatting.\n\n"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        -1008,
+        144
+      ],
+      "id": "3c89850a-d6f8-4a88-833e-079489ea1efc",
+      "name": "monta o plano",
+      "retryOnFail": true,
+      "waitBetweenTries": 5000
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "deep-research",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        -2128,
+        240
+      ],
+      "id": "386ce54c-a9df-4a7b-b02a-b778784f4bf1",
+      "name": "Webhook",
+      "webhookId": "52e90967-cca5-4784-90e1-4ff356962bcd"
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={\n  \"status\": 202,\n  \"message\": \"Accepted\",\n  \"description\": \"The request has been received and is being processed in the background.\",\n  \"data\": {\n    \"jobId\": \"{{ $json.query.id }}\",\n    \"status\": \"processing\",\n    \"statusUrl\": \"https://myn8n.seommerce.shop/webhook/deepresearch_status\",\n    \"createdAt\": \"{{ $now.toISO() }}\",\n    \"estimatedCompletionTime\": \"{{ $now.plus({ minutes: 5 }).toISO() }}\"\n  }\n}",
+        "options": {
+          "responseCode": 202,
+          "responseHeaders": {
+            "entries": [
+              {
+                "name": "OK",
+                "value": "Deep research initiated."
+              },
+              {
+                "name": "Warning",
+                "value": " Do NOT call this tool again. We will send the final report via webhook upon completion of the research."
+              }
+            ]
+          }
+        }
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        -1680,
+        144
+      ],
+      "id": "bbf8ab50-6d7c-4400-b841-58d3521a0ab8",
+      "name": "Respond to Webhook"
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ $json }}",
+        "options": {
+          "responseCode": 400,
+          "responseHeaders": {
+            "entries": []
+          }
+        }
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        -1456,
+        336
+      ],
+      "id": "b9c2e1f8-8a41-4d3b-8133-1c047d0550bc",
+      "name": "Respond to Webhook1"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "c6b7fb74-e73d-4ca0-87d4-193128918757",
+              "leftValue": "={{ $json.query.id }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "exists",
+                "singleValue": true
+              }
+            },
+            {
+              "id": "57605277-7555-488a-8e14-1a421c0c820d",
+              "leftValue": "={{ $json.body.tema }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "exists",
+                "singleValue": true
+              }
+            },
+            {
+              "id": "0212c5b7-8e60-4c7a-ada3-052a6649181c",
+              "leftValue": "={{ $json.query.id }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "notEmpty",
+                "singleValue": true
+              }
+            },
+            {
+              "id": "781247ed-7e9b-497c-8507-e761ab213875",
+              "leftValue": "={{ $json.body.tema }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "notEmpty",
+                "singleValue": true
+              }
+            },
+            {
+              "id": "a781601b-69d7-4913-a25b-8d2df4453001",
+              "leftValue": "={{ $json.headers[\"x-apify-secret\"] }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "exists",
+                "singleValue": true
+              }
+            },
+            {
+              "id": "c157859a-5fd3-46cf-a666-bf1294cfad1e",
+              "leftValue": "={{ $json.headers[\"x-apify-secret\"] }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "notEmpty",
+                "singleValue": true
+              }
+            },
+            {
+              "id": "8c6fc4fe-a47b-4f27-91be-ae4802e18f90",
+              "leftValue": "={{ $json.headers[\"x-apify-secret\"] }}",
+              "rightValue": "bowT7Vwgclr4bUcJd80xZXgyVmI2HzjQdCRYNKX8rjiq3TorPWyw3EiHezLK7hygLlsah6ZLvZmuZf2XIjFmwk6UrtWT26a8OnKGwwje9aDEGLiHMU9N6FYhcO04326B",
+              "operator": {
+                "type": "string",
+                "operation": "equals",
+                "name": "filter.operator.equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        -1904,
+        240
+      ],
+      "id": "c68c6894-7e3b-46bf-8063-4a10686d0eda",
+      "name": "schema"
+    },
+    {
+      "parameters": {
+        "operation": "upsert",
+        "dataTableId": {
+          "__rl": true,
+          "value": "9ltZLFGUXe11LFQk",
+          "mode": "list",
+          "cachedResultName": "Pesquisa",
+          "cachedResultUrl": "/projects/0m3AYoFvtbqWOB3e/datatables/9ltZLFGUXe11LFQk"
+        },
+        "matchType": "allConditions",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "id_pesquisa",
+              "keyValue": "={{ $('Webhook').item.json.query.id }}"
+            }
+          ]
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "asssunto": "={{ $json.guardrailsInput }}",
+            "webhook_callback": "={{ $('Webhook').item.json.body.callbackUrl }}",
+            "id_pesquisa": "={{ $('Webhook').item.json.query.id }}",
+            "Fase": "planejar",
+            "lang": "={{ $('Webhook').item.json.body.language }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "asssunto",
+              "displayName": "asssunto",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "id_pesquisa",
+              "displayName": "id_pesquisa",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "angulo",
+              "displayName": "angulo",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "gancho",
+              "displayName": "gancho",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "relatorio",
+              "displayName": "relatorio",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "justificativa_angulo",
+              "displayName": "justificativa_angulo",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "justificativa_gancho",
+              "displayName": "justificativa_gancho",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "justificativa_assunto",
+              "displayName": "justificativa_assunto",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "keywords_assunto",
+              "displayName": "keywords_assunto",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "atualizacao",
+              "displayName": "atualizacao",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "boolean",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "webhook_callback",
+              "displayName": "webhook_callback",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Fase",
+              "displayName": "Fase",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "lang",
+              "displayName": "lang",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "position": [
+        -1232,
+        144
+      ],
+      "id": "1a281335-1a37-4544-b460-a59277039aea",
+      "name": "pega a pesquisa"
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "dataTableId": {
+          "__rl": true,
+          "value": "9ltZLFGUXe11LFQk",
+          "mode": "list",
+          "cachedResultName": "Pesquisa",
+          "cachedResultUrl": "/projects/0m3AYoFvtbqWOB3e/datatables/9ltZLFGUXe11LFQk"
+        },
+        "matchType": "allConditions",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "id_pesquisa",
+              "keyValue": "={{ $('pega a pesquisa').item.json.id_pesquisa }}"
+            },
+            {
+              "keyName": "Fase",
+              "keyValue": "planejar"
+            }
+          ]
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Fase": "garimpar"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "asssunto",
+              "displayName": "asssunto",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "id_pesquisa",
+              "displayName": "id_pesquisa",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "angulo",
+              "displayName": "angulo",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "gancho",
+              "displayName": "gancho",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "relatorio",
+              "displayName": "relatorio",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "justificativa_angulo",
+              "displayName": "justificativa_angulo",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "justificativa_gancho",
+              "displayName": "justificativa_gancho",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "justificativa_assunto",
+              "displayName": "justificativa_assunto",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "keywords_assunto",
+              "displayName": "keywords_assunto",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "atualizacao",
+              "displayName": "atualizacao",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "boolean",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "webhook_callback",
+              "displayName": "webhook_callback",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Fase",
+              "displayName": "Fase",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "position": [
+        -160,
+        48
+      ],
+      "id": "c21794a6-c57c-4ef7-892b-30e170b27e9d",
+      "name": "muda fase da pesquisa",
+      "executeOnce": true
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "gemini-3.5-flash",
+          "mode": "list",
+          "cachedResultName": "gemini-3.5-flash"
+        },
+        "builtInTools": {},
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.3,
+      "position": [
+        -976,
+        384
+      ],
+      "id": "145e1cbb-d6d2-4153-93b2-53d33ec917d5",
+      "name": "OpenAI Chat Model",
+      "credentials": {
+        "openAiApi": {
+          "id": "ni5SGSoVdackq86c",
+          "name": "test"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "amount": "={{ Math.random() * 3 }}"
+      },
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        -160,
+        240
+      ],
+      "id": "fd5e5ef0-fa24-4244-bb03-6faab741d07d",
+      "name": "Wait2",
+      "webhookId": "26d01100-6434-479f-be13-92cf21f2c9c8"
+    },
+    {
+      "parameters": {
+        "url": "https://myn8n.seommerce.shop/webhook/Scrapper",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "id_pesquisa",
+              "value": "={{ $json.id_pesquisa }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        64,
+        240
+      ],
+      "id": "5cf9b1ba-9e66-45a6-8d9e-be688af8c157",
+      "name": "chama garimpeiro2",
+      "executeOnce": false
+    },
+    {
+      "parameters": {
+        "jsCode": "// Pega os dados que chegaram no Webhook\nconst item = $input.first().json;\n\nconst errors = [];\nconst EXPECTED_SECRET = \"bowT7Vwgclr4bUcJd80xZXgyVml2HzjQdCRYNKX8rjiq3TorPWyw3EiHezl\";\n\n// 1. Validate query.id (Must exist, not empty, and MUST be an integer)\nconst idRaw = item.query?.id;\nconst idNum = Number(idRaw);\n\nif (idRaw === undefined || idRaw === null || String(idRaw).trim() === '') {\n  errors.push(\"Missing or empty required parameter: 'query.id'.\");\n} else if (isNaN(idNum) || !Number.isInteger(idNum)) {\n  errors.push(\"Invalid parameter: 'query.id' must be a valid integer number (e.g. 123456).\");\n}\n\n// 2. Validate body.tema\nconst tema = item.body?.tema;\nif (tema === undefined || tema === null || String(tema).trim() === '') {\n  errors.push(\"Missing or empty required parameter: 'body.tema'.\");\n}\n\n// 3. Validate x-apify-secret\nconst secretHeader = item.headers ? (item.headers['x-apify-secret'] || item.headers['X-Apify-Secret']) : undefined;\n\nif (!secretHeader || String(secretHeader).trim() === '') {\n  errors.push(\"Missing required header: 'x-apify-secret'.\");\n} else if (secretHeader !== EXPECTED_SECRET) {\n  errors.push(\"Unauthorized: Invalid 'x-apify-secret' header provided.\");\n}\n\n// 4. Validate body.webhook_callback\nconst webhookCallback = item.body?.webhook_callback;\nif (webhookCallback === undefined || webhookCallback === null || String(webhookCallback).trim() === '') {\n  errors.push(\"Missing or empty required parameter: 'body.webhook_callback'.\");\n}\n\nconst isValid = errors.length === 0;\n\n// Return JSON error response\nreturn [{\n  json: {\n    status: isValid ? 200 : 400,\n    success: isValid,\n    is_valid: isValid,\n    error: isValid ? null : \"Input Validation Error\",\n    errors: errors,\n    message: isValid ? \"Validation successful.\" : errors.join(\" | \")\n  }\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -1680,
+        336
+      ],
+      "id": "095eb874-7600-4541-9178-68bd642eb4eb",
+      "name": "Code in JavaScript"
+    },
+    {
+      "parameters": {
+        "dataTableId": {
+          "__rl": true,
+          "value": "arAS2xvz1XBxyA57",
+          "mode": "list",
+          "cachedResultName": "passos",
+          "cachedResultUrl": "/projects/0m3AYoFvtbqWOB3e/datatables/arAS2xvz1XBxyA57"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Processando": "={{ false }}",
+            "id_pesquisa": "={{ $('pega a pesquisa').item.json.id_pesquisa }}",
+            "passo_id": "={{ $json.passo_id }}",
+            "topico_principal": "={{ $json.topico_principal }}",
+            "status": "pendente",
+            "descricao_subtopico": "={{ $json.descricao_subtopico }}",
+            "webhook_callback": "={{ $('pega a pesquisa').item.json.webhook_callback }}",
+            "tentativas": 0
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "id_pesquisa",
+              "displayName": "id_pesquisa",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "passo_id",
+              "displayName": "passo_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "topico_principal",
+              "displayName": "topico_principal",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "status",
+              "displayName": "status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "descricao_subtopico",
+              "displayName": "descricao_subtopico",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "ultima_query",
+              "displayName": "ultima_query",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "informacao_consolidada",
+              "displayName": "informacao_consolidada",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "webhook_callback",
+              "displayName": "webhook_callback",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "tentativas",
+              "displayName": "tentativas",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Processando",
+              "displayName": "Processando",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "boolean",
+              "readOnly": false,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "position": [
+        -384,
+        144
+      ],
+      "id": "acab8921-fb7f-498c-9063-6f42ac1bc29e",
+      "name": "Insert row"
+    },
+    {
+      "parameters": {
+        "jsCode": "// 1. Pega o texto bruto que veio no campo \"output\" do nó anterior\nlet rawText = $input.first().json.output || \"\";\n\n// 2. Remove possíveis blocos de formatação markdown (```json ... ```) caso a IA tenha inserido\nconst cleanText = rawText.replace(/^```(json)?|```$/gm, '').trim();\n\ntry {\n  // 3. Transforma a string de texto em um Array JavaScript real\n  const parsedArray = JSON.parse(cleanText);\n\n  // 4. Corrige as chaves e formata a saída\n  // (A IA mudou \"topico_principal\" para \"topico principal\" e \"passo_id\" para \"passo\")\n  const finalItems = parsedArray.map(item => {\n    return {\n      topico_principal: item[\"topico principal\"] || item.topico_principal || \"\",\n      passo_id: item.passo || item.passo_id || \"\",\n      descricao_subtopico: item.descricao_subtopico || \"\"\n    };\n  });\n\n  // 5. Retorna o array. \n  // O n8n automaticamente transforma cada objeto do array em uma \"linha/item\" separada!\n  return finalItems;\n\n} catch (error) {\n  // Se a IA cuspir algo muito quebrado, o nó avisa exatamente o erro\n  throw new Error(\"Falha ao processar o JSON gerado pela IA. Texto recebido: \" + rawText);\n}"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -608,
+        144
+      ],
+      "id": "2ec2f860-0ded-4871-9c35-e95339adf72a",
+      "name": "Code in JavaScript1"
+    },
+    {
+      "parameters": {
+        "operation": "sanitize",
+        "text": "={{ $json.body.tema }}",
+        "guardrails": {
+          "secretKeys": {
+            "value": {
+              "permissiveness": "balanced"
+            }
+          }
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.guardrails",
+      "typeVersion": 2,
+      "position": [
+        -1456,
+        144
+      ],
+      "id": "3033ab0e-15ec-4371-a8af-0a68329c5bfb",
+      "name": "Guardrails"
+    }
+  ],
+  "connections": {
+    "OpenRouter Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "monta o plano",
+            "type": "ai_languageModel",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "monta o plano": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "schema",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Respond to Webhook": {
+      "main": [
+        [
+          {
+            "node": "Guardrails",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "schema": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "pega a pesquisa": {
+      "main": [
+        [
+          {
+            "node": "monta o plano",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "monta o plano",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait2": {
+      "main": [
+        [
+          {
+            "node": "chama garimpeiro2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Insert row": {
+      "main": [
+        [
+          {
+            "node": "muda fase da pesquisa",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Wait2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript1": {
+      "main": [
+        [
+          {
+            "node": "Insert row",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Guardrails": {
+      "main": [
+        [
+          {
+            "node": "pega a pesquisa",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "nodeGroups": [],
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": true
+  },
+  "staticData": null,
+  "pinData": {
+    "Webhook": [
+      {
+        "json": {
+          "headers": {
+            "host": "myn8n.seommerce.shop",
+            "user-agent": "node",
+            "content-length": "95",
+            "accept": "*/*",
+            "accept-encoding": "br, gzip, deflate",
+            "accept-language": "*",
+            "content-type": "application/json",
+            "sec-fetch-mode": "cors",
+            "x-apify-secret": "bowT7Vwgclr4bUcJd80xZXgyVmI2HzjQdCRYNKX8rjiq3TorPWyw3EiHezLK7hygLlsah6ZLvZmuZf2XIjFmwk6UrtWT26a8OnKGwwje9aDEGLiHMU9N6FYhcO04326B",
+            "x-forwarded-for": "35.175.191.179",
+            "x-forwarded-host": "myn8n.seommerce.shop",
+            "x-forwarded-port": "443",
+            "x-forwarded-proto": "https",
+            "x-forwarded-server": "0f31aca31a73",
+            "x-real-ip": "35.175.191.179"
+          },
+          "params": {},
+          "query": {
+            "id": "1789902645916"
+          },
+          "body": {
+            "tema": "Motonapratica.online",
+            "id_pesquisa": 1789902645916,
+            "language": "en-US",
+            "callbackUrl": ""
+          },
+          "webhookUrl": "https://myn8n.seommerce.shop/webhook/deep-research",
+          "executionMode": "production"
+        }
+      }
+    ]
+  },
+  "meta": null,
+  "tags": [
+    {
+      "id": "I1tPTJVmCdtv2spd",
+      "name": "Deep Research",
+      "createdAt": "2026-09-23T20:00:38.358Z",
+      "updatedAt": "2026-09-23T20:00:38.358Z"
+    },
+    {
+      "id": "WWkQSlVovFHP0UDj",
+      "name": "Moto-Na-Pratica",
+      "createdAt": "2026-09-23T17:08:30.993Z",
+      "updatedAt": "2026-09-23T17:08:30.993Z"
+    }
+  ],
+  "shared": [
+    {
+      "role": "workflow:owner",
+      "workflowId": "op3gvAdtkYjO9ydV",
+      "projectId": "0m3AYoFvtbqWOB3e",
+      "project": {
+        "id": "0m3AYoFvtbqWOB3e",
+        "name": "eliezer vargas <eliejosuevargas01@gmail.com>",
+        "type": "personal",
+        "icon": null,
+        "description": null,
+        "customTelemetryTags": [],
+        "creatorId": "a8a2c9ad-2763-4a77-ba81-c27a1ac09067",
+        "createdAt": "2025-12-06T14:56:50.686Z",
+        "updatedAt": "2025-12-06T14:58:20.912Z"
+      },
+      "createdAt": "2026-09-23T19:59:48.778Z",
+      "updatedAt": "2026-09-23T19:59:48.778Z"
+    }
+  ],
+  "activeVersion": null
+}

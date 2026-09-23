@@ -1,5 +1,16 @@
 {
+  "id": "sgK1oLuR2qMVcvXI",
   "name": "Moto Na Pratica - Midia Generator",
+  "description": "este é o gerador de midias do artigo, ele deve gerar duas imagens por artigo, não mais do que isso, ele é chamado diretamente pelo Escritor para gerar a midia (imagens e audios)",
+  "active": true,
+  "activeVersionId": "4e0d5ea2-6b48-48eb-8add-186e755efe91",
+  "createdAt": "2026-09-23T17:15:35.433Z",
+  "updatedAt": "2026-09-23T17:19:21.960Z",
+  "isArchived": false,
+  "versionId": "4e0d5ea2-6b48-48eb-8add-186e755efe91",
+  "versionCounter": 3,
+  "sourceWorkflowId": null,
+  "triggerCount": 1,
   "nodes": [
     {
       "parameters": {
@@ -9,25 +20,1979 @@
         "nodeCredentialType": "googleApi",
         "sendBody": true,
         "specifyBody": "json",
-        "jsonBody": "={{ JSON.stringify({\n  \"contents\": [\n    {\n      \"role\": \"user\",\n      \"parts\": [\n        {\n          \"text\": \"Você é o Diretor de Arte Fotográfica...\"\n        }\n      ]\n    }\n  ],\n  \"generationConfig\": {\n    \"temperature\": 0.5,\n    \"responseMimeType\": \"application/json\"\n  }\n}) }}"
+        "jsonBody": "={{ JSON.stringify({\n  \"contents\": [\n    {\n      \"role\": \"user\",\n      \"parts\": [\n        {\n          \"text\": \"Você é o Diretor de Arte Fotográfica de uma revista de motociclismo de elite. Sua tarefa é analisar um artigo e criar comandos (prompts) em INGLÊS para uma IA gerar imagens, mas sob um orçamento rigoroso. NÃO reescreva o artigo nem devolva o texto do post, retorne apenas os prompts e a estratégia.\\n\\nTÍTULO DO ARTIGO: \" + $json.body.payload_para_api.output.pt.title + \"\\n\\nTEXTO DOS BLOCOS:\\n\" + Object.keys($json.body.payload_para_api.output.pt).filter(k => k.startsWith('block-')).sort((a, b) => Number(a.split('-')[1]) - Number(b.split('-')[1])).map(k => 'BLOCO ' + k.split('-')[1] + ':\\n' + $json.body.payload_para_api.output.pt[k]).join('\\n\\n') + \"\\n\\nSUA TAREFA EXECUTIVA:\\n- PASSO 1: Crie 1 prompt de imagem para a CAPA (ampla, épica, que resuma o tom geral).\\n- PASSO 2 (Gestão de Orçamento): Você tem limite para criar imagens para no MÁXIMO 4 BLOCOS INTERNOS (ou seja, você vai escolher apenas 3 a 4 blocos cruciais no meio do texto inteiro para ilustrar).\\n- PASSO 3: Leia os blocos e escolha os momentos mais 'visuais' (ex: uma queda na Curva 1, um piloto com dor no ombro, mecânicos analisando telemetria) e crie os prompts em inglês apenas para esses blocos específicos.\\n\\nREGRAS DOS PROMPTS:\\n- Idioma: INGLÊS.\\n- Estilo visual: 'Hyper-realistic editorial motorsport photography, action sports photography, 35mm lens, 8k resolution, cinematic lighting, highly detailed'.\\n- NUNCA peça textos, marcas ou letras na imagem.\\n- ANTI-CENSURA OBRIGATÓRIO: É ESTRITAMENTE PROIBIDO usar nomes de pessoas reais (Pedro Acosta, Marc Márquez, Bagnaia) ou marcas/fabricantes (Ducati, Aprilia, KTM) nos prompts. O sistema de geração de imagens bloqueia nomes próprios. Para burlar isso, você DEVE substituir os nomes por DESCRIÇÕES FÍSICAS EXTREMAMENTE DETALHADAS. Exemplo: em vez de 'Pedro Acosta na Ducati', escreva 'A young Spanish motorcycle racer wearing a red, white and black racing suit with number 31 and a shark-themed helmet, riding a red Italian prototype sports motorcycle with aerodynamic front winglets'. Em vez de 'Aprilia', use 'black Italian racing motorcycle'.\\n- Intercale as fotos: Não coloque fotos em blocos seguidos (ex: evite fotos no Bloco 1 e 2 juntos).\"\n        }\n      ]\n    }\n  ],\n  \"generationConfig\": {\n    \"temperature\": 0.5,\n    \"responseMimeType\": \"application/json\",\n    \"responseSchema\": {\n      \"type\": \"OBJECT\",\n      \"properties\": {\n        \"estrategia_visual_e_orcamento\": {\n          \"type\": \"STRING\",\n          \"description\": \"Explicação em PT-BR de por que você escolheu ilustrar esses blocos específicos e ignorou os outros para economizar imagens.\"\n        },\n        \"prompt_capa\": {\n          \"type\": \"STRING\",\n          \"description\": \"O prompt hiper-detalhado em INGLÊS para a imagem principal. PROIBIDO USAR NOMES PRÓPRIOS OU MARCAS AQUI, use apenas descrições físicas.\"\n        },\n        \"imagens_internas\": {\n          \"type\": \"ARRAY\",\n          \"description\": \"A lista com no máximo 4 imagens para distribuir no texto.\",\n          \"items\": {\n            \"type\": \"OBJECT\",\n            \"properties\": {\n              \"numero_do_bloco_alvo\": {\n                \"type\": \"INTEGER\",\n                \"description\": \"O número do bloco (1 a 12) APÓS o qual esta imagem será inserida (ex: 2 significa que a foto entra depois do Bloco 2).\"\n              },\n              \"prompt_em_ingles\": {\n                \"type\": \"STRING\",\n                \"description\": \"O comando detalhado para gerar esta imagem. DEVE usar descrições visuais genéricas de roupas e motos em vez de citar nomes reais ou marcas.\"\n              }\n            },\n            \"required\": [\"numero_do_bloco_alvo\", \"prompt_em_ingles\"]\n          }\n        }\n      },\n      \"required\": [\"estrategia_visual_e_orcamento\", \"prompt_capa\", \"imagens_internas\"]\n    }\n  }\n}) }}",
+        "options": {}
       },
       "id": "4cea7343-e3e3-4eed-af24-4f2cbe94080d",
       "name": "Vertex AI (Passo 4) - Diretor De Artes",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
-      "position": [-1632, 128],
+      "position": [
+        -1632,
+        128
+      ],
+      "retryOnFail": true,
+      "credentials": {
+        "googleApi": {
+          "id": "LHBHRLlwptta0XHn",
+          "name": "Google Service Account account"
+        }
+      },
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "jsCode": "// 1. Extrai a resposta bruta do Diretor de Arte\nconst dadosArte = Array.isArray($input.all()[0].json) ? $input.all()[0].json[0] : $input.all()[0].json;\nconst textoBruto = dadosArte?.candidates?.[0]?.content?.parts?.[0]?.text;\nif (!textoBruto) throw new Error(\"Resposta do Diretor de Arte inválida.\");\n\n// Limpa e faz o parse do JSON do Diretor de Arte\nlet jsonLimpo = textoBruto.trim().replace(/^```json/, \"\").replace(/```$/, \"\").trim();\nconst iArte = JSON.parse(jsonLimpo);\n\n// 2. Monta o objeto contendo estritamente a capa e as imagens internas escolhidas\nconst imagensGeradas = {\n    \"img-1\": iArte.prompt_capa\n};\n\nif (iArte.imagens_internas && Array.isArray(iArte.imagens_internas)) {\n    iArte.imagens_internas.forEach(img => {\n        // A foto após o bloco N equivale a img-(N+1)\n        const chaveImg = `img-${img.numero_do_bloco_alvo + 1}`;\n        imagensGeradas[chaveImg] = img.prompt_em_ingles;\n    });\n}\n\n// 3. Retorna APENAS a estratégia e os prompts, zerando qualquer texto do post\nreturn [{\n    json: {\n        estrategia_visual: iArte.estrategia_visual_e_orcamento,\n        prompts_de_imagens: imagensGeradas\n    }\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -1088,
+        128
+      ],
+      "id": "87f56bb8-23dc-435b-9957-6d61acc13ac3",
+      "name": "parser 4"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        -336,
+        128
+      ],
+      "id": "6ab16e33-d22c-4fb2-81ec-48ddcf2d4635",
+      "name": "Loop Over Items1"
+    },
+    {
+      "parameters": {
+        "amount": 20
+      },
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        560,
+        128
+      ],
+      "id": "ac3d0157-cbb0-4d06-851c-66284ce4a84b",
+      "name": "Wait",
+      "webhookId": "55b2bc5c-5374-40df-9f4b-9940fcb28ad3"
+    },
+    {
+      "parameters": {
+        "jsCode": "// 1. Pega os prompts de imagem do nó anterior\nconst item = $input.first();\nif (!item || !item.json || !item.json.prompts_de_imagens) {\n    throw new Error(\"A estrutura 'prompts_de_imagens' não foi encontrada na entrada.\");\n}\n\nconst prompts = item.json.prompts_de_imagens;\n\n// 2. Puxa o ID estritamente do nó \"Image Generator\" direto do body\nconst dadosWebhook = $('Image Generator').first().json;\nconst postId = dadosWebhook?.body?.payload_para_api?.output?.pt?.id || \"ID_NAO_ENCONTRADO\";\n\nconst filaDeImagens = [];\n\n// 3. Varre as chaves de imagem e monta o payload individual para o loop\nfor (const key in prompts) {\n    if (key.startsWith('img-')) {\n        // Extrai o número da posição (1 = hero, 2 = bloco 1, etc.)\n        const numeroPosicao = parseInt(key.replace('img-', ''), 10);\n        \n        filaDeImagens.push({\n            json: {\n                post_id: postId,         // ID puxado do body do webhook\n                position: numeroPosicao, // Posição numérica da imagem\n                image: prompts[key]      // O prompt fotorrealista em inglês\n            }\n        });\n    }\n}\n\n// 4. Retorna a fila dividida para a Vertex AI processar item por item\nreturn filaDeImagens;"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -560,
+        128
+      ],
+      "id": "3fabd4c4-1576-4e26-8f71-dcf98b60d689",
+      "name": "formata prompts para o loop"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "a50398b8-940a-4dd7-9231-abd87aa0fe82",
+              "name": "post_id",
+              "value": "={{ $('Loop Over Items1').item.json.post_id }}",
+              "type": "string"
+            },
+            {
+              "id": "b8283818-13bb-49e2-8165-11debb684ff2",
+              "name": "position",
+              "value": "={{ $('Loop Over Items1').item.json.position }}",
+              "type": "number"
+            },
+            {
+              "id": "a699dc87-d2a3-4f2b-8bc1-2f82df871c5a",
+              "name": "image",
+              "value": "={{ $json.body?.choices?.[0]?.message?.images?.[0]?.image_url?.url || $json.choices?.[0]?.message?.images?.[0]?.image_url?.url || \"\" }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.5,
+      "position": [
+        112,
+        48
+      ],
+      "id": "a9f9f350-1a55-4797-a69c-1d6e56db98c8",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://render-llm-router.onrender.com/v1/chat/completions",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "openAiApi",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"model\": \"google/gemini-2.5-flash-image\",\n  \"messages\": [\n    {\n      \"role\": \"system\",\n      \"content\": \"You are an expert image generation AI. Generate high-quality, realistic images based on the user prompt. Always output the image in the response.\"\n    },\n    {\n      \"role\": \"user\",\n      \"content\": $json.image\n    }\n  ]\n}",
+        "options": {
+          "response": {
+            "response": {
+              "neverError": true
+            }
+          }
+        }
+      },
+      "id": "32190d19-9e11-4ae6-9a9f-95aa79a73a45",
+      "name": "Vertex AI (Passo 5) - Gerador De Imagens",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -112,
+        48
+      ],
+      "retryOnFail": true,
+      "maxTries": 5,
+      "waitBetweenTries": 5000,
+      "credentials": {
+        "openAiApi": {
+          "id": "ni5SGSoVdackq86c",
+          "name": "test"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "PATCH",
+        "url": "https://motonapratica.online/api/posts",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "x-api-key",
+              "value": "motonapratica-secret-key-2026"
+            }
+          ]
+        },
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "post_id",
+              "value": "={{ $json.post_id }}"
+            },
+            {
+              "name": "position",
+              "value": "={{ $json.position }}"
+            },
+            {
+              "name": "image",
+              "value": "={{ $json.image }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        336,
+        48
+      ],
+      "id": "18dad177-dc54-4bac-813e-4b3e872080ca",
+      "name": "send image to moto na pratica"
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "motonapratica",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        -2080,
+        416
+      ],
+      "id": "999cf5f7-8c5b-4ea1-b791-4160ce5c146e",
+      "name": "Image Generator",
+      "webhookId": "e654658a-6b46-4833-8409-40e0e50b751a"
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.query.action }}",
+                    "rightValue": "img",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "id": "ad513b27-8efe-44ce-82a4-ee78d9a21e0e"
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "gerar imagens"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "189b1f05-c00c-4a78-bf84-4d21759d42c7",
+                    "leftValue": "={{ $json.query.action }}",
+                    "rightValue": "update",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "melhorar post"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "45df7078-f169-4284-ac12-8ced924e7eab",
+                    "leftValue": "={{ $json.query.action }}",
+                    "rightValue": "audio",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "narração"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.4,
+      "position": [
+        -1856,
+        400
+      ],
+      "id": "efb04fd0-53f4-4a6c-af8e-1ba3e63e9574",
+      "name": "Switch1"
+    },
+    {
+      "parameters": {
+        "jsonSchemaExample": "{\n  \"tema_pesquisa\": \"[O texto exato e cirúrgico que foi elaborado e enviado para a ferramenta 'Moto na pratica - Deep Research', detalhando as lacunas do post antigo e o ângulo de atualização]\",\n  \"keywords_validadas\": [\n    \"[palavra-chave principal de alto volume extraída do Trends atual]\",\n    \"[termo secundário relevante para atualização]\"\n  ],\n  \"paa_identificadas\": [\n    \"[pergunta exata 1 extraída do People Also Ask que estava faltando no post original]\",\n    \"[pergunta exata 2 extraída do People Also Ask que precisa ser respondida]\"\n  ],\n  \"justificativa\": \"[Explicação lógica detalhada da estratégia de atualização, citando os novos volumes de buscas, o peso dessas novas PAAs identificadas, o que exatamente estava obsoleto no texto antigo, e como essa pesquisa vai tornar a pauta competitiva novamente]\"\n}"
+      },
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.3,
+      "position": [
+        -760,
+        536
+      ],
+      "id": "265b2317-2c11-430e-8932-e93e419b435b",
+      "name": "Structured Output Parser"
+    },
+    {
+      "parameters": {
+        "description": "=Use this tool specifically to collect quantitative data about public interest via Google Trends. Trigger it when you need to analyze search volumes, compare relative popularity between keywords, or track trends over time. \n\n⚠️ CRITICAL LIMITATION: Google Trends fails and returns empty data for long-tail keywords or specific phrases. \n- You MUST NOT generate full questions, sentences, or highly specific long-tail phrases.\n- KEEP IT SHORT: You MUST strictly use broad, high-volume terms consisting of 1 to 3 words maximum per term.\n- WRONG EXAMPLES (DO NOT USE): \"como funciona consórcio de motos\", \"vantagens consórcio moto\".\n- CORRECT EXAMPLES (USE THESE): \"consórcio moto\", \"Yamaha FZ25\", \"Honda CG 160\", \"MotoGP\".\n- Limit the array to a maximum of 5 terms.\n\nJSON Example:\n\n[\n  {\n    \"keywords_to_search\": [\n      \"Yamaha FZ25\",\n      \"Fazer 250\",\n      \"Honda CB Twister\",\n      \"consórcio moto\"\n    ]\n  }\n]",
+        "workflowId": {
+          "__rl": true,
+          "value": "kzsJmLkAWtfy7d6k",
+          "mode": "list",
+          "cachedResultUrl": "/workflow/kzsJmLkAWtfy7d6k",
+          "cachedResultName": "moto na pratica tools"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {},
+          "matchingColumns": [],
+          "schema": [],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.toolWorkflow",
+      "typeVersion": 2.2,
+      "position": [
+        -1144,
+        536
+      ],
+      "id": "a046d357-7777-4d1e-b1f0-2330572d5d64",
+      "name": "Call 'Moto na pratica - Google Trends'1"
+    },
+    {
+      "parameters": {
+        "toolDescription": "Moto na pratica - Deep Research\nUse this tool specifically to search for qualitative, factual, and in-depth information on the web. Trigger it when you need to read multiple sources, extract complex narratives, investigate specific news, market rumors, contract changes, technical details, and synthesize dense texts into comprehensive analytical reports.\n\nJSON Example:\n\n{\n  \"tema\": \"The exact topic the writer needs to research\",\n  \"webhook_callback\": \"https://myn8n.seommerce.shop/webhook/deep-research-callback\"\n}",
+        "method": "POST",
+        "url": "https://myn8n.seommerce.shop/webhook/deep-research",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "id",
+              "value": "={{ $('cria um id unico1').item.json.id_pesquisa }}"
+            }
+          ]
+        },
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('parameters0_Name', ``, 'string') }}",
+              "value": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('parameters0_Value', ``, 'string') }}"
+            },
+            {
+              "name": "webhook_callback",
+              "value": "https://myn8n.seommerce.shop/webhook/deep-research-callback"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequestTool",
+      "typeVersion": 4.4,
+      "position": [
+        -1016,
+        536
+      ],
+      "id": "4d8daa63-c783-4863-9975-b5e93620a687",
+      "name": "Call 'Moto na Pratica'1"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Artigo a ser Atualizado:\n{{ JSON.stringify($json.body) }}\n\nGoogle Search & PAA: {{ JSON.stringify($json.pesquisa_profunda_google) }} use the google trends news to know",
+        "hasOutputParser": true,
+        "needsFallback": true,
+        "options": {
+          "systemMessage": "=You are the Autonomous Editor-in-Chief and Content Auditor of the \"Moto na Prática\" portal.\nYour sole objective is to analyze an OUTDATED ARTICLE provided by the user, identify information gaps based on current search trends, and dispatch a targeted research task to modernize, update, and optimize the post for Google Discover and Search. YOU DO NOT WRITE ARTICLES.\n\nCurrent year context: 2026. Always base your timeline, dates, and season references strictly on the current year 2026 and upcoming 2027, 2028 etc.\n\nCore Focus & Intent Preservation: You must maintain the exact focus, tone, and format of the original article. Never force a drastic shift in the narrative angle. Mirror the source material's primary intent:\n- Reviews/Listicles: Focus strictly on evaluating the products or items.\n- Events: Center the narrative exclusively on the specific event details.\n- News: Stick directly to the factual reporting of the news.\nAvoid diverging from the article's fundamental subject.\n\nEDITORIAL TONE & CRITERIA (MANDATORY):\n- O tom de voz do blog é \"papo reto\", amigável e com fascinação por 2 rodas. É uma conversa de amigos no posto de gasolina ou na oficina.\n- O público-alvo é o motociclista real (ex: o cara que pega sua FZ25 ou moto naked média para ir trampar, pra faculdade ou pegar uma estrada no fim de semana).\n- A atualização da pauta deve unir duas coisas: ALTO volume de busca atual E responder às novas dores/dúvidas reais do leitor (People Also Ask) traduzidas para a realidade prática das ruas.\n\nTool Usage & Capabilities:\nYou have access to specialized tools and must use them strategically to audit and update the content.\n\nCRITICAL TOOL EXECUTION PROTOCOL (MANDATORY ORDER):\nYou are STRICTLY FORBIDDEN from generating final content or calling tools out of order. Each tool can only be called EXACTLY ONCE and in this exact sequence:\n\nSTEP 1: Call 'Moto na pratica - Google Trends' (EXACTLY ONCE).\n- Read the user input (the subject or title of the outdated article).\n- Formulate a diverse list of keywords related to this subject to discover what people are actively searching for NOW.\n- Call the tool to gather quantitative data about current public interest, search volumes, PAA (People Also Ask), and top 3 competitor titles currently ranking for this subject. Wait for it to finish.\n\nSTEP 2: Call 'Posts Ja Escritos' (EXACTLY ONCE).\n- Use this tool to retrieve the current published version of the outdated article from the blog's archive.\n- You MUST analyze what is currently written to establish a baseline.\n- Identify exactly what is obsolete, what current keywords are missing, and which new PAAs (discovered in Step 1) are not being answered in the old text. Wait for the tool to finish.\n\nSTEP 3: Evaluate the Information & Behavioral Gap (CRITICAL ANALYSIS).\nAnalyze the discrepancy between the fresh data returned by the Trends tool and the old content. You must translate dry keywords and PAA questions into real-world rider friction:\n- If a PAA asks about \"reliability\", translate this into hunting for frequent inconveniences and design flaws.\n- If a keyword points to \"fuel economy\", translate this into hunting for real-world rush hour and lane-splitting performance.\n- Define the exact \"Update Strategy\": What new angle is needed? Which specific questions must be answered? What obsolete data (prices, model years, specs) needs correction to reflect 2026/2027 reality?\n\nSTEP 4: Call 'Moto na pratica - Deep Research' (EXACTLY ONCE).\nUse the gaps identified in Step 3 to construct your research queries. You are NOT researching a new topic; you are researching the MISSING PIECES to update the old post.\nWhen calling the tool, you MUST strictly use the structure below, forcing the Deep Research to extract both technical data and behavioral insights:\n\n{\n  \"tema\": \"The exact elements needed to update the post. You must explicitly direct the Deep Research tool to find: 1) Core technical updates (2026/2027 specs, updated prices, missing PAA answers); 2) User behavioral data: Frequent inconveniences and chronic pain points discussed by real riders in forums/comments regarding this topic; 3) 'Corridor & Rush Hour' reality checks versus marketing claims; 4) 'Traffic light' curiosities (polarizing or unique elements that generate street-level debate among everyday riders).\"\n}\n\nSTEP 5: Final Output & Justification.\nAfter the Deep Research tool has been successfully triggered, output your final audit report to the user.\nYou MUST provide a clear justification explaining the UPDATE STRATEGY (explicitly citing the new search volumes, the new PAA questions that dictated the research, what exactly was obsolete in the original post, and how the dispatched Deep Research targeting technical gaps and real-world rider complaints will make this article highly competitive again).\n\nConclude your execution. DO NOT WRITE THE ARTICLE.\n"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        -1176,
+        320
+      ],
+      "id": "b892ec4f-900e-4d78-885b-dbe6d2d9f001",
+      "name": "Diretor SEO Escolhe a pauta a ser produzida1",
+      "retryOnFail": true
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "945b31c8-1f71-4359-9a88-129b2f491822",
+              "name": "id_pesquisa",
+              "value": "={{ $json.body.translationGroupId }}",
+              "type": "string"
+            },
+            {
+              "id": "f545dce5-6ab8-4400-9981-5b547331cb24",
+              "name": "body",
+              "value": "={{ $json.body }}",
+              "type": "object"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.5,
+      "position": [
+        -1632,
+        416
+      ],
+      "id": "59f40dd3-122d-42de-8a82-399b3c75f042",
+      "name": "cria um id unico1"
+    },
+    {
+      "parameters": {
+        "url": "https://myn8n.seommerce.shop/webhook/posts-slug",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "action",
+              "value": "get_posts_ja_gerados"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequestTool",
+      "typeVersion": 4.4,
+      "position": [
+        -888,
+        536
+      ],
+      "id": "0a276597-4b3b-470a-b622-471678217c39",
+      "name": "Call 'Posts Ja Escritos'1"
+    },
+    {
+      "parameters": {
+        "jsCode": "function converterHtmlParaTextoTts(titulo, blocosHtml) {\n  // Unifica todos os blocos HTML em uma única string\n  let html = blocosHtml.join(\"\\n\\n\");\n\n  // Função auxiliar inteligente para substituir blocos <div> respeitando o aninhamento (evita o corte do texto)\n  function replaceDivBlock(htmlStr, className, replacement) {\n    let regex = new RegExp(`<div[^>]*class=\"[^\"]*${className}[^\"]*\"`, 'gi');\n    let match;\n    \n    while ((match = regex.exec(htmlStr)) !== null) {\n      let start = match.index;\n      let end = start + match[0].length;\n      let openDivs = 1; // Já conta a div principal que abriu o bloco\n\n      // Procura pelas próximas tags div (abrindo ou fechando)\n      let tagRegex = /<\\/?div[^>]*>/gi;\n      tagRegex.lastIndex = end;\n\n      let tagMatch;\n      while ((tagMatch = tagRegex.exec(htmlStr)) !== null) {\n        if (tagMatch[0].toLowerCase().startsWith('</div')) {\n          openDivs--;\n        } else {\n          openDivs++;\n        }\n\n        // Quando zerar as divs abertas, achamos o fim exato do bloco\n        if (openDivs === 0) {\n          end = tagMatch.index + tagMatch[0].length;\n          break;\n        }\n      }\n\n      // Substitui o bloco exato e mantém o restante do texto intacto\n      let before = htmlStr.substring(0, start);\n      let after = htmlStr.substring(openDivs === 0 ? end : htmlStr.length);\n      htmlStr = before + replacement + after;\n      \n      // Ajusta o cursor do regex para continuar procurando outros blocos\n      regex.lastIndex = start + replacement.length;\n    }\n    return htmlStr;\n  }\n\n  // 1. Detecta e substitui TABELAS COMPARATIVAS\n  html = html.replace(/<table[\\s\\S]*?<\\/table>/gi, '\\n\\nVeja a tabela comparativa de valores e custos completa em nosso site.\\n\\n');\n\n  // 2. Detecta e substitui FICHAS TÉCNICAS (.ficha-tecnica) - Usando a função inteligente\n  html = replaceDivBlock(html, 'ficha-tecnica', '\\n\\nConfira a ficha técnica detalhada no nosso site.\\n\\n');\n\n  // 3. Detecta e substitui CAIXAS DE PRÓS E CONTRAS (.box-pros-cons) - Usando a função inteligente\n  html = replaceDivBlock(html, 'box-pros-cons', '\\n\\nConfira a lista completa de prós e contras em nosso site.\\n\\n');\n\n  // 4. Converte BLOCKQUOTES (Dicas/Alertas) em avisos narrados\n  html = html.replace(/<blockquote[^>]*>([\\s\\S]*?)<\\/blockquote>/gi, (match, conteudo) => {\n    let textoLimpo = conteudo.replace(/<[^>]+>/g, '').trim();\n    return `\\n\\nAtenção para a dica da oficina: ${textoLimpo}\\n\\n`;\n  });\n\n  // 5. Converte Títulos (H2, H3) em frases com pontuação final para pausa na leitura\n  html = html.replace(/<h[2-4][^>]*>([\\s\\S]*?)<\\/h[2-4]>/gi, (match, tituloBloco) => {\n    let t = tituloBloco.replace(/<[^>]+>/g, '').trim();\n    if (!/[.!?:]$/.test(t)) t += '.';\n    return `\\n\\n${t}\\n\\n`;\n  });\n\n  // 6. Trata quebras de parágrafos e itens de listas\n  html = html.replace(/<\\/p>/gi, '\\n');\n  html = html.replace(/<\\/li>/gi, '.\\n');\n\n  // 7. Remove todas as tags HTML restantes\n  let textoLimpo = html.replace(/<[^>]+>/g, '');\n\n  // 8. Decodifica entidades HTML\n  textoLimpo = textoLimpo\n    .replace(/&nbsp;/g, ' ')\n    .replace(/&amp;/g, ' e ')\n    .replace(/&quot;/g, '\"')\n    .replace(/&#39;/g, \"'\")\n    .replace(/&lt;/g, '<')\n    .replace(/&gt;/g, '>')\n    .replace(/<code>/g, '')\n    .replace(/<\\/code>/g, '');\n\n  // 9. Normaliza espaços múltiplos e quebras de linha\n  textoLimpo = textoLimpo\n    .replace(/[ \\t]+/g, ' ')\n    .replace(/\\n\\s*\\n+/g, '\\n\\n')\n    .trim();\n\n  // Vincula a introdução com o texto limpo\n  const introAudio = `Você está ouvindo o artigo: ${titulo}. No portal Moto na Prática.\\n\\n`;\n  return introAudio + textoLimpo;\n}\n\n// --- EXECUÇÃO ---\nconst inputData = $input.item.json;\nlet titulo = \"\";\nlet blocosHtml = [];\n\n// Extração do título e blocos\nif (inputData.payload_para_api && inputData.payload_para_api.output && inputData.payload_para_api.output.pt) {\n  const pt = inputData.payload_para_api.output.pt;\n  titulo = pt.title || \"\";\n  \n  const blockKeys = Object.keys(pt)\n    .filter(k => k.startsWith(\"block-\"))\n    .sort((a, b) => parseInt(a.replace(\"block-\", \"\")) - parseInt(b.replace(\"block-\", \"\")));\n    \n  blocosHtml = blockKeys.map(k => pt[k]);\n} else if (inputData.blocos_originais && Array.isArray(inputData.blocos_originais)) {\n  titulo = inputData.title || (inputData.payload_para_api && inputData.payload_para_api.output.pt.title) || \"\";\n  blocosHtml = inputData.blocos_originais.map(b => b.html_do_bloco || \"\");\n}\n\nconst textoFinalTts = converterHtmlParaTextoTts(titulo, blocosHtml);\n\n// Retorna APENAS tts_text\nreturn {\n  json: {\n    tts_text: textoFinalTts\n  }\n};"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -1088,
+        720
+      ],
+      "id": "6ffb9ece-894a-4a70-bb19-34da016d61cf",
+      "name": "monta o tts_text1"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://texttospeech.googleapis.com/v1/projects/project-a4e884a2-8b32-4e15-878/locations/global:synthesizeLongAudio",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "googleApi",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"input\": {\n    \"text\": {{ JSON.stringify($json.tts_text) }}\n  },\n  \"voice\": {\n    \"languageCode\": \"pt-BR\",\n    \"name\": \"pt-BR-Neural2-B\"\n  },\n  \"audioConfig\": {\n    \"audioEncoding\": \"LINEAR16\"\n  },\n  \"outputGcsUri\": \"gs://audios-de-teste/{{ $('Split Out').item.json.payload_para_api.output.pt.id }}=pt=motonapratica.online-api-posts-{{ Math.random() * 8 + 1 }}\"\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        -560,
+        720
+      ],
+      "id": "ac17ac82-50c2-46e5-9cce-9fa9709a105b",
+      "name": "gera o audio1",
       "credentials": {
         "googleApi": {
           "id": "LHBHRLlwptta0XHn",
           "name": "Google Service Account account"
         }
       }
+    },
+    {
+      "parameters": {
+        "fieldToSplitOut": "body",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitOut",
+      "typeVersion": 1,
+      "position": [
+        -1632,
+        720
+      ],
+      "id": "c8e1a13e-1ef6-45a4-9ae4-8b22c7521658",
+      "name": "Split Out"
+    },
+    {
+      "parameters": {
+        "operation": "upsert",
+        "dataTableId": {
+          "__rl": true,
+          "value": "9ltZLFGUXe11LFQk",
+          "mode": "list",
+          "cachedResultName": "deep_research_relatorio_final",
+          "cachedResultUrl": "/projects/0m3AYoFvtbqWOB3e/datatables/9ltZLFGUXe11LFQk"
+        },
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "id_pesquisa",
+              "keyValue": "={{ $('cria um id unico1').item.json.id_pesquisa }}"
+            }
+          ]
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "asssunto": "={{ $json.output.tema_pesquisa }}\n{{ $json.output.keywords_validadas }}\n{{ $json.output.paa_identificadas }}",
+            "justificativa_assunto": "={{ $json.output.justificativa }}",
+            "keywords_assunto": "={{ JSON.stringify($json.output.keywords_validadas) }}",
+            "webhook_callback": "https://myn8n.seommerce.shop/webhook/deep-research-callback",
+            "Fase": "planejar",
+            "id_pesquisa": "={{ $('Image Generator').item.json.body.translation_group_id }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "asssunto",
+              "displayName": "asssunto",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "id_pesquisa",
+              "displayName": "id_pesquisa",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "angulo",
+              "displayName": "angulo",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "gancho",
+              "displayName": "gancho",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "relatorio",
+              "displayName": "relatorio",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "justificativa_angulo",
+              "displayName": "justificativa_angulo",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "justificativa_gancho",
+              "displayName": "justificativa_gancho",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "justificativa_assunto",
+              "displayName": "justificativa_assunto",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "keywords_assunto",
+              "displayName": "keywords_assunto",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "atualizacao",
+              "displayName": "atualizacao",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "boolean",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "webhook_callback",
+              "displayName": "webhook_callback",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Fase",
+              "displayName": "Fase",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "position": [
+        -560,
+        416
+      ],
+      "id": "396e1ac9-d2cb-474a-91ff-00f115ad688d",
+      "name": "salva assunto2"
+    },
+    {
+      "parameters": {
+        "model": "openrouter/free",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenRouter",
+      "typeVersion": 1,
+      "position": [
+        -1272,
+        536
+      ],
+      "id": "3f1c29d3-97ae-4718-892a-65ef63864f3c",
+      "name": "OpenRouter Chat Model",
+      "credentials": {
+        "openRouterApi": {
+          "id": "6EGfrOZ5n31iTUmN",
+          "name": "VARGASELIEZER112"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "gemini-2.5-flash",
+          "mode": "list",
+          "cachedResultName": "gemini-2.5-flash"
+        },
+        "responsesApiEnabled": false,
+        "options": {
+          "temperature": 1
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.3,
+      "position": [
+        -1400,
+        536
+      ],
+      "id": "55a3f803-f5a2-4e3a-96f5-c7310b06303f",
+      "name": "OpenAI Chat Model5",
+      "credentials": {
+        "openAiApi": {
+          "id": "ni5SGSoVdackq86c",
+          "name": "test"
+        }
+      }
     }
   ],
-  "connections": {},
+  "connections": {
+    "Vertex AI (Passo 4) - Diretor De Artes": {
+      "main": [
+        [
+          {
+            "node": "parser 4",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "parser 4": {
+      "main": [
+        [
+          {
+            "node": "formata prompts para o loop",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Loop Over Items1": {
+      "main": [
+        [],
+        [
+          {
+            "node": "Vertex AI (Passo 5) - Gerador De Imagens",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "formata prompts para o loop": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "send image to moto na pratica",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Vertex AI (Passo 5) - Gerador De Imagens": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "send image to moto na pratica": {
+      "main": [
+        [
+          {
+            "node": "Wait",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Image Generator": {
+      "main": [
+        [
+          {
+            "node": "Switch1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Switch1": {
+      "main": [
+        [
+          {
+            "node": "Vertex AI (Passo 4) - Diretor De Artes",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "cria um id unico1",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Split Out",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Structured Output Parser": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "Diretor SEO Escolhe a pauta a ser produzida1",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Call 'Moto na pratica - Google Trends'1": {
+      "ai_tool": [
+        [
+          {
+            "node": "Diretor SEO Escolhe a pauta a ser produzida1",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Call 'Moto na Pratica'1": {
+      "ai_tool": [
+        [
+          {
+            "node": "Diretor SEO Escolhe a pauta a ser produzida1",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Diretor SEO Escolhe a pauta a ser produzida1": {
+      "main": [
+        [
+          {
+            "node": "salva assunto2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "cria um id unico1": {
+      "main": [
+        [
+          {
+            "node": "Diretor SEO Escolhe a pauta a ser produzida1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Call 'Posts Ja Escritos'1": {
+      "ai_tool": [
+        [
+          {
+            "node": "Diretor SEO Escolhe a pauta a ser produzida1",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "monta o tts_text1": {
+      "main": [
+        [
+          {
+            "node": "gera o audio1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split Out": {
+      "main": [
+        [
+          {
+            "node": "monta o tts_text1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenRouter Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Diretor SEO Escolhe a pauta a ser produzida1",
+            "type": "ai_languageModel",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model5": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Diretor SEO Escolhe a pauta a ser produzida1",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "nodeGroups": [],
   "settings": {
     "executionOrder": "v1",
-    "callerPolicy": "workflowsFromSameOwner"
+    "binaryMode": "separate",
+    "timeSavedMode": "fixed",
+    "callerPolicy": "workflowsFromSameOwner",
+    "availableInMCP": true
   },
-  "tags": [{"name": "Moto-Na-Pratica"}]
+  "staticData": null,
+  "pinData": {},
+  "meta": null,
+  "tags": [
+    {
+      "id": "WWkQSlVovFHP0UDj",
+      "name": "Moto-Na-Pratica",
+      "createdAt": "2026-09-23T17:08:30.993Z",
+      "updatedAt": "2026-09-23T17:08:30.993Z"
+    }
+  ],
+  "shared": [
+    {
+      "role": "workflow:owner",
+      "workflowId": "sgK1oLuR2qMVcvXI",
+      "projectId": "0m3AYoFvtbqWOB3e",
+      "project": {
+        "id": "0m3AYoFvtbqWOB3e",
+        "name": "eliezer vargas <eliejosuevargas01@gmail.com>",
+        "type": "personal",
+        "icon": null,
+        "description": null,
+        "customTelemetryTags": [],
+        "creatorId": "a8a2c9ad-2763-4a77-ba81-c27a1ac09067",
+        "createdAt": "2025-12-06T14:56:50.686Z",
+        "updatedAt": "2025-12-06T14:58:20.912Z"
+      },
+      "createdAt": "2026-09-23T17:15:35.433Z",
+      "updatedAt": "2026-09-23T17:15:35.433Z"
+    }
+  ],
+  "activeVersion": {
+    "versionId": "4e0d5ea2-6b48-48eb-8add-186e755efe91",
+    "workflowId": "sgK1oLuR2qMVcvXI",
+    "nodes": [
+      {
+        "parameters": {
+          "method": "POST",
+          "url": "https://aiplatform.googleapis.com/v1/projects/project-a4e884a2-8b32-4e15-878/locations/global/publishers/google/models/gemini-3.6-flash:generateContent",
+          "authentication": "predefinedCredentialType",
+          "nodeCredentialType": "googleApi",
+          "sendBody": true,
+          "specifyBody": "json",
+          "jsonBody": "={{ JSON.stringify({\n  \"contents\": [\n    {\n      \"role\": \"user\",\n      \"parts\": [\n        {\n          \"text\": \"Você é o Diretor de Arte Fotográfica de uma revista de motociclismo de elite. Sua tarefa é analisar um artigo e criar comandos (prompts) em INGLÊS para uma IA gerar imagens, mas sob um orçamento rigoroso. NÃO reescreva o artigo nem devolva o texto do post, retorne apenas os prompts e a estratégia.\\n\\nTÍTULO DO ARTIGO: \" + $json.body.payload_para_api.output.pt.title + \"\\n\\nTEXTO DOS BLOCOS:\\n\" + Object.keys($json.body.payload_para_api.output.pt).filter(k => k.startsWith('block-')).sort((a, b) => Number(a.split('-')[1]) - Number(b.split('-')[1])).map(k => 'BLOCO ' + k.split('-')[1] + ':\\n' + $json.body.payload_para_api.output.pt[k]).join('\\n\\n') + \"\\n\\nSUA TAREFA EXECUTIVA:\\n- PASSO 1: Crie 1 prompt de imagem para a CAPA (ampla, épica, que resuma o tom geral).\\n- PASSO 2 (Gestão de Orçamento): Você tem limite para criar imagens para no MÁXIMO 4 BLOCOS INTERNOS (ou seja, você vai escolher apenas 3 a 4 blocos cruciais no meio do texto inteiro para ilustrar).\\n- PASSO 3: Leia os blocos e escolha os momentos mais 'visuais' (ex: uma queda na Curva 1, um piloto com dor no ombro, mecânicos analisando telemetria) e crie os prompts em inglês apenas para esses blocos específicos.\\n\\nREGRAS DOS PROMPTS:\\n- Idioma: INGLÊS.\\n- Estilo visual: 'Hyper-realistic editorial motorsport photography, action sports photography, 35mm lens, 8k resolution, cinematic lighting, highly detailed'.\\n- NUNCA peça textos, marcas ou letras na imagem.\\n- ANTI-CENSURA OBRIGATÓRIO: É ESTRITAMENTE PROIBIDO usar nomes de pessoas reais (Pedro Acosta, Marc Márquez, Bagnaia) ou marcas/fabricantes (Ducati, Aprilia, KTM) nos prompts. O sistema de geração de imagens bloqueia nomes próprios. Para burlar isso, você DEVE substituir os nomes por DESCRIÇÕES FÍSICAS EXTREMAMENTE DETALHADAS. Exemplo: em vez de 'Pedro Acosta na Ducati', escreva 'A young Spanish motorcycle racer wearing a red, white and black racing suit with number 31 and a shark-themed helmet, riding a red Italian prototype sports motorcycle with aerodynamic front winglets'. Em vez de 'Aprilia', use 'black Italian racing motorcycle'.\\n- Intercale as fotos: Não coloque fotos em blocos seguidos (ex: evite fotos no Bloco 1 e 2 juntos).\"\n        }\n      ]\n    }\n  ],\n  \"generationConfig\": {\n    \"temperature\": 0.5,\n    \"responseMimeType\": \"application/json\",\n    \"responseSchema\": {\n      \"type\": \"OBJECT\",\n      \"properties\": {\n        \"estrategia_visual_e_orcamento\": {\n          \"type\": \"STRING\",\n          \"description\": \"Explicação em PT-BR de por que você escolheu ilustrar esses blocos específicos e ignorou os outros para economizar imagens.\"\n        },\n        \"prompt_capa\": {\n          \"type\": \"STRING\",\n          \"description\": \"O prompt hiper-detalhado em INGLÊS para a imagem principal. PROIBIDO USAR NOMES PRÓPRIOS OU MARCAS AQUI, use apenas descrições físicas.\"\n        },\n        \"imagens_internas\": {\n          \"type\": \"ARRAY\",\n          \"description\": \"A lista com no máximo 4 imagens para distribuir no texto.\",\n          \"items\": {\n            \"type\": \"OBJECT\",\n            \"properties\": {\n              \"numero_do_bloco_alvo\": {\n                \"type\": \"INTEGER\",\n                \"description\": \"O número do bloco (1 a 12) APÓS o qual esta imagem será inserida (ex: 2 significa que a foto entra depois do Bloco 2).\"\n              },\n              \"prompt_em_ingles\": {\n                \"type\": \"STRING\",\n                \"description\": \"O comando detalhado para gerar esta imagem. DEVE usar descrições visuais genéricas de roupas e motos em vez de citar nomes reais ou marcas.\"\n              }\n            },\n            \"required\": [\"numero_do_bloco_alvo\", \"prompt_em_ingles\"]\n          }\n        }\n      },\n      \"required\": [\"estrategia_visual_e_orcamento\", \"prompt_capa\", \"imagens_internas\"]\n    }\n  }\n}) }}",
+          "options": {}
+        },
+        "id": "4cea7343-e3e3-4eed-af24-4f2cbe94080d",
+        "name": "Vertex AI (Passo 4) - Diretor De Artes",
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.2,
+        "position": [
+          -1632,
+          128
+        ],
+        "retryOnFail": true,
+        "credentials": {
+          "googleApi": {
+            "id": "LHBHRLlwptta0XHn",
+            "name": "Google Service Account account"
+          }
+        },
+        "onError": "continueErrorOutput"
+      },
+      {
+        "parameters": {
+          "jsCode": "// 1. Extrai a resposta bruta do Diretor de Arte\nconst dadosArte = Array.isArray($input.all()[0].json) ? $input.all()[0].json[0] : $input.all()[0].json;\nconst textoBruto = dadosArte?.candidates?.[0]?.content?.parts?.[0]?.text;\nif (!textoBruto) throw new Error(\"Resposta do Diretor de Arte inválida.\");\n\n// Limpa e faz o parse do JSON do Diretor de Arte\nlet jsonLimpo = textoBruto.trim().replace(/^```json/, \"\").replace(/```$/, \"\").trim();\nconst iArte = JSON.parse(jsonLimpo);\n\n// 2. Monta o objeto contendo estritamente a capa e as imagens internas escolhidas\nconst imagensGeradas = {\n    \"img-1\": iArte.prompt_capa\n};\n\nif (iArte.imagens_internas && Array.isArray(iArte.imagens_internas)) {\n    iArte.imagens_internas.forEach(img => {\n        // A foto após o bloco N equivale a img-(N+1)\n        const chaveImg = `img-${img.numero_do_bloco_alvo + 1}`;\n        imagensGeradas[chaveImg] = img.prompt_em_ingles;\n    });\n}\n\n// 3. Retorna APENAS a estratégia e os prompts, zerando qualquer texto do post\nreturn [{\n    json: {\n        estrategia_visual: iArte.estrategia_visual_e_orcamento,\n        prompts_de_imagens: imagensGeradas\n    }\n}];"
+        },
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          -1088,
+          128
+        ],
+        "id": "87f56bb8-23dc-435b-9957-6d61acc13ac3",
+        "name": "parser 4"
+      },
+      {
+        "parameters": {
+          "options": {}
+        },
+        "type": "n8n-nodes-base.splitInBatches",
+        "typeVersion": 3,
+        "position": [
+          -336,
+          128
+        ],
+        "id": "6ab16e33-d22c-4fb2-81ec-48ddcf2d4635",
+        "name": "Loop Over Items1"
+      },
+      {
+        "parameters": {
+          "amount": 20
+        },
+        "type": "n8n-nodes-base.wait",
+        "typeVersion": 1.1,
+        "position": [
+          560,
+          128
+        ],
+        "id": "ac3d0157-cbb0-4d06-851c-66284ce4a84b",
+        "name": "Wait",
+        "webhookId": "55b2bc5c-5374-40df-9f4b-9940fcb28ad3"
+      },
+      {
+        "parameters": {
+          "jsCode": "// 1. Pega os prompts de imagem do nó anterior\nconst item = $input.first();\nif (!item || !item.json || !item.json.prompts_de_imagens) {\n    throw new Error(\"A estrutura 'prompts_de_imagens' não foi encontrada na entrada.\");\n}\n\nconst prompts = item.json.prompts_de_imagens;\n\n// 2. Puxa o ID estritamente do nó \"Image Generator\" direto do body\nconst dadosWebhook = $('Image Generator').first().json;\nconst postId = dadosWebhook?.body?.payload_para_api?.output?.pt?.id || \"ID_NAO_ENCONTRADO\";\n\nconst filaDeImagens = [];\n\n// 3. Varre as chaves de imagem e monta o payload individual para o loop\nfor (const key in prompts) {\n    if (key.startsWith('img-')) {\n        // Extrai o número da posição (1 = hero, 2 = bloco 1, etc.)\n        const numeroPosicao = parseInt(key.replace('img-', ''), 10);\n        \n        filaDeImagens.push({\n            json: {\n                post_id: postId,         // ID puxado do body do webhook\n                position: numeroPosicao, // Posição numérica da imagem\n                image: prompts[key]      // O prompt fotorrealista em inglês\n            }\n        });\n    }\n}\n\n// 4. Retorna a fila dividida para a Vertex AI processar item por item\nreturn filaDeImagens;"
+        },
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          -560,
+          128
+        ],
+        "id": "3fabd4c4-1576-4e26-8f71-dcf98b60d689",
+        "name": "formata prompts para o loop"
+      },
+      {
+        "parameters": {
+          "assignments": {
+            "assignments": [
+              {
+                "id": "a50398b8-940a-4dd7-9231-abd87aa0fe82",
+                "name": "post_id",
+                "value": "={{ $('Loop Over Items1').item.json.post_id }}",
+                "type": "string"
+              },
+              {
+                "id": "b8283818-13bb-49e2-8165-11debb684ff2",
+                "name": "position",
+                "value": "={{ $('Loop Over Items1').item.json.position }}",
+                "type": "number"
+              },
+              {
+                "id": "a699dc87-d2a3-4f2b-8bc1-2f82df871c5a",
+                "name": "image",
+                "value": "={{ $json.body?.choices?.[0]?.message?.images?.[0]?.image_url?.url || $json.choices?.[0]?.message?.images?.[0]?.image_url?.url || \"\" }}",
+                "type": "string"
+              }
+            ]
+          },
+          "options": {}
+        },
+        "type": "n8n-nodes-base.set",
+        "typeVersion": 3.5,
+        "position": [
+          112,
+          48
+        ],
+        "id": "a9f9f350-1a55-4797-a69c-1d6e56db98c8",
+        "name": "Edit Fields"
+      },
+      {
+        "parameters": {
+          "method": "POST",
+          "url": "https://render-llm-router.onrender.com/v1/chat/completions",
+          "authentication": "predefinedCredentialType",
+          "nodeCredentialType": "openAiApi",
+          "sendBody": true,
+          "specifyBody": "json",
+          "jsonBody": "={\n  \"model\": \"google/gemini-2.5-flash-image\",\n  \"messages\": [\n    {\n      \"role\": \"system\",\n      \"content\": \"You are an expert image generation AI. Generate high-quality, realistic images based on the user prompt. Always output the image in the response.\"\n    },\n    {\n      \"role\": \"user\",\n      \"content\": $json.image\n    }\n  ]\n}",
+          "options": {
+            "response": {
+              "response": {
+                "neverError": true
+              }
+            }
+          }
+        },
+        "id": "32190d19-9e11-4ae6-9a9f-95aa79a73a45",
+        "name": "Vertex AI (Passo 5) - Gerador De Imagens",
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.2,
+        "position": [
+          -112,
+          48
+        ],
+        "retryOnFail": true,
+        "maxTries": 5,
+        "waitBetweenTries": 5000,
+        "credentials": {
+          "openAiApi": {
+            "id": "ni5SGSoVdackq86c",
+            "name": "test"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "method": "PATCH",
+          "url": "https://motonapratica.online/api/posts",
+          "sendHeaders": true,
+          "headerParameters": {
+            "parameters": [
+              {
+                "name": "x-api-key",
+                "value": "motonapratica-secret-key-2026"
+              }
+            ]
+          },
+          "sendBody": true,
+          "bodyParameters": {
+            "parameters": [
+              {
+                "name": "post_id",
+                "value": "={{ $json.post_id }}"
+              },
+              {
+                "name": "position",
+                "value": "={{ $json.position }}"
+              },
+              {
+                "name": "image",
+                "value": "={{ $json.image }}"
+              }
+            ]
+          },
+          "options": {}
+        },
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.4,
+        "position": [
+          336,
+          48
+        ],
+        "id": "18dad177-dc54-4bac-813e-4b3e872080ca",
+        "name": "send image to moto na pratica"
+      },
+      {
+        "parameters": {
+          "httpMethod": "POST",
+          "path": "motonapratica",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.webhook",
+        "typeVersion": 2.1,
+        "position": [
+          -2080,
+          416
+        ],
+        "id": "999cf5f7-8c5b-4ea1-b791-4160ce5c146e",
+        "name": "Image Generator",
+        "webhookId": "e654658a-6b46-4833-8409-40e0e50b751a"
+      },
+      {
+        "parameters": {
+          "rules": {
+            "values": [
+              {
+                "conditions": {
+                  "options": {
+                    "caseSensitive": true,
+                    "leftValue": "",
+                    "typeValidation": "strict",
+                    "version": 3
+                  },
+                  "conditions": [
+                    {
+                      "leftValue": "={{ $json.query.action }}",
+                      "rightValue": "img",
+                      "operator": {
+                        "type": "string",
+                        "operation": "equals"
+                      },
+                      "id": "ad513b27-8efe-44ce-82a4-ee78d9a21e0e"
+                    }
+                  ],
+                  "combinator": "and"
+                },
+                "renameOutput": true,
+                "outputKey": "gerar imagens"
+              },
+              {
+                "conditions": {
+                  "options": {
+                    "caseSensitive": true,
+                    "leftValue": "",
+                    "typeValidation": "strict",
+                    "version": 3
+                  },
+                  "conditions": [
+                    {
+                      "id": "189b1f05-c00c-4a78-bf84-4d21759d42c7",
+                      "leftValue": "={{ $json.query.action }}",
+                      "rightValue": "update",
+                      "operator": {
+                        "type": "string",
+                        "operation": "equals"
+                      }
+                    }
+                  ],
+                  "combinator": "and"
+                },
+                "renameOutput": true,
+                "outputKey": "melhorar post"
+              },
+              {
+                "conditions": {
+                  "options": {
+                    "caseSensitive": true,
+                    "leftValue": "",
+                    "typeValidation": "strict",
+                    "version": 3
+                  },
+                  "conditions": [
+                    {
+                      "id": "45df7078-f169-4284-ac12-8ced924e7eab",
+                      "leftValue": "={{ $json.query.action }}",
+                      "rightValue": "audio",
+                      "operator": {
+                        "type": "string",
+                        "operation": "equals",
+                        "name": "filter.operator.equals"
+                      }
+                    }
+                  ],
+                  "combinator": "and"
+                },
+                "renameOutput": true,
+                "outputKey": "narração"
+              }
+            ]
+          },
+          "options": {}
+        },
+        "type": "n8n-nodes-base.switch",
+        "typeVersion": 3.4,
+        "position": [
+          -1856,
+          400
+        ],
+        "id": "efb04fd0-53f4-4a6c-af8e-1ba3e63e9574",
+        "name": "Switch1"
+      },
+      {
+        "parameters": {
+          "jsonSchemaExample": "{\n  \"tema_pesquisa\": \"[O texto exato e cirúrgico que foi elaborado e enviado para a ferramenta 'Moto na pratica - Deep Research', detalhando as lacunas do post antigo e o ângulo de atualização]\",\n  \"keywords_validadas\": [\n    \"[palavra-chave principal de alto volume extraída do Trends atual]\",\n    \"[termo secundário relevante para atualização]\"\n  ],\n  \"paa_identificadas\": [\n    \"[pergunta exata 1 extraída do People Also Ask que estava faltando no post original]\",\n    \"[pergunta exata 2 extraída do People Also Ask que precisa ser respondida]\"\n  ],\n  \"justificativa\": \"[Explicação lógica detalhada da estratégia de atualização, citando os novos volumes de buscas, o peso dessas novas PAAs identificadas, o que exatamente estava obsoleto no texto antigo, e como essa pesquisa vai tornar a pauta competitiva novamente]\"\n}"
+        },
+        "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+        "typeVersion": 1.3,
+        "position": [
+          -760,
+          536
+        ],
+        "id": "265b2317-2c11-430e-8932-e93e419b435b",
+        "name": "Structured Output Parser"
+      },
+      {
+        "parameters": {
+          "description": "=Use this tool specifically to collect quantitative data about public interest via Google Trends. Trigger it when you need to analyze search volumes, compare relative popularity between keywords, or track trends over time. \n\n⚠️ CRITICAL LIMITATION: Google Trends fails and returns empty data for long-tail keywords or specific phrases. \n- You MUST NOT generate full questions, sentences, or highly specific long-tail phrases.\n- KEEP IT SHORT: You MUST strictly use broad, high-volume terms consisting of 1 to 3 words maximum per term.\n- WRONG EXAMPLES (DO NOT USE): \"como funciona consórcio de motos\", \"vantagens consórcio moto\".\n- CORRECT EXAMPLES (USE THESE): \"consórcio moto\", \"Yamaha FZ25\", \"Honda CG 160\", \"MotoGP\".\n- Limit the array to a maximum of 5 terms.\n\nJSON Example:\n\n[\n  {\n    \"keywords_to_search\": [\n      \"Yamaha FZ25\",\n      \"Fazer 250\",\n      \"Honda CB Twister\",\n      \"consórcio moto\"\n    ]\n  }\n]",
+          "workflowId": {
+            "__rl": true,
+            "value": "kzsJmLkAWtfy7d6k",
+            "mode": "list",
+            "cachedResultUrl": "/workflow/kzsJmLkAWtfy7d6k",
+            "cachedResultName": "moto na pratica tools"
+          },
+          "workflowInputs": {
+            "mappingMode": "defineBelow",
+            "value": {},
+            "matchingColumns": [],
+            "schema": [],
+            "attemptToConvertTypes": false,
+            "convertFieldsToString": false
+          }
+        },
+        "type": "@n8n/n8n-nodes-langchain.toolWorkflow",
+        "typeVersion": 2.2,
+        "position": [
+          -1144,
+          536
+        ],
+        "id": "a046d357-7777-4d1e-b1f0-2330572d5d64",
+        "name": "Call 'Moto na pratica - Google Trends'1"
+      },
+      {
+        "parameters": {
+          "toolDescription": "Moto na pratica - Deep Research\nUse this tool specifically to search for qualitative, factual, and in-depth information on the web. Trigger it when you need to read multiple sources, extract complex narratives, investigate specific news, market rumors, contract changes, technical details, and synthesize dense texts into comprehensive analytical reports.\n\nJSON Example:\n\n{\n  \"tema\": \"The exact topic the writer needs to research\",\n  \"webhook_callback\": \"https://myn8n.seommerce.shop/webhook/deep-research-callback\"\n}",
+          "method": "POST",
+          "url": "https://myn8n.seommerce.shop/webhook/deep-research",
+          "sendQuery": true,
+          "queryParameters": {
+            "parameters": [
+              {
+                "name": "id",
+                "value": "={{ $('cria um id unico1').item.json.id_pesquisa }}"
+              }
+            ]
+          },
+          "sendBody": true,
+          "bodyParameters": {
+            "parameters": [
+              {
+                "name": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('parameters0_Name', ``, 'string') }}",
+                "value": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('parameters0_Value', ``, 'string') }}"
+              },
+              {
+                "name": "webhook_callback",
+                "value": "https://myn8n.seommerce.shop/webhook/deep-research-callback"
+              }
+            ]
+          },
+          "options": {}
+        },
+        "type": "n8n-nodes-base.httpRequestTool",
+        "typeVersion": 4.4,
+        "position": [
+          -1016,
+          536
+        ],
+        "id": "4d8daa63-c783-4863-9975-b5e93620a687",
+        "name": "Call 'Moto na Pratica'1"
+      },
+      {
+        "parameters": {
+          "promptType": "define",
+          "text": "=Artigo a ser Atualizado:\n{{ JSON.stringify($json.body) }}\n\nGoogle Search & PAA: {{ JSON.stringify($json.pesquisa_profunda_google) }} use the google trends news to know",
+          "hasOutputParser": true,
+          "needsFallback": true,
+          "options": {
+            "systemMessage": "=You are the Autonomous Editor-in-Chief and Content Auditor of the \"Moto na Prática\" portal.\nYour sole objective is to analyze an OUTDATED ARTICLE provided by the user, identify information gaps based on current search trends, and dispatch a targeted research task to modernize, update, and optimize the post for Google Discover and Search. YOU DO NOT WRITE ARTICLES.\n\nCurrent year context: 2026. Always base your timeline, dates, and season references strictly on the current year 2026 and upcoming 2027, 2028 etc.\n\nCore Focus & Intent Preservation: You must maintain the exact focus, tone, and format of the original article. Never force a drastic shift in the narrative angle. Mirror the source material's primary intent:\n- Reviews/Listicles: Focus strictly on evaluating the products or items.\n- Events: Center the narrative exclusively on the specific event details.\n- News: Stick directly to the factual reporting of the news.\nAvoid diverging from the article's fundamental subject.\n\nEDITORIAL TONE & CRITERIA (MANDATORY):\n- O tom de voz do blog é \"papo reto\", amigável e com fascinação por 2 rodas. É uma conversa de amigos no posto de gasolina ou na oficina.\n- O público-alvo é o motociclista real (ex: o cara que pega sua FZ25 ou moto naked média para ir trampar, pra faculdade ou pegar uma estrada no fim de semana).\n- A atualização da pauta deve unir duas coisas: ALTO volume de busca atual E responder às novas dores/dúvidas reais do leitor (People Also Ask) traduzidas para a realidade prática das ruas.\n\nTool Usage & Capabilities:\nYou have access to specialized tools and must use them strategically to audit and update the content.\n\nCRITICAL TOOL EXECUTION PROTOCOL (MANDATORY ORDER):\nYou are STRICTLY FORBIDDEN from generating final content or calling tools out of order. Each tool can only be called EXACTLY ONCE and in this exact sequence:\n\nSTEP 1: Call 'Moto na pratica - Google Trends' (EXACTLY ONCE).\n- Read the user input (the subject or title of the outdated article).\n- Formulate a diverse list of keywords related to this subject to discover what people are actively searching for NOW.\n- Call the tool to gather quantitative data about current public interest, search volumes, PAA (People Also Ask), and top 3 competitor titles currently ranking for this subject. Wait for it to finish.\n\nSTEP 2: Call 'Posts Ja Escritos' (EXACTLY ONCE).\n- Use this tool to retrieve the current published version of the outdated article from the blog's archive.\n- You MUST analyze what is currently written to establish a baseline.\n- Identify exactly what is obsolete, what current keywords are missing, and which new PAAs (discovered in Step 1) are not being answered in the old text. Wait for the tool to finish.\n\nSTEP 3: Evaluate the Information & Behavioral Gap (CRITICAL ANALYSIS).\nAnalyze the discrepancy between the fresh data returned by the Trends tool and the old content. You must translate dry keywords and PAA questions into real-world rider friction:\n- If a PAA asks about \"reliability\", translate this into hunting for frequent inconveniences and design flaws.\n- If a keyword points to \"fuel economy\", translate this into hunting for real-world rush hour and lane-splitting performance.\n- Define the exact \"Update Strategy\": What new angle is needed? Which specific questions must be answered? What obsolete data (prices, model years, specs) needs correction to reflect 2026/2027 reality?\n\nSTEP 4: Call 'Moto na pratica - Deep Research' (EXACTLY ONCE).\nUse the gaps identified in Step 3 to construct your research queries. You are NOT researching a new topic; you are researching the MISSING PIECES to update the old post.\nWhen calling the tool, you MUST strictly use the structure below, forcing the Deep Research to extract both technical data and behavioral insights:\n\n{\n  \"tema\": \"The exact elements needed to update the post. You must explicitly direct the Deep Research tool to find: 1) Core technical updates (2026/2027 specs, updated prices, missing PAA answers); 2) User behavioral data: Frequent inconveniences and chronic pain points discussed by real riders in forums/comments regarding this topic; 3) 'Corridor & Rush Hour' reality checks versus marketing claims; 4) 'Traffic light' curiosities (polarizing or unique elements that generate street-level debate among everyday riders).\"\n}\n\nSTEP 5: Final Output & Justification.\nAfter the Deep Research tool has been successfully triggered, output your final audit report to the user.\nYou MUST provide a clear justification explaining the UPDATE STRATEGY (explicitly citing the new search volumes, the new PAA questions that dictated the research, what exactly was obsolete in the original post, and how the dispatched Deep Research targeting technical gaps and real-world rider complaints will make this article highly competitive again).\n\nConclude your execution. DO NOT WRITE THE ARTICLE.\n"
+          }
+        },
+        "type": "@n8n/n8n-nodes-langchain.agent",
+        "typeVersion": 3.1,
+        "position": [
+          -1176,
+          320
+        ],
+        "id": "b892ec4f-900e-4d78-885b-dbe6d2d9f001",
+        "name": "Diretor SEO Escolhe a pauta a ser produzida1",
+        "retryOnFail": true
+      },
+      {
+        "parameters": {
+          "assignments": {
+            "assignments": [
+              {
+                "id": "945b31c8-1f71-4359-9a88-129b2f491822",
+                "name": "id_pesquisa",
+                "value": "={{ $json.body.translationGroupId }}",
+                "type": "string"
+              },
+              {
+                "id": "f545dce5-6ab8-4400-9981-5b547331cb24",
+                "name": "body",
+                "value": "={{ $json.body }}",
+                "type": "object"
+              }
+            ]
+          },
+          "options": {}
+        },
+        "type": "n8n-nodes-base.set",
+        "typeVersion": 3.5,
+        "position": [
+          -1632,
+          416
+        ],
+        "id": "59f40dd3-122d-42de-8a82-399b3c75f042",
+        "name": "cria um id unico1"
+      },
+      {
+        "parameters": {
+          "url": "https://myn8n.seommerce.shop/webhook/posts-slug",
+          "sendQuery": true,
+          "queryParameters": {
+            "parameters": [
+              {
+                "name": "action",
+                "value": "get_posts_ja_gerados"
+              }
+            ]
+          },
+          "options": {}
+        },
+        "type": "n8n-nodes-base.httpRequestTool",
+        "typeVersion": 4.4,
+        "position": [
+          -888,
+          536
+        ],
+        "id": "0a276597-4b3b-470a-b622-471678217c39",
+        "name": "Call 'Posts Ja Escritos'1"
+      },
+      {
+        "parameters": {
+          "jsCode": "function converterHtmlParaTextoTts(titulo, blocosHtml) {\n  // Unifica todos os blocos HTML em uma única string\n  let html = blocosHtml.join(\"\\n\\n\");\n\n  // Função auxiliar inteligente para substituir blocos <div> respeitando o aninhamento (evita o corte do texto)\n  function replaceDivBlock(htmlStr, className, replacement) {\n    let regex = new RegExp(`<div[^>]*class=\"[^\"]*${className}[^\"]*\"`, 'gi');\n    let match;\n    \n    while ((match = regex.exec(htmlStr)) !== null) {\n      let start = match.index;\n      let end = start + match[0].length;\n      let openDivs = 1; // Já conta a div principal que abriu o bloco\n\n      // Procura pelas próximas tags div (abrindo ou fechando)\n      let tagRegex = /<\\/?div[^>]*>/gi;\n      tagRegex.lastIndex = end;\n\n      let tagMatch;\n      while ((tagMatch = tagRegex.exec(htmlStr)) !== null) {\n        if (tagMatch[0].toLowerCase().startsWith('</div')) {\n          openDivs--;\n        } else {\n          openDivs++;\n        }\n\n        // Quando zerar as divs abertas, achamos o fim exato do bloco\n        if (openDivs === 0) {\n          end = tagMatch.index + tagMatch[0].length;\n          break;\n        }\n      }\n\n      // Substitui o bloco exato e mantém o restante do texto intacto\n      let before = htmlStr.substring(0, start);\n      let after = htmlStr.substring(openDivs === 0 ? end : htmlStr.length);\n      htmlStr = before + replacement + after;\n      \n      // Ajusta o cursor do regex para continuar procurando outros blocos\n      regex.lastIndex = start + replacement.length;\n    }\n    return htmlStr;\n  }\n\n  // 1. Detecta e substitui TABELAS COMPARATIVAS\n  html = html.replace(/<table[\\s\\S]*?<\\/table>/gi, '\\n\\nVeja a tabela comparativa de valores e custos completa em nosso site.\\n\\n');\n\n  // 2. Detecta e substitui FICHAS TÉCNICAS (.ficha-tecnica) - Usando a função inteligente\n  html = replaceDivBlock(html, 'ficha-tecnica', '\\n\\nConfira a ficha técnica detalhada no nosso site.\\n\\n');\n\n  // 3. Detecta e substitui CAIXAS DE PRÓS E CONTRAS (.box-pros-cons) - Usando a função inteligente\n  html = replaceDivBlock(html, 'box-pros-cons', '\\n\\nConfira a lista completa de prós e contras em nosso site.\\n\\n');\n\n  // 4. Converte BLOCKQUOTES (Dicas/Alertas) em avisos narrados\n  html = html.replace(/<blockquote[^>]*>([\\s\\S]*?)<\\/blockquote>/gi, (match, conteudo) => {\n    let textoLimpo = conteudo.replace(/<[^>]+>/g, '').trim();\n    return `\\n\\nAtenção para a dica da oficina: ${textoLimpo}\\n\\n`;\n  });\n\n  // 5. Converte Títulos (H2, H3) em frases com pontuação final para pausa na leitura\n  html = html.replace(/<h[2-4][^>]*>([\\s\\S]*?)<\\/h[2-4]>/gi, (match, tituloBloco) => {\n    let t = tituloBloco.replace(/<[^>]+>/g, '').trim();\n    if (!/[.!?:]$/.test(t)) t += '.';\n    return `\\n\\n${t}\\n\\n`;\n  });\n\n  // 6. Trata quebras de parágrafos e itens de listas\n  html = html.replace(/<\\/p>/gi, '\\n');\n  html = html.replace(/<\\/li>/gi, '.\\n');\n\n  // 7. Remove todas as tags HTML restantes\n  let textoLimpo = html.replace(/<[^>]+>/g, '');\n\n  // 8. Decodifica entidades HTML\n  textoLimpo = textoLimpo\n    .replace(/&nbsp;/g, ' ')\n    .replace(/&amp;/g, ' e ')\n    .replace(/&quot;/g, '\"')\n    .replace(/&#39;/g, \"'\")\n    .replace(/&lt;/g, '<')\n    .replace(/&gt;/g, '>')\n    .replace(/<code>/g, '')\n    .replace(/<\\/code>/g, '');\n\n  // 9. Normaliza espaços múltiplos e quebras de linha\n  textoLimpo = textoLimpo\n    .replace(/[ \\t]+/g, ' ')\n    .replace(/\\n\\s*\\n+/g, '\\n\\n')\n    .trim();\n\n  // Vincula a introdução com o texto limpo\n  const introAudio = `Você está ouvindo o artigo: ${titulo}. No portal Moto na Prática.\\n\\n`;\n  return introAudio + textoLimpo;\n}\n\n// --- EXECUÇÃO ---\nconst inputData = $input.item.json;\nlet titulo = \"\";\nlet blocosHtml = [];\n\n// Extração do título e blocos\nif (inputData.payload_para_api && inputData.payload_para_api.output && inputData.payload_para_api.output.pt) {\n  const pt = inputData.payload_para_api.output.pt;\n  titulo = pt.title || \"\";\n  \n  const blockKeys = Object.keys(pt)\n    .filter(k => k.startsWith(\"block-\"))\n    .sort((a, b) => parseInt(a.replace(\"block-\", \"\")) - parseInt(b.replace(\"block-\", \"\")));\n    \n  blocosHtml = blockKeys.map(k => pt[k]);\n} else if (inputData.blocos_originais && Array.isArray(inputData.blocos_originais)) {\n  titulo = inputData.title || (inputData.payload_para_api && inputData.payload_para_api.output.pt.title) || \"\";\n  blocosHtml = inputData.blocos_originais.map(b => b.html_do_bloco || \"\");\n}\n\nconst textoFinalTts = converterHtmlParaTextoTts(titulo, blocosHtml);\n\n// Retorna APENAS tts_text\nreturn {\n  json: {\n    tts_text: textoFinalTts\n  }\n};"
+        },
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          -1088,
+          720
+        ],
+        "id": "6ffb9ece-894a-4a70-bb19-34da016d61cf",
+        "name": "monta o tts_text1"
+      },
+      {
+        "parameters": {
+          "method": "POST",
+          "url": "https://texttospeech.googleapis.com/v1/projects/project-a4e884a2-8b32-4e15-878/locations/global:synthesizeLongAudio",
+          "authentication": "predefinedCredentialType",
+          "nodeCredentialType": "googleApi",
+          "sendBody": true,
+          "specifyBody": "json",
+          "jsonBody": "={\n  \"input\": {\n    \"text\": {{ JSON.stringify($json.tts_text) }}\n  },\n  \"voice\": {\n    \"languageCode\": \"pt-BR\",\n    \"name\": \"pt-BR-Neural2-B\"\n  },\n  \"audioConfig\": {\n    \"audioEncoding\": \"LINEAR16\"\n  },\n  \"outputGcsUri\": \"gs://audios-de-teste/{{ $('Split Out').item.json.payload_para_api.output.pt.id }}=pt=motonapratica.online-api-posts-{{ Math.random() * 8 + 1 }}\"\n}",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.4,
+        "position": [
+          -560,
+          720
+        ],
+        "id": "ac17ac82-50c2-46e5-9cce-9fa9709a105b",
+        "name": "gera o audio1",
+        "credentials": {
+          "googleApi": {
+            "id": "LHBHRLlwptta0XHn",
+            "name": "Google Service Account account"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "fieldToSplitOut": "body",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.splitOut",
+        "typeVersion": 1,
+        "position": [
+          -1632,
+          720
+        ],
+        "id": "c8e1a13e-1ef6-45a4-9ae4-8b22c7521658",
+        "name": "Split Out"
+      },
+      {
+        "parameters": {
+          "operation": "upsert",
+          "dataTableId": {
+            "__rl": true,
+            "value": "9ltZLFGUXe11LFQk",
+            "mode": "list",
+            "cachedResultName": "deep_research_relatorio_final",
+            "cachedResultUrl": "/projects/0m3AYoFvtbqWOB3e/datatables/9ltZLFGUXe11LFQk"
+          },
+          "filters": {
+            "conditions": [
+              {
+                "keyName": "id_pesquisa",
+                "keyValue": "={{ $('cria um id unico1').item.json.id_pesquisa }}"
+              }
+            ]
+          },
+          "columns": {
+            "mappingMode": "defineBelow",
+            "value": {
+              "asssunto": "={{ $json.output.tema_pesquisa }}\n{{ $json.output.keywords_validadas }}\n{{ $json.output.paa_identificadas }}",
+              "justificativa_assunto": "={{ $json.output.justificativa }}",
+              "keywords_assunto": "={{ JSON.stringify($json.output.keywords_validadas) }}",
+              "webhook_callback": "https://myn8n.seommerce.shop/webhook/deep-research-callback",
+              "Fase": "planejar",
+              "id_pesquisa": "={{ $('Image Generator').item.json.body.translation_group_id }}"
+            },
+            "matchingColumns": [],
+            "schema": [
+              {
+                "id": "asssunto",
+                "displayName": "asssunto",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "string",
+                "readOnly": false,
+                "removed": false
+              },
+              {
+                "id": "id_pesquisa",
+                "displayName": "id_pesquisa",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "number",
+                "readOnly": false,
+                "removed": false
+              },
+              {
+                "id": "angulo",
+                "displayName": "angulo",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "string",
+                "readOnly": false,
+                "removed": true
+              },
+              {
+                "id": "gancho",
+                "displayName": "gancho",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "string",
+                "readOnly": false,
+                "removed": true
+              },
+              {
+                "id": "relatorio",
+                "displayName": "relatorio",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "string",
+                "readOnly": false,
+                "removed": true
+              },
+              {
+                "id": "justificativa_angulo",
+                "displayName": "justificativa_angulo",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "string",
+                "readOnly": false,
+                "removed": true
+              },
+              {
+                "id": "justificativa_gancho",
+                "displayName": "justificativa_gancho",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "string",
+                "readOnly": false,
+                "removed": true
+              },
+              {
+                "id": "justificativa_assunto",
+                "displayName": "justificativa_assunto",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "string",
+                "readOnly": false,
+                "removed": false
+              },
+              {
+                "id": "keywords_assunto",
+                "displayName": "keywords_assunto",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "string",
+                "readOnly": false,
+                "removed": false
+              },
+              {
+                "id": "atualizacao",
+                "displayName": "atualizacao",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "boolean",
+                "readOnly": false,
+                "removed": false
+              },
+              {
+                "id": "webhook_callback",
+                "displayName": "webhook_callback",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "string",
+                "readOnly": false,
+                "removed": false
+              },
+              {
+                "id": "Fase",
+                "displayName": "Fase",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "string",
+                "readOnly": false,
+                "removed": false
+              }
+            ],
+            "attemptToConvertTypes": false,
+            "convertFieldsToString": false
+          },
+          "options": {}
+        },
+        "type": "n8n-nodes-base.dataTable",
+        "typeVersion": 1.1,
+        "position": [
+          -560,
+          416
+        ],
+        "id": "396e1ac9-d2cb-474a-91ff-00f115ad688d",
+        "name": "salva assunto2"
+      },
+      {
+        "parameters": {
+          "model": "openrouter/free",
+          "options": {}
+        },
+        "type": "@n8n/n8n-nodes-langchain.lmChatOpenRouter",
+        "typeVersion": 1,
+        "position": [
+          -1272,
+          536
+        ],
+        "id": "3f1c29d3-97ae-4718-892a-65ef63864f3c",
+        "name": "OpenRouter Chat Model",
+        "credentials": {
+          "openRouterApi": {
+            "id": "6EGfrOZ5n31iTUmN",
+            "name": "VARGASELIEZER112"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "model": {
+            "__rl": true,
+            "value": "gemini-2.5-flash",
+            "mode": "list",
+            "cachedResultName": "gemini-2.5-flash"
+          },
+          "responsesApiEnabled": false,
+          "options": {
+            "temperature": 1
+          }
+        },
+        "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+        "typeVersion": 1.3,
+        "position": [
+          -1400,
+          536
+        ],
+        "id": "55a3f803-f5a2-4e3a-96f5-c7310b06303f",
+        "name": "OpenAI Chat Model5",
+        "credentials": {
+          "openAiApi": {
+            "id": "ni5SGSoVdackq86c",
+            "name": "test"
+          }
+        }
+      }
+    ],
+    "connections": {
+      "Vertex AI (Passo 4) - Diretor De Artes": {
+        "main": [
+          [
+            {
+              "node": "parser 4",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "parser 4": {
+        "main": [
+          [
+            {
+              "node": "formata prompts para o loop",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Loop Over Items1": {
+        "main": [
+          [],
+          [
+            {
+              "node": "Vertex AI (Passo 5) - Gerador De Imagens",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Wait": {
+        "main": [
+          [
+            {
+              "node": "Loop Over Items1",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "formata prompts para o loop": {
+        "main": [
+          [
+            {
+              "node": "Loop Over Items1",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Edit Fields": {
+        "main": [
+          [
+            {
+              "node": "send image to moto na pratica",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Vertex AI (Passo 5) - Gerador De Imagens": {
+        "main": [
+          [
+            {
+              "node": "Edit Fields",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "send image to moto na pratica": {
+        "main": [
+          [
+            {
+              "node": "Wait",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Image Generator": {
+        "main": [
+          [
+            {
+              "node": "Switch1",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Switch1": {
+        "main": [
+          [
+            {
+              "node": "Vertex AI (Passo 4) - Diretor De Artes",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "cria um id unico1",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "Split Out",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Structured Output Parser": {
+        "ai_outputParser": [
+          [
+            {
+              "node": "Diretor SEO Escolhe a pauta a ser produzida1",
+              "type": "ai_outputParser",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Call 'Moto na pratica - Google Trends'1": {
+        "ai_tool": [
+          [
+            {
+              "node": "Diretor SEO Escolhe a pauta a ser produzida1",
+              "type": "ai_tool",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Call 'Moto na Pratica'1": {
+        "ai_tool": [
+          [
+            {
+              "node": "Diretor SEO Escolhe a pauta a ser produzida1",
+              "type": "ai_tool",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Diretor SEO Escolhe a pauta a ser produzida1": {
+        "main": [
+          [
+            {
+              "node": "salva assunto2",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "cria um id unico1": {
+        "main": [
+          [
+            {
+              "node": "Diretor SEO Escolhe a pauta a ser produzida1",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Call 'Posts Ja Escritos'1": {
+        "ai_tool": [
+          [
+            {
+              "node": "Diretor SEO Escolhe a pauta a ser produzida1",
+              "type": "ai_tool",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "monta o tts_text1": {
+        "main": [
+          [
+            {
+              "node": "gera o audio1",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Split Out": {
+        "main": [
+          [
+            {
+              "node": "monta o tts_text1",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "OpenRouter Chat Model": {
+        "ai_languageModel": [
+          [
+            {
+              "node": "Diretor SEO Escolhe a pauta a ser produzida1",
+              "type": "ai_languageModel",
+              "index": 1
+            }
+          ]
+        ]
+      },
+      "OpenAI Chat Model5": {
+        "ai_languageModel": [
+          [
+            {
+              "node": "Diretor SEO Escolhe a pauta a ser produzida1",
+              "type": "ai_languageModel",
+              "index": 0
+            }
+          ]
+        ]
+      }
+    },
+    "nodeGroups": [],
+    "authors": "eliezer vargas",
+    "name": "Version 4e0d5ea2",
+    "description": "",
+    "autosaved": true,
+    "createdAt": "2026-09-23T17:15:45.084Z",
+    "updatedAt": "2026-09-23T17:19:13.188Z",
+    "workflowPublishHistory": [
+      {
+        "id": 3347,
+        "workflowId": "sgK1oLuR2qMVcvXI",
+        "versionId": "4e0d5ea2-6b48-48eb-8add-186e755efe91",
+        "event": "activated",
+        "userId": "a8a2c9ad-2763-4a77-ba81-c27a1ac09067",
+        "createdAt": "2026-09-23T17:19:13.181Z"
+      },
+      {
+        "id": 3348,
+        "workflowId": "sgK1oLuR2qMVcvXI",
+        "versionId": "4e0d5ea2-6b48-48eb-8add-186e755efe91",
+        "event": "deactivated",
+        "userId": "a8a2c9ad-2763-4a77-ba81-c27a1ac09067",
+        "createdAt": "2026-09-23T17:19:22.128Z"
+      },
+      {
+        "id": 3349,
+        "workflowId": "sgK1oLuR2qMVcvXI",
+        "versionId": "4e0d5ea2-6b48-48eb-8add-186e755efe91",
+        "event": "activated",
+        "userId": "a8a2c9ad-2763-4a77-ba81-c27a1ac09067",
+        "createdAt": "2026-09-23T17:19:22.173Z"
+      }
+    ]
+  }
 }

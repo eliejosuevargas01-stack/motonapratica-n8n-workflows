@@ -1,0 +1,1501 @@
+{
+  "id": "WGxdU1MdmoMpdZa3",
+  "name": "Deep Research - Redator",
+  "description": "redator do dossier final",
+  "active": true,
+  "activeVersionId": "9cdf9c7f-e5f0-4c1c-af32-ce0ce049858a",
+  "createdAt": "2026-09-23T20:09:33.729Z",
+  "updatedAt": "2026-09-23T20:09:59.351Z",
+  "isArchived": false,
+  "versionId": "9cdf9c7f-e5f0-4c1c-af32-ce0ce049858a",
+  "versionCounter": 1,
+  "sourceWorkflowId": null,
+  "triggerCount": 1,
+  "nodes": [
+    {
+      "parameters": {
+        "model": "openrouter/free",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenRouter",
+      "typeVersion": 1,
+      "position": [
+        1408,
+        224
+      ],
+      "id": "4dcd9da1-49ea-4b3d-a538-df63414f93f0",
+      "name": "OpenRouter Chat Model2",
+      "credentials": {
+        "openRouterApi": {
+          "id": "HSdnSXTZr0ZDrfG2",
+          "name": "EJVG"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.dossie_pronto_para_ia }}",
+        "hasOutputParser": true,
+        "needsFallback": true,
+        "options": {
+          "systemMessage": "You are a Senior Technical Writer, Information Architect, and Data Analyst with expertise in market intelligence and Google Discover behavioral optimization. Your mission is to transform a fragmented \"Research Dossier\" into an Exhaustive, Highly Structured, Topic-by-Topic Master Report.\n\nYour primary goal is to meticulously organize the information coherently, ensuring that NO useful data is left behind, while guaranteeing ABSOLUTE ZERO DUPLICATION of information across different sections. Do not write a generic fluid essay; you must deliver a highly compartmentalized, detailed, and analytical breakdown of each topic and subtopic.\n\nBEHAVIOR AND WRITING GUIDELINES (READ CAREFULLY):\n\n1. STRICT TOPIC-BY-TOPIC ARCHITECTURE (MANDATORY FORMAT):\nYou must structure your entire response using the exact hierarchy below. Do not merge topics.\n- Start each main topic by announcing it and stating how many subtopics it contains.\n  Example: `## Tópico 1: [Name of the Main Topic] (Este tópico contém X subtópicos)`\n- Follow with each subtopic clearly separated.\n  Example: `### Subtópico 1.1: [Description/Goal of the Subtopic]`\n- Under each subtopic, provide a `**Descrição Detalhada e Análise:**` where you will dump all the rich data, metrics, and conclusions specifically belonging to that subtopic.\n\n2. ZERO DUPLICATION & COMPARTMENTALIZATION (CRITICAL):\n- Read the entire dossier before writing. Map out where each piece of information belongs.\n- If a technical specification, price, or historical fact is fully detailed in Subtopic 1a, DO NOT repeat it in Subtopic 1b. Just reference it briefly if absolutely necessary for context. Each subtopic must be a self-contained vault of unique information.\n\n3. SURGICAL EXTRACTION & DEEP ENRICHMENT:\n- Base your text EXCLUSIVELY on the provided information. Do not invent data.\n- The Auditor’s Conclusion is the Foundation; the Raw Data is the \"Meat\". Do not just summarize. Extract exact numbers, precise dates, financial values, technical specs (horsepower, torque), parts, and direct quotes from the raw data to deeply enrich the auditor's summary. Prefer a long, meticulous breakdown over a superficial summary.\n\n4. BEHAVIORAL MINING FOR GOOGLE DISCOVER:\nWhile detailing the subtopics, if the raw data contains community feedback or behavioral patterns, you MUST actively extract and highlight them using bullet points:\n- Frequent Inconveniences & Pain Points: Identify unaddressed design flaws, ergonomic complaints, or hidden maintenance costs.\n- The \"Corridor & Rush Hour\" Reality Check: Extract how the product performs in real-world messy conditions vs. marketing claims.\n- \"Traffic Light\" Curiosities (Curiosidades de Semáforo): Pinpoint unique aesthetic details or polarizing innovations that spark debate among users.\n\n5. HANDLING GAPS & ANTI-NOISE FILTER:\n- Discard web scraping garbage (cookie notices, 404 errors, \"click here to read more\").\n- If raw data presents conflicting information, adopt the Auditor’s Conclusion as the official truth, but enrich the text by citing the market friction (e.g., \"While some sources point to X, the consolidated fact is Y...\").\n\n6. RICH MARKDOWN & VISUAL ORGANIZATION:\n- Bold (Skimming): Use bold strictly to highlight crucial data: metrics, prices, dates, technical specs, and proper names.\n- Markdown Tables: ALWAYS build Markdown Tables within a subtopic if there is comparative data (e.g., engine comparisons, price lists, dimensions).\n- Lists: Use bullet points heavily to break down features, flaws, or timelines to make the deep information highly readable.\n\n7. MANDATORY TRACEABILITY OF SOURCES AND URLS:\n- Whenever you extract a specific technical data, price, quote, or metric from the raw data, you MUST include the exact URL right next to it. \n- Example: \"O torque máximo atinge 93 Nm a 7.000 rpm (Fonte: https://...).\" NEVER hide or delete URLs from valid raw data.\n\n8. FINAL SOURCE AUDIT APPENDIX:\n- At the end of the entire report, add a section titled `## Apêndice: Mapeamento de Fontes`.\n- Inside, create two lists:\n  * Fontes Utilizadas: List all URLs that provided real, useful data incorporated into the text.\n  * Fontes Descartadas (Ruído): List URLs that yielded only errors or generic texts and were ignored.\n"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        1344,
+        0
+      ],
+      "id": "eb628bcd-92d7-4ec1-8ab8-2116bbe78281",
+      "name": "monta relatorio final",
+      "retryOnFail": true,
+      "waitBetweenTries": 5000,
+      "maxTries": 4
+    },
+    {
+      "parameters": {
+        "path": "gera-relatorio-final",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "ea78891b-42c1-495a-b514-b82009dde653",
+      "name": "redator final",
+      "webhookId": "08a5c7f7-c9f0-4c48-9002-eec9557c6dfb"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $json.webhook_callback }}",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "id",
+              "value": "={{ $json.id_pesquisa }}"
+            },
+            {
+              "name": "dores",
+              "value": "={{ $('monta relatorio final').item.json.output.comportamento_e_dores_discover }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        1888,
+        0
+      ],
+      "id": "4640c400-b4a4-4e01-aa8f-b27e66bf476a",
+      "name": "callback entrega relatorio final",
+      "executeOnce": true,
+      "alwaysOutputData": false,
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "dataTableId": {
+          "__rl": true,
+          "value": "9ltZLFGUXe11LFQk",
+          "mode": "list",
+          "cachedResultName": "deep_research_relatorio_final",
+          "cachedResultUrl": "/projects/0m3AYoFvtbqWOB3e/datatables/9ltZLFGUXe11LFQk"
+        },
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "id_pesquisa",
+              "keyValue": "={{ $('Code in JavaScript2').item.json.id_pesquisa }}"
+            }
+          ]
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "relatorio": "={{ JSON.stringify($json.output) }}",
+            "Fase": "entregue"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "asssunto",
+              "displayName": "asssunto",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "id_pesquisa",
+              "displayName": "id_pesquisa",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "angulo",
+              "displayName": "angulo",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "gancho",
+              "displayName": "gancho",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "relatorio",
+              "displayName": "relatorio",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "justificativa_angulo",
+              "displayName": "justificativa_angulo",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "justificativa_gancho",
+              "displayName": "justificativa_gancho",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "justificativa_assunto",
+              "displayName": "justificativa_assunto",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "keywords_assunto",
+              "displayName": "keywords_assunto",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "atualizacao",
+              "displayName": "atualizacao",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "boolean",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "webhook_callback",
+              "displayName": "webhook_callback",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Fase",
+              "displayName": "Fase",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "position": [
+        1696,
+        0
+      ],
+      "id": "6f8a173a-c4f3-4a5e-8b91-938697e2af10",
+      "name": "Update row(s)",
+      "executeOnce": true
+    },
+    {
+      "parameters": {
+        "operation": "get",
+        "dataTableId": {
+          "__rl": true,
+          "value": "arAS2xvz1XBxyA57",
+          "mode": "list",
+          "cachedResultName": "passos",
+          "cachedResultUrl": "/projects/0m3AYoFvtbqWOB3e/datatables/arAS2xvz1XBxyA57"
+        },
+        "matchType": "allConditions",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "id_pesquisa",
+              "keyValue": "={{ $json.id_pesquisa }}"
+            },
+            {
+              "keyName": "status",
+              "keyValue": "ok"
+            },
+            {
+              "keyName": "Processando",
+              "condition": "isFalse"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "position": [
+        416,
+        0
+      ],
+      "id": "a69bc764-6e1e-4b62-8139-3b27c0dd03da",
+      "name": "obtem relatorio final anterior",
+      "retryOnFail": false,
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "jsCode": "// 1. Pega os dados do NÓ ANTERIOR DIRETO (Netos: Resumos, Temas de Pesquisa e URLs)\nconst inputsDiretos = $input.all();\n\n// 2. Pega os dados do NÓ \"status diferente de ok1\" (Pais e Filhos: Tópicos e Descrições)\nlet inputsConsolidados = [];\ntry {\n  inputsConsolidados = $('status diferente de ok1').all();\n} catch (error) {\n  console.log(\"Nó 'status diferente de ok1' não retornou dados.\");\n}\n\nif (inputsDiretos.length === 0 && inputsConsolidados.length === 0) {\n  return [];\n}\n\n// 3. ID da Pesquisa\nlet idPesquisa = inputsDiretos[0]?.json?.id_pesquisa || inputsConsolidados[0]?.json?.id_pesquisa || null;\n\n// 4. Tenta capturar o Relatório Primitivo Base\nlet relatorioPrimitivo = null;\ntry {\n  const relatorioNodeData = $('verifica se é mesmo a fase relatar')?.first()?.json \n                         || $('verifica se é mesmo a fase redatar')?.first()?.json\n                         || $('verifica se é mesmo a fase reatar')?.first()?.json;\n  relatorioPrimitivo = relatorioNodeData?.relatorio || relatorioNodeData?.relatorio_final || null;\n} catch (e) {\n  // Ignora se não houver\n}\n\n// 5. CRIA A HIERARQUIA: PAI -> FILHO -> NETO\nconst estrutura = {};\n\nfunction garantirHierarquia(passo) {\n  const match = passo.match(/\\d+/);\n  const numeroTopico = match ? match[0] : \"Outros\";\n\n  // Nível PAI (Tópico Principal)\n  if (!estrutura[numeroTopico]) {\n    estrutura[numeroTopico] = { \n      topico_id: numeroTopico, \n      topico_principal: \"Tópico não nomeado\", // Será preenchido pelo nó consolidado\n      subtopicos: {} \n    };\n  }\n\n  // Nível FILHO (Subtópico)\n  if (!estrutura[numeroTopico].subtopicos[passo]) {\n    estrutura[numeroTopico].subtopicos[passo] = {\n      passo_id: passo,\n      descricao_subtopico: \"\", \n      consolidada: \"\",\n      netos_pesquisas: [] // Array para guardar os Netos\n    };\n  }\n  \n  return {\n    pai: estrutura[numeroTopico],\n    filho: estrutura[numeroTopico].subtopicos[passo]\n  };\n}\n\n// 5A. Preenche PAI e FILHO com dados do \"status diferente de ok1\"\n// Como isso aqui apenas substitui variáveis (=\"\"), não gera duplicidade\ninputsConsolidados.forEach(item => {\n  const json = item.json;\n  if (!json.passo_id) return;\n  \n  const hierarquia = garantirHierarquia(json.passo_id);\n  \n  if (json.topico_principal) hierarquia.pai.topico_principal = json.topico_principal;\n  if (json.descricao_subtopico) hierarquia.filho.descricao_subtopico = json.descricao_subtopico;\n  if (json.informacao_consolidada) hierarquia.filho.consolidada = json.informacao_consolidada;\n});\n\n// 5B. Preenche os NETOS com dados do nó ANTERIOR DIRETO (COM TRAVA ANTIDUPLICIDADE)\ninputsDiretos.forEach(item => {\n  const json = item.json;\n  if (!json.passo_id) return;\n  \n  const hierarquia = garantirHierarquia(json.passo_id);\n  \n  if (json.informacao_resumida || json.tema_pesquisa) {\n    const novoResumo = json.informacao_resumida || \"Sem resumo\";\n    const novoTema = json.tema_pesquisa || \"Sem tema definido\";\n    const novaUrl = json.url_fonte || \"URL não identificada\";\n\n    // ✅ A CORREÇÃO ESTÁ AQUI: Verifica se esse resumo exato já foi inserido neste subtópico\n    const jaExiste = hierarquia.filho.netos_pesquisas.some(neto => neto.resumo === novoResumo);\n\n    // Se não existir, aí sim ele adiciona. Se já existir, ele simplesmente descarta a cópia.\n    if (!jaExiste) {\n      hierarquia.filho.netos_pesquisas.push({\n        tema_pesquisa: novoTema,\n        resumo: novoResumo,\n        url: novaUrl\n      });\n    }\n  }\n});\n\n\n// 6. Monta o Prompt (Dossiê) visualmente alinhado com a hierarquia\nlet dossieTexto = `# INSTRUÇÃO PARA A IA REDATORA:\\n`;\ndossieTexto += `Sua missão é ATUALIZAR, REVISAR e EXPANDIR o **Relatório Primitivo Base** (se existente), incorporando de forma harmoniosa todas as novas evidências trazidas no **Dossiê de Pesquisa Profunda**.\\n\\n`;\n\ndossieTexto += `========================================================\\n`;\ndossieTexto += `1. RELATÓRIO PRIMITIVO BASE (DOCUMENTO A SER ATUALIZADO)\\n`;\ndossieTexto += `========================================================\\n`;\ndossieTexto += `${relatorioPrimitivo ? relatorioPrimitivo : \"(Nenhum relatório primitivo base encontrado. Gere o conteúdo do zero a partir do dossiê abaixo.)\"}\\n\\n`;\n\ndossieTexto += `========================================================\\n`;\ndossieTexto += `2. DOSSIÊ DE NOVAS DESCOBERTAS E EVIDÊNCIAS DE PESQUISA\\n`;\ndossieTexto += `========================================================\\n`;\ndossieTexto += `ID DA PESQUISA: ${idPesquisa || \"N/A\"}\\n\\n`;\n\nconst planoJson = [];\nconst topicosOrdenados = Object.keys(estrutura).sort((a, b) => parseInt(a) - parseInt(b));\n\n// Renderiza a hierarquia no texto\ntopicosOrdenados.forEach(numTopico => {\n  const pai = estrutura[numTopico];\n  \n  // Renderiza o PAI\n  dossieTexto += `## 📁 PAI: ${pai.topico_principal}\\n`;\n  dossieTexto += `--------------------------------------------------------\\n`;\n\n  const subtopicosArray = [];\n  const passosOrdenados = Object.keys(pai.subtopicos).sort((a, b) => a.localeCompare(b));\n\n  passosOrdenados.forEach(passo => {\n    const filho = pai.subtopicos[passo];\n\n    // Renderiza o FILHO\n    dossieTexto += `### 📄 FILHO [${filho.passo_id}]: ${filho.descricao_subtopico}\\n\\n`;\n\n    if (filho.consolidada) {\n      dossieTexto += `**Conclusão/Síntese do Auditor para este subtópico:**\\n${filho.consolidada}\\n\\n`;\n    }\n\n    // Renderiza os NETOS\n    if (filho.netos_pesquisas.length > 0) {\n      dossieTexto += `**🔬 NETOS (Pesquisas Individuais Realizadas):**\\n`;\n      filho.netos_pesquisas.forEach((neto, index) => {\n        dossieTexto += `\\n> **Pesquisa ${index + 1} | Tema:** ${neto.tema_pesquisa}\\n`;\n        dossieTexto += `> **Fonte:** ${neto.url}\\n`;\n        dossieTexto += `> **Resumo:** ${neto.resumo}\\n`;\n      });\n      dossieTexto += `\\n`;\n    }\n    \n    dossieTexto += `--------------------------------------------------------\\n`;\n\n    // Monta a estrutura de dados limpa (JSON)\n    subtopicosArray.push({\n      passo: filho.passo_id,\n      descricao_subtopico: filho.descricao_subtopico,\n      conclusao_auditor: filho.consolidada,\n      pesquisas_realizadas: filho.netos_pesquisas // Aqui estão os netos limpos e sem duplicatas!\n    });\n  });\n\n  planoJson.push({\n    topico_principal: pai.topico_principal,\n    subtopicos: subtopicosArray\n  });\n\n  dossieTexto += `\\n`;\n});\n\n// 7. Retorna 1 ÚNICO item empacotado para o LLM Redator\nreturn [{\n  json: {\n    id_pesquisa: idPesquisa,\n    relatorio_primitivo_base: relatorioPrimitivo, \n    plano_json_estruturado: planoJson, \n    dossie_pronto_para_ia: dossieTexto \n  }\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1104,
+        0
+      ],
+      "id": "d9c5329a-1984-4064-be39-c9e2103dba56",
+      "name": "Code in JavaScript2"
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "dataTableId": {
+          "__rl": true,
+          "value": "arAS2xvz1XBxyA57",
+          "mode": "list",
+          "cachedResultName": "status_pesquisa",
+          "cachedResultUrl": "/projects/0m3AYoFvtbqWOB3e/datatables/arAS2xvz1XBxyA57"
+        },
+        "matchType": "allConditions",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "id_pesquisa",
+              "keyValue": "={{ $('redator final').item.json.query.id_pesquisa }}"
+            },
+            {
+              "keyName": "passo_id",
+              "keyValue": "={{ $json.passo_id }}"
+            },
+            {
+              "keyName": "Processando",
+              "condition": "isFalse"
+            }
+          ]
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "status": "redatando",
+            "Processando": true
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "id_pesquisa",
+              "displayName": "id_pesquisa",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "passo_id",
+              "displayName": "passo_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "topico_principal",
+              "displayName": "topico_principal",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "descricao_subtopico",
+              "displayName": "descricao_subtopico",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "status",
+              "displayName": "status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "ultima_query",
+              "displayName": "ultima_query",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "informacao_consolidada",
+              "displayName": "informacao_consolidada",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "webhook_callback",
+              "displayName": "webhook_callback",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "tentativas",
+              "displayName": "tentativas",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Processando",
+              "displayName": "Processando",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "boolean",
+              "readOnly": false,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "position": [
+        624,
+        0
+      ],
+      "id": "b1280444-fe97-489b-8a99-7cfc983c6df3",
+      "name": "status diferente de ok1",
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "operation": "get",
+        "dataTableId": {
+          "__rl": true,
+          "value": "ckZETOjmwN7qToHV",
+          "mode": "list",
+          "cachedResultName": "deep_research",
+          "cachedResultUrl": "/projects/0m3AYoFvtbqWOB3e/datatables/ckZETOjmwN7qToHV"
+        },
+        "matchType": "allConditions",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "id_pesquisa",
+              "keyValue": "={{ $json.id_pesquisa }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "position": [
+        832,
+        0
+      ],
+      "id": "faf42172-68f8-4c84-8173-d486d2aac61f",
+      "name": "Obtem Pesquisas Realizadas"
+    },
+    {
+      "parameters": {
+        "operation": "deleteRows",
+        "dataTableId": {
+          "__rl": true,
+          "value": "arAS2xvz1XBxyA57",
+          "mode": "list",
+          "cachedResultName": "status_pesquisa",
+          "cachedResultUrl": "/projects/0m3AYoFvtbqWOB3e/datatables/arAS2xvz1XBxyA57"
+        },
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "id_pesquisa",
+              "keyValue": "={{ $json.id_pesquisa }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "position": [
+        1888,
+        176
+      ],
+      "id": "f2bffcac-6112-4360-a21d-ed19f2772e99",
+      "name": "Delete row(s)"
+    },
+    {
+      "parameters": {
+        "operation": "get",
+        "dataTableId": {
+          "__rl": true,
+          "value": "9ltZLFGUXe11LFQk",
+          "mode": "list",
+          "cachedResultName": "Pesquisa",
+          "cachedResultUrl": "/projects/0m3AYoFvtbqWOB3e/datatables/9ltZLFGUXe11LFQk"
+        },
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "id_pesquisa",
+              "keyValue": "={{ $json.query.id_pesquisa }}"
+            },
+            {
+              "keyName": "Fase",
+              "keyValue": "redatar"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "position": [
+        208,
+        0
+      ],
+      "id": "c47726f2-5334-420c-8bcd-60e954268f03",
+      "name": "verifica se é mesmo a fase reatar"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "vertex_ai/gemini-3.6-flash",
+          "mode": "list",
+          "cachedResultName": "vertex_ai/gemini-3.6-flash"
+        },
+        "builtInTools": {},
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.3,
+      "position": [
+        1264,
+        224
+      ],
+      "id": "246f31c3-cd78-45f1-9599-87a26082ae81",
+      "name": "OpenAI Chat Model1",
+      "credentials": {
+        "openAiApi": {
+          "id": "Su8igitAIxbJpkcY",
+          "name": "litellm api"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsonSchemaExample": "{\n  \"id_pesquisa\": \"79475614\",\n  \"titulo_relatorio\": \"[In PT-BR] Título Executivo do Relatório Baseado no Tema Principal\",\n  \"topicos\": [\n    {\n      \"id_topico\": \"1\",\n      \"titulo_topico\": \"[In PT-BR] Nome do Tópico Principal 1\",\n      \"quantidade_subtopicos\": 3,\n      \"subtopicos\": [\n        {\n          \"id_subtopico\": \"1a\",\n          \"descricao_objetivo\": \"[In PT-BR] Descrição exata do que o subtópico pede\",\n          \"analise_detalhada\": \"[In PT-BR] Descrição detalhada da informação encontrada. Use Markdown pesado aqui (Listas, **Negrito** para métricas e Tabelas Markdown se houver comparação). NÃO REPITA dados que já foram citados em outros subtópicos. Cite a (Fonte: https://...) para cada métrica extraída.\"\n        },\n        {\n          \"id_subtopico\": \"1b\",\n          \"descricao_objetivo\": \"[In PT-BR] Descrição do subtópico 1b\",\n          \"analise_detalhada\": \"[In PT-BR] Análise profunda, focada estritamente neste objetivo, sem duplicar o que foi dito no 1a. (Fonte: https://...)\"\n        },\n        {\n          \"id_subtopico\": \"1c\",\n          \"descricao_objetivo\": \"[In PT-BR] Descrição do subtópico 1c (Se existir no input)\",\n          \"analise_detalhada\": \"[In PT-BR] Análise profunda... (Fonte: https://...)\"\n        }\n      ]\n    },\n    {\n      \"id_topico\": \"2\",\n      \"titulo_topico\": \"[In PT-BR] Nome do Tópico Principal 2\",\n      \"quantidade_subtopicos\": 2,\n      \"subtopicos\": [\n        {\n          \"id_subtopico\": \"2a\",\n          \"descricao_objetivo\": \"[In PT-BR] Descrição...\",\n          \"analise_detalhada\": \"[In PT-BR] Conteúdo denso e rico em detalhes... (Fonte: https://...)\"\n        },\n        {\n          \"id_subtopico\": \"2b\",\n          \"descricao_objetivo\": \"[In PT-BR] Descrição...\",\n          \"analise_detalhada\": \"[In PT-BR] Conteúdo... (Fonte: https://...)\"\n        }\n      ]\n    },\n    {\n      \"id_topico\": \"3\",\n      \"titulo_topico\": \"[In PT-BR] Nome do Tópico Principal 3\",\n      \"quantidade_subtopicos\": 2,\n      \"subtopicos\": [\n        {\n          \"id_subtopico\": \"3a\",\n          \"descricao_objetivo\": \"[In PT-BR] Descrição...\",\n          \"analise_detalhada\": \"[In PT-BR] Conteúdo... (Fonte: https://...)\"\n        },\n        {\n          \"id_subtopico\": \"3b\",\n          \"descricao_objetivo\": \"[In PT-BR] Descrição...\",\n          \"analise_detalhada\": \"[In PT-BR] Conteúdo... (Fonte: https://...)\"\n        }\n      ]\n    },\n    {\n      \"id_topico\": \"4\",\n      \"titulo_topico\": \"[In PT-BR] Nome do Tópico Principal 4\",\n      \"quantidade_subtopicos\": 2,\n      \"subtopicos\": [\n        {\n          \"id_subtopico\": \"4a\",\n          \"descricao_objetivo\": \"[In PT-BR] Descrição...\",\n          \"analise_detalhada\": \"[In PT-BR] Conteúdo... (Fonte: https://...)\"\n        },\n        {\n          \"id_subtopico\": \"4b\",\n          \"descricao_objetivo\": \"[In PT-BR] Descrição...\",\n          \"analise_detalhada\": \"[In PT-BR] Conteúdo... (Fonte: https://...)\"\n        }\n      ]\n    },\n    {\n      \"id_topico\": \"5\",\n      \"titulo_topico\": \"[In PT-BR] Nome do Tópico Principal 5\",\n      \"quantidade_subtopicos\": 2,\n      \"subtopicos\": [\n        {\n          \"id_subtopico\": \"5a\",\n          \"descricao_objetivo\": \"[In PT-BR] Descrição...\",\n          \"analise_detalhada\": \"[In PT-BR] Conteúdo com tabela comparativa... (Fonte: https://...)\"\n        },\n        {\n          \"id_subtopico\": \"5b\",\n          \"descricao_objetivo\": \"[In PT-BR] Descrição...\",\n          \"analise_detalhada\": \"[In PT-BR] Conteúdo... (Fonte: https://...)\"\n        }\n      ]\n    },\n    {\n      \"id_topico\": \"6\",\n      \"titulo_topico\": \"[In PT-BR] Nome do Tópico Principal 6 (Opcional - Apenas se existir no input)\",\n      \"quantidade_subtopicos\": 2,\n      \"subtopicos\": [\n        {\n          \"id_subtopico\": \"6a\",\n          \"descricao_objetivo\": \"[In PT-BR] Descrição...\",\n          \"analise_detalhada\": \"[In PT-BR] Conteúdo focado em curiosidades ou edições especiais... (Fonte: https://...)\"\n        },\n        {\n          \"id_subtopico\": \"6b\",\n          \"descricao_objetivo\": \"[In PT-BR] Descrição...\",\n          \"analise_detalhada\": \"[In PT-BR] Conteúdo... (Fonte: https://...)\"\n        }\n      ]\n    }\n  ],\n  \"comportamento_e_dores_discover\": {\n    \"incomodidades_frequentes\": [\n      {\n        \"id\": \"INC-01\",\n        \"dor_cronica\": \"[In PT-BR] Ex: Suspensão bate seco em buracos\",\n        \"descricao_comunidade\": \"[In PT-BR] Explicar a dor real dos usuários...\",\n        \"url_origem\": \"https://...\"\n      }\n    ],\n    \"curiosidades_de_semaforo\": [\n      {\n        \"id\": \"CUR-01\",\n        \"elemento_polarizador\": \"[In PT-BR] Ex: Painel TFT pequeno\",\n        \"descricao_comunidade\": \"[In PT-BR] O que os motociclistas debatem sobre isso...\",\n        \"url_origem\": \"https://...\"\n      },\n      {\n        \"id\": \"CUR-02\",\n        \"elemento_polarizador\": \"O visual agressivo dos faróis em LED e a carenagem frontal.\",\n        \"descricao_comunidade\": \"A moto chama a atenção na rua por parecer maior do que uma 200cc tradicional. Gera debates constantes em grupos de WhatsApp se ela 'vale o investimento' frente às marcas tradicionais pelo quesito presença de estrada.\",\n        \"url_origem\": \"https://instagram.com\"\n      }\n    ]\n  },\n  \"apendice_fontes\": {\n    \"fontes_utilizadas\": [\n      \"https://link1.com\",\n      \"https://link2.com\"\n    ],\n    \"fontes_descartadas\": [\n      \"https://link3-erro-404.com\",\n      \"https://link4-sem-dados.com\"\n    ]\n  }\n}"
+      },
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.3,
+      "position": [
+        1616,
+        208
+      ],
+      "id": "49c2e1e7-56c5-43ed-9af9-0e291dc7f6d9",
+      "name": "Structured Output Parser"
+    }
+  ],
+  "connections": {
+    "OpenRouter Chat Model2": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "monta relatorio final",
+            "type": "ai_languageModel",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "monta relatorio final": {
+      "main": [
+        [
+          {
+            "node": "Update row(s)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "redator final": {
+      "main": [
+        [
+          {
+            "node": "verifica se é mesmo a fase reatar",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update row(s)": {
+      "main": [
+        [
+          {
+            "node": "Delete row(s)",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "callback entrega relatorio final",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "obtem relatorio final anterior": {
+      "main": [
+        [
+          {
+            "node": "status diferente de ok1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript2": {
+      "main": [
+        [
+          {
+            "node": "monta relatorio final",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "status diferente de ok1": {
+      "main": [
+        [
+          {
+            "node": "Obtem Pesquisas Realizadas",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Obtem Pesquisas Realizadas": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "verifica se é mesmo a fase reatar": {
+      "main": [
+        [
+          {
+            "node": "obtem relatorio final anterior",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model1": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "monta relatorio final",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Structured Output Parser": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "monta relatorio final",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "nodeGroups": [],
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "staticData": null,
+  "pinData": {},
+  "meta": null,
+  "tags": [
+    {
+      "id": "I1tPTJVmCdtv2spd",
+      "name": "Deep Research",
+      "createdAt": "2026-09-23T20:00:38.358Z",
+      "updatedAt": "2026-09-23T20:00:38.358Z"
+    },
+    {
+      "id": "WWkQSlVovFHP0UDj",
+      "name": "Moto-Na-Pratica",
+      "createdAt": "2026-09-23T17:08:30.993Z",
+      "updatedAt": "2026-09-23T17:08:30.993Z"
+    }
+  ],
+  "shared": [
+    {
+      "role": "workflow:owner",
+      "workflowId": "WGxdU1MdmoMpdZa3",
+      "projectId": "0m3AYoFvtbqWOB3e",
+      "project": {
+        "id": "0m3AYoFvtbqWOB3e",
+        "name": "eliezer vargas <eliejosuevargas01@gmail.com>",
+        "type": "personal",
+        "icon": null,
+        "description": null,
+        "customTelemetryTags": [],
+        "creatorId": "a8a2c9ad-2763-4a77-ba81-c27a1ac09067",
+        "createdAt": "2025-12-06T14:56:50.686Z",
+        "updatedAt": "2025-12-06T14:58:20.912Z"
+      },
+      "createdAt": "2026-09-23T20:09:33.729Z",
+      "updatedAt": "2026-09-23T20:09:33.729Z"
+    }
+  ],
+  "activeVersion": {
+    "versionId": "9cdf9c7f-e5f0-4c1c-af32-ce0ce049858a",
+    "workflowId": "WGxdU1MdmoMpdZa3",
+    "nodes": [
+      {
+        "parameters": {
+          "model": "openrouter/free",
+          "options": {}
+        },
+        "type": "@n8n/n8n-nodes-langchain.lmChatOpenRouter",
+        "typeVersion": 1,
+        "position": [
+          1408,
+          224
+        ],
+        "id": "4dcd9da1-49ea-4b3d-a538-df63414f93f0",
+        "name": "OpenRouter Chat Model2",
+        "credentials": {
+          "openRouterApi": {
+            "id": "HSdnSXTZr0ZDrfG2",
+            "name": "EJVG"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "promptType": "define",
+          "text": "={{ $json.dossie_pronto_para_ia }}",
+          "hasOutputParser": true,
+          "needsFallback": true,
+          "options": {
+            "systemMessage": "You are a Senior Technical Writer, Information Architect, and Data Analyst with expertise in market intelligence and Google Discover behavioral optimization. Your mission is to transform a fragmented \"Research Dossier\" into an Exhaustive, Highly Structured, Topic-by-Topic Master Report.\n\nYour primary goal is to meticulously organize the information coherently, ensuring that NO useful data is left behind, while guaranteeing ABSOLUTE ZERO DUPLICATION of information across different sections. Do not write a generic fluid essay; you must deliver a highly compartmentalized, detailed, and analytical breakdown of each topic and subtopic.\n\nBEHAVIOR AND WRITING GUIDELINES (READ CAREFULLY):\n\n1. STRICT TOPIC-BY-TOPIC ARCHITECTURE (MANDATORY FORMAT):\nYou must structure your entire response using the exact hierarchy below. Do not merge topics.\n- Start each main topic by announcing it and stating how many subtopics it contains.\n  Example: `## Tópico 1: [Name of the Main Topic] (Este tópico contém X subtópicos)`\n- Follow with each subtopic clearly separated.\n  Example: `### Subtópico 1.1: [Description/Goal of the Subtopic]`\n- Under each subtopic, provide a `**Descrição Detalhada e Análise:**` where you will dump all the rich data, metrics, and conclusions specifically belonging to that subtopic.\n\n2. ZERO DUPLICATION & COMPARTMENTALIZATION (CRITICAL):\n- Read the entire dossier before writing. Map out where each piece of information belongs.\n- If a technical specification, price, or historical fact is fully detailed in Subtopic 1a, DO NOT repeat it in Subtopic 1b. Just reference it briefly if absolutely necessary for context. Each subtopic must be a self-contained vault of unique information.\n\n3. SURGICAL EXTRACTION & DEEP ENRICHMENT:\n- Base your text EXCLUSIVELY on the provided information. Do not invent data.\n- The Auditor’s Conclusion is the Foundation; the Raw Data is the \"Meat\". Do not just summarize. Extract exact numbers, precise dates, financial values, technical specs (horsepower, torque), parts, and direct quotes from the raw data to deeply enrich the auditor's summary. Prefer a long, meticulous breakdown over a superficial summary.\n\n4. BEHAVIORAL MINING FOR GOOGLE DISCOVER:\nWhile detailing the subtopics, if the raw data contains community feedback or behavioral patterns, you MUST actively extract and highlight them using bullet points:\n- Frequent Inconveniences & Pain Points: Identify unaddressed design flaws, ergonomic complaints, or hidden maintenance costs.\n- The \"Corridor & Rush Hour\" Reality Check: Extract how the product performs in real-world messy conditions vs. marketing claims.\n- \"Traffic Light\" Curiosities (Curiosidades de Semáforo): Pinpoint unique aesthetic details or polarizing innovations that spark debate among users.\n\n5. HANDLING GAPS & ANTI-NOISE FILTER:\n- Discard web scraping garbage (cookie notices, 404 errors, \"click here to read more\").\n- If raw data presents conflicting information, adopt the Auditor’s Conclusion as the official truth, but enrich the text by citing the market friction (e.g., \"While some sources point to X, the consolidated fact is Y...\").\n\n6. RICH MARKDOWN & VISUAL ORGANIZATION:\n- Bold (Skimming): Use bold strictly to highlight crucial data: metrics, prices, dates, technical specs, and proper names.\n- Markdown Tables: ALWAYS build Markdown Tables within a subtopic if there is comparative data (e.g., engine comparisons, price lists, dimensions).\n- Lists: Use bullet points heavily to break down features, flaws, or timelines to make the deep information highly readable.\n\n7. MANDATORY TRACEABILITY OF SOURCES AND URLS:\n- Whenever you extract a specific technical data, price, quote, or metric from the raw data, you MUST include the exact URL right next to it. \n- Example: \"O torque máximo atinge 93 Nm a 7.000 rpm (Fonte: https://...).\" NEVER hide or delete URLs from valid raw data.\n\n8. FINAL SOURCE AUDIT APPENDIX:\n- At the end of the entire report, add a section titled `## Apêndice: Mapeamento de Fontes`.\n- Inside, create two lists:\n  * Fontes Utilizadas: List all URLs that provided real, useful data incorporated into the text.\n  * Fontes Descartadas (Ruído): List URLs that yielded only errors or generic texts and were ignored.\n"
+          }
+        },
+        "type": "@n8n/n8n-nodes-langchain.agent",
+        "typeVersion": 3.1,
+        "position": [
+          1344,
+          0
+        ],
+        "id": "eb628bcd-92d7-4ec1-8ab8-2116bbe78281",
+        "name": "monta relatorio final",
+        "retryOnFail": true,
+        "waitBetweenTries": 5000,
+        "maxTries": 4
+      },
+      {
+        "parameters": {
+          "path": "gera-relatorio-final",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.webhook",
+        "typeVersion": 2.1,
+        "position": [
+          0,
+          0
+        ],
+        "id": "ea78891b-42c1-495a-b514-b82009dde653",
+        "name": "redator final",
+        "webhookId": "08a5c7f7-c9f0-4c48-9002-eec9557c6dfb"
+      },
+      {
+        "parameters": {
+          "method": "POST",
+          "url": "={{ $json.webhook_callback }}",
+          "sendBody": true,
+          "bodyParameters": {
+            "parameters": [
+              {
+                "name": "id",
+                "value": "={{ $json.id_pesquisa }}"
+              },
+              {
+                "name": "dores",
+                "value": "={{ $('monta relatorio final').item.json.output.comportamento_e_dores_discover }}"
+              }
+            ]
+          },
+          "options": {}
+        },
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.4,
+        "position": [
+          1888,
+          0
+        ],
+        "id": "4640c400-b4a4-4e01-aa8f-b27e66bf476a",
+        "name": "callback entrega relatorio final",
+        "executeOnce": true,
+        "alwaysOutputData": false,
+        "onError": "continueErrorOutput"
+      },
+      {
+        "parameters": {
+          "operation": "update",
+          "dataTableId": {
+            "__rl": true,
+            "value": "9ltZLFGUXe11LFQk",
+            "mode": "list",
+            "cachedResultName": "deep_research_relatorio_final",
+            "cachedResultUrl": "/projects/0m3AYoFvtbqWOB3e/datatables/9ltZLFGUXe11LFQk"
+          },
+          "filters": {
+            "conditions": [
+              {
+                "keyName": "id_pesquisa",
+                "keyValue": "={{ $('Code in JavaScript2').item.json.id_pesquisa }}"
+              }
+            ]
+          },
+          "columns": {
+            "mappingMode": "defineBelow",
+            "value": {
+              "relatorio": "={{ JSON.stringify($json.output) }}",
+              "Fase": "entregue"
+            },
+            "matchingColumns": [],
+            "schema": [
+              {
+                "id": "asssunto",
+                "displayName": "asssunto",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "string",
+                "readOnly": false,
+                "removed": true
+              },
+              {
+                "id": "id_pesquisa",
+                "displayName": "id_pesquisa",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "number",
+                "readOnly": false,
+                "removed": true
+              },
+              {
+                "id": "angulo",
+                "displayName": "angulo",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "string",
+                "readOnly": false,
+                "removed": true
+              },
+              {
+                "id": "gancho",
+                "displayName": "gancho",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "string",
+                "readOnly": false,
+                "removed": true
+              },
+              {
+                "id": "relatorio",
+                "displayName": "relatorio",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "string",
+                "readOnly": false,
+                "removed": false
+              },
+              {
+                "id": "justificativa_angulo",
+                "displayName": "justificativa_angulo",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "string",
+                "readOnly": false,
+                "removed": true
+              },
+              {
+                "id": "justificativa_gancho",
+                "displayName": "justificativa_gancho",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "string",
+                "readOnly": false,
+                "removed": true
+              },
+              {
+                "id": "justificativa_assunto",
+                "displayName": "justificativa_assunto",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "string",
+                "readOnly": false,
+                "removed": true
+              },
+              {
+                "id": "keywords_assunto",
+                "displayName": "keywords_assunto",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "string",
+                "readOnly": false,
+                "removed": true
+              },
+              {
+                "id": "atualizacao",
+                "displayName": "atualizacao",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "boolean",
+                "readOnly": false,
+                "removed": true
+              },
+              {
+                "id": "webhook_callback",
+                "displayName": "webhook_callback",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "string",
+                "readOnly": false,
+                "removed": true
+              },
+              {
+                "id": "Fase",
+                "displayName": "Fase",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "string",
+                "readOnly": false,
+                "removed": false
+              }
+            ],
+            "attemptToConvertTypes": false,
+            "convertFieldsToString": false
+          },
+          "options": {}
+        },
+        "type": "n8n-nodes-base.dataTable",
+        "typeVersion": 1.1,
+        "position": [
+          1696,
+          0
+        ],
+        "id": "6f8a173a-c4f3-4a5e-8b91-938697e2af10",
+        "name": "Update row(s)",
+        "executeOnce": true
+      },
+      {
+        "parameters": {
+          "operation": "get",
+          "dataTableId": {
+            "__rl": true,
+            "value": "arAS2xvz1XBxyA57",
+            "mode": "list",
+            "cachedResultName": "passos",
+            "cachedResultUrl": "/projects/0m3AYoFvtbqWOB3e/datatables/arAS2xvz1XBxyA57"
+          },
+          "matchType": "allConditions",
+          "filters": {
+            "conditions": [
+              {
+                "keyName": "id_pesquisa",
+                "keyValue": "={{ $json.id_pesquisa }}"
+              },
+              {
+                "keyName": "status",
+                "keyValue": "ok"
+              },
+              {
+                "keyName": "Processando",
+                "condition": "isFalse"
+              }
+            ]
+          }
+        },
+        "type": "n8n-nodes-base.dataTable",
+        "typeVersion": 1.1,
+        "position": [
+          416,
+          0
+        ],
+        "id": "a69bc764-6e1e-4b62-8139-3b27c0dd03da",
+        "name": "obtem relatorio final anterior",
+        "retryOnFail": false,
+        "alwaysOutputData": true
+      },
+      {
+        "parameters": {
+          "jsCode": "// 1. Pega os dados do NÓ ANTERIOR DIRETO (Netos: Resumos, Temas de Pesquisa e URLs)\nconst inputsDiretos = $input.all();\n\n// 2. Pega os dados do NÓ \"status diferente de ok1\" (Pais e Filhos: Tópicos e Descrições)\nlet inputsConsolidados = [];\ntry {\n  inputsConsolidados = $('status diferente de ok1').all();\n} catch (error) {\n  console.log(\"Nó 'status diferente de ok1' não retornou dados.\");\n}\n\nif (inputsDiretos.length === 0 && inputsConsolidados.length === 0) {\n  return [];\n}\n\n// 3. ID da Pesquisa\nlet idPesquisa = inputsDiretos[0]?.json?.id_pesquisa || inputsConsolidados[0]?.json?.id_pesquisa || null;\n\n// 4. Tenta capturar o Relatório Primitivo Base\nlet relatorioPrimitivo = null;\ntry {\n  const relatorioNodeData = $('verifica se é mesmo a fase relatar')?.first()?.json \n                         || $('verifica se é mesmo a fase redatar')?.first()?.json\n                         || $('verifica se é mesmo a fase reatar')?.first()?.json;\n  relatorioPrimitivo = relatorioNodeData?.relatorio || relatorioNodeData?.relatorio_final || null;\n} catch (e) {\n  // Ignora se não houver\n}\n\n// 5. CRIA A HIERARQUIA: PAI -> FILHO -> NETO\nconst estrutura = {};\n\nfunction garantirHierarquia(passo) {\n  const match = passo.match(/\\d+/);\n  const numeroTopico = match ? match[0] : \"Outros\";\n\n  // Nível PAI (Tópico Principal)\n  if (!estrutura[numeroTopico]) {\n    estrutura[numeroTopico] = { \n      topico_id: numeroTopico, \n      topico_principal: \"Tópico não nomeado\", // Será preenchido pelo nó consolidado\n      subtopicos: {} \n    };\n  }\n\n  // Nível FILHO (Subtópico)\n  if (!estrutura[numeroTopico].subtopicos[passo]) {\n    estrutura[numeroTopico].subtopicos[passo] = {\n      passo_id: passo,\n      descricao_subtopico: \"\", \n      consolidada: \"\",\n      netos_pesquisas: [] // Array para guardar os Netos\n    };\n  }\n  \n  return {\n    pai: estrutura[numeroTopico],\n    filho: estrutura[numeroTopico].subtopicos[passo]\n  };\n}\n\n// 5A. Preenche PAI e FILHO com dados do \"status diferente de ok1\"\n// Como isso aqui apenas substitui variáveis (=\"\"), não gera duplicidade\ninputsConsolidados.forEach(item => {\n  const json = item.json;\n  if (!json.passo_id) return;\n  \n  const hierarquia = garantirHierarquia(json.passo_id);\n  \n  if (json.topico_principal) hierarquia.pai.topico_principal = json.topico_principal;\n  if (json.descricao_subtopico) hierarquia.filho.descricao_subtopico = json.descricao_subtopico;\n  if (json.informacao_consolidada) hierarquia.filho.consolidada = json.informacao_consolidada;\n});\n\n// 5B. Preenche os NETOS com dados do nó ANTERIOR DIRETO (COM TRAVA ANTIDUPLICIDADE)\ninputsDiretos.forEach(item => {\n  const json = item.json;\n  if (!json.passo_id) return;\n  \n  const hierarquia = garantirHierarquia(json.passo_id);\n  \n  if (json.informacao_resumida || json.tema_pesquisa) {\n    const novoResumo = json.informacao_resumida || \"Sem resumo\";\n    const novoTema = json.tema_pesquisa || \"Sem tema definido\";\n    const novaUrl = json.url_fonte || \"URL não identificada\";\n\n    // ✅ A CORREÇÃO ESTÁ AQUI: Verifica se esse resumo exato já foi inserido neste subtópico\n    const jaExiste = hierarquia.filho.netos_pesquisas.some(neto => neto.resumo === novoResumo);\n\n    // Se não existir, aí sim ele adiciona. Se já existir, ele simplesmente descarta a cópia.\n    if (!jaExiste) {\n      hierarquia.filho.netos_pesquisas.push({\n        tema_pesquisa: novoTema,\n        resumo: novoResumo,\n        url: novaUrl\n      });\n    }\n  }\n});\n\n\n// 6. Monta o Prompt (Dossiê) visualmente alinhado com a hierarquia\nlet dossieTexto = `# INSTRUÇÃO PARA A IA REDATORA:\\n`;\ndossieTexto += `Sua missão é ATUALIZAR, REVISAR e EXPANDIR o **Relatório Primitivo Base** (se existente), incorporando de forma harmoniosa todas as novas evidências trazidas no **Dossiê de Pesquisa Profunda**.\\n\\n`;\n\ndossieTexto += `========================================================\\n`;\ndossieTexto += `1. RELATÓRIO PRIMITIVO BASE (DOCUMENTO A SER ATUALIZADO)\\n`;\ndossieTexto += `========================================================\\n`;\ndossieTexto += `${relatorioPrimitivo ? relatorioPrimitivo : \"(Nenhum relatório primitivo base encontrado. Gere o conteúdo do zero a partir do dossiê abaixo.)\"}\\n\\n`;\n\ndossieTexto += `========================================================\\n`;\ndossieTexto += `2. DOSSIÊ DE NOVAS DESCOBERTAS E EVIDÊNCIAS DE PESQUISA\\n`;\ndossieTexto += `========================================================\\n`;\ndossieTexto += `ID DA PESQUISA: ${idPesquisa || \"N/A\"}\\n\\n`;\n\nconst planoJson = [];\nconst topicosOrdenados = Object.keys(estrutura).sort((a, b) => parseInt(a) - parseInt(b));\n\n// Renderiza a hierarquia no texto\ntopicosOrdenados.forEach(numTopico => {\n  const pai = estrutura[numTopico];\n  \n  // Renderiza o PAI\n  dossieTexto += `## 📁 PAI: ${pai.topico_principal}\\n`;\n  dossieTexto += `--------------------------------------------------------\\n`;\n\n  const subtopicosArray = [];\n  const passosOrdenados = Object.keys(pai.subtopicos).sort((a, b) => a.localeCompare(b));\n\n  passosOrdenados.forEach(passo => {\n    const filho = pai.subtopicos[passo];\n\n    // Renderiza o FILHO\n    dossieTexto += `### 📄 FILHO [${filho.passo_id}]: ${filho.descricao_subtopico}\\n\\n`;\n\n    if (filho.consolidada) {\n      dossieTexto += `**Conclusão/Síntese do Auditor para este subtópico:**\\n${filho.consolidada}\\n\\n`;\n    }\n\n    // Renderiza os NETOS\n    if (filho.netos_pesquisas.length > 0) {\n      dossieTexto += `**🔬 NETOS (Pesquisas Individuais Realizadas):**\\n`;\n      filho.netos_pesquisas.forEach((neto, index) => {\n        dossieTexto += `\\n> **Pesquisa ${index + 1} | Tema:** ${neto.tema_pesquisa}\\n`;\n        dossieTexto += `> **Fonte:** ${neto.url}\\n`;\n        dossieTexto += `> **Resumo:** ${neto.resumo}\\n`;\n      });\n      dossieTexto += `\\n`;\n    }\n    \n    dossieTexto += `--------------------------------------------------------\\n`;\n\n    // Monta a estrutura de dados limpa (JSON)\n    subtopicosArray.push({\n      passo: filho.passo_id,\n      descricao_subtopico: filho.descricao_subtopico,\n      conclusao_auditor: filho.consolidada,\n      pesquisas_realizadas: filho.netos_pesquisas // Aqui estão os netos limpos e sem duplicatas!\n    });\n  });\n\n  planoJson.push({\n    topico_principal: pai.topico_principal,\n    subtopicos: subtopicosArray\n  });\n\n  dossieTexto += `\\n`;\n});\n\n// 7. Retorna 1 ÚNICO item empacotado para o LLM Redator\nreturn [{\n  json: {\n    id_pesquisa: idPesquisa,\n    relatorio_primitivo_base: relatorioPrimitivo, \n    plano_json_estruturado: planoJson, \n    dossie_pronto_para_ia: dossieTexto \n  }\n}];"
+        },
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          1104,
+          0
+        ],
+        "id": "d9c5329a-1984-4064-be39-c9e2103dba56",
+        "name": "Code in JavaScript2"
+      },
+      {
+        "parameters": {
+          "operation": "update",
+          "dataTableId": {
+            "__rl": true,
+            "value": "arAS2xvz1XBxyA57",
+            "mode": "list",
+            "cachedResultName": "status_pesquisa",
+            "cachedResultUrl": "/projects/0m3AYoFvtbqWOB3e/datatables/arAS2xvz1XBxyA57"
+          },
+          "matchType": "allConditions",
+          "filters": {
+            "conditions": [
+              {
+                "keyName": "id_pesquisa",
+                "keyValue": "={{ $('redator final').item.json.query.id_pesquisa }}"
+              },
+              {
+                "keyName": "passo_id",
+                "keyValue": "={{ $json.passo_id }}"
+              },
+              {
+                "keyName": "Processando",
+                "condition": "isFalse"
+              }
+            ]
+          },
+          "columns": {
+            "mappingMode": "defineBelow",
+            "value": {
+              "status": "redatando",
+              "Processando": true
+            },
+            "matchingColumns": [],
+            "schema": [
+              {
+                "id": "id_pesquisa",
+                "displayName": "id_pesquisa",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "number",
+                "readOnly": false,
+                "removed": true
+              },
+              {
+                "id": "passo_id",
+                "displayName": "passo_id",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "string",
+                "readOnly": false,
+                "removed": true
+              },
+              {
+                "id": "topico_principal",
+                "displayName": "topico_principal",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "string",
+                "readOnly": false,
+                "removed": true
+              },
+              {
+                "id": "descricao_subtopico",
+                "displayName": "descricao_subtopico",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "string",
+                "readOnly": false,
+                "removed": true
+              },
+              {
+                "id": "status",
+                "displayName": "status",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "string",
+                "readOnly": false,
+                "removed": false
+              },
+              {
+                "id": "ultima_query",
+                "displayName": "ultima_query",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "string",
+                "readOnly": false,
+                "removed": true
+              },
+              {
+                "id": "informacao_consolidada",
+                "displayName": "informacao_consolidada",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "string",
+                "readOnly": false,
+                "removed": true
+              },
+              {
+                "id": "webhook_callback",
+                "displayName": "webhook_callback",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "string",
+                "readOnly": false,
+                "removed": true
+              },
+              {
+                "id": "tentativas",
+                "displayName": "tentativas",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "number",
+                "readOnly": false,
+                "removed": true
+              },
+              {
+                "id": "Processando",
+                "displayName": "Processando",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "boolean",
+                "readOnly": false,
+                "removed": false
+              }
+            ],
+            "attemptToConvertTypes": false,
+            "convertFieldsToString": false
+          },
+          "options": {}
+        },
+        "type": "n8n-nodes-base.dataTable",
+        "typeVersion": 1.1,
+        "position": [
+          624,
+          0
+        ],
+        "id": "b1280444-fe97-489b-8a99-7cfc983c6df3",
+        "name": "status diferente de ok1",
+        "alwaysOutputData": true
+      },
+      {
+        "parameters": {
+          "operation": "get",
+          "dataTableId": {
+            "__rl": true,
+            "value": "ckZETOjmwN7qToHV",
+            "mode": "list",
+            "cachedResultName": "deep_research",
+            "cachedResultUrl": "/projects/0m3AYoFvtbqWOB3e/datatables/ckZETOjmwN7qToHV"
+          },
+          "matchType": "allConditions",
+          "filters": {
+            "conditions": [
+              {
+                "keyName": "id_pesquisa",
+                "keyValue": "={{ $json.id_pesquisa }}"
+              }
+            ]
+          }
+        },
+        "type": "n8n-nodes-base.dataTable",
+        "typeVersion": 1.1,
+        "position": [
+          832,
+          0
+        ],
+        "id": "faf42172-68f8-4c84-8173-d486d2aac61f",
+        "name": "Obtem Pesquisas Realizadas"
+      },
+      {
+        "parameters": {
+          "operation": "deleteRows",
+          "dataTableId": {
+            "__rl": true,
+            "value": "arAS2xvz1XBxyA57",
+            "mode": "list",
+            "cachedResultName": "status_pesquisa",
+            "cachedResultUrl": "/projects/0m3AYoFvtbqWOB3e/datatables/arAS2xvz1XBxyA57"
+          },
+          "filters": {
+            "conditions": [
+              {
+                "keyName": "id_pesquisa",
+                "keyValue": "={{ $json.id_pesquisa }}"
+              }
+            ]
+          },
+          "options": {}
+        },
+        "type": "n8n-nodes-base.dataTable",
+        "typeVersion": 1.1,
+        "position": [
+          1888,
+          176
+        ],
+        "id": "f2bffcac-6112-4360-a21d-ed19f2772e99",
+        "name": "Delete row(s)"
+      },
+      {
+        "parameters": {
+          "operation": "get",
+          "dataTableId": {
+            "__rl": true,
+            "value": "9ltZLFGUXe11LFQk",
+            "mode": "list",
+            "cachedResultName": "Pesquisa",
+            "cachedResultUrl": "/projects/0m3AYoFvtbqWOB3e/datatables/9ltZLFGUXe11LFQk"
+          },
+          "filters": {
+            "conditions": [
+              {
+                "keyName": "id_pesquisa",
+                "keyValue": "={{ $json.query.id_pesquisa }}"
+              },
+              {
+                "keyName": "Fase",
+                "keyValue": "redatar"
+              }
+            ]
+          }
+        },
+        "type": "n8n-nodes-base.dataTable",
+        "typeVersion": 1.1,
+        "position": [
+          208,
+          0
+        ],
+        "id": "c47726f2-5334-420c-8bcd-60e954268f03",
+        "name": "verifica se é mesmo a fase reatar"
+      },
+      {
+        "parameters": {
+          "model": {
+            "__rl": true,
+            "value": "vertex_ai/gemini-3.6-flash",
+            "mode": "list",
+            "cachedResultName": "vertex_ai/gemini-3.6-flash"
+          },
+          "builtInTools": {},
+          "options": {}
+        },
+        "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+        "typeVersion": 1.3,
+        "position": [
+          1264,
+          224
+        ],
+        "id": "246f31c3-cd78-45f1-9599-87a26082ae81",
+        "name": "OpenAI Chat Model1",
+        "credentials": {
+          "openAiApi": {
+            "id": "Su8igitAIxbJpkcY",
+            "name": "litellm api"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "jsonSchemaExample": "{\n  \"id_pesquisa\": \"79475614\",\n  \"titulo_relatorio\": \"[In PT-BR] Título Executivo do Relatório Baseado no Tema Principal\",\n  \"topicos\": [\n    {\n      \"id_topico\": \"1\",\n      \"titulo_topico\": \"[In PT-BR] Nome do Tópico Principal 1\",\n      \"quantidade_subtopicos\": 3,\n      \"subtopicos\": [\n        {\n          \"id_subtopico\": \"1a\",\n          \"descricao_objetivo\": \"[In PT-BR] Descrição exata do que o subtópico pede\",\n          \"analise_detalhada\": \"[In PT-BR] Descrição detalhada da informação encontrada. Use Markdown pesado aqui (Listas, **Negrito** para métricas e Tabelas Markdown se houver comparação). NÃO REPITA dados que já foram citados em outros subtópicos. Cite a (Fonte: https://...) para cada métrica extraída.\"\n        },\n        {\n          \"id_subtopico\": \"1b\",\n          \"descricao_objetivo\": \"[In PT-BR] Descrição do subtópico 1b\",\n          \"analise_detalhada\": \"[In PT-BR] Análise profunda, focada estritamente neste objetivo, sem duplicar o que foi dito no 1a. (Fonte: https://...)\"\n        },\n        {\n          \"id_subtopico\": \"1c\",\n          \"descricao_objetivo\": \"[In PT-BR] Descrição do subtópico 1c (Se existir no input)\",\n          \"analise_detalhada\": \"[In PT-BR] Análise profunda... (Fonte: https://...)\"\n        }\n      ]\n    },\n    {\n      \"id_topico\": \"2\",\n      \"titulo_topico\": \"[In PT-BR] Nome do Tópico Principal 2\",\n      \"quantidade_subtopicos\": 2,\n      \"subtopicos\": [\n        {\n          \"id_subtopico\": \"2a\",\n          \"descricao_objetivo\": \"[In PT-BR] Descrição...\",\n          \"analise_detalhada\": \"[In PT-BR] Conteúdo denso e rico em detalhes... (Fonte: https://...)\"\n        },\n        {\n          \"id_subtopico\": \"2b\",\n          \"descricao_objetivo\": \"[In PT-BR] Descrição...\",\n          \"analise_detalhada\": \"[In PT-BR] Conteúdo... (Fonte: https://...)\"\n        }\n      ]\n    },\n    {\n      \"id_topico\": \"3\",\n      \"titulo_topico\": \"[In PT-BR] Nome do Tópico Principal 3\",\n      \"quantidade_subtopicos\": 2,\n      \"subtopicos\": [\n        {\n          \"id_subtopico\": \"3a\",\n          \"descricao_objetivo\": \"[In PT-BR] Descrição...\",\n          \"analise_detalhada\": \"[In PT-BR] Conteúdo... (Fonte: https://...)\"\n        },\n        {\n          \"id_subtopico\": \"3b\",\n          \"descricao_objetivo\": \"[In PT-BR] Descrição...\",\n          \"analise_detalhada\": \"[In PT-BR] Conteúdo... (Fonte: https://...)\"\n        }\n      ]\n    },\n    {\n      \"id_topico\": \"4\",\n      \"titulo_topico\": \"[In PT-BR] Nome do Tópico Principal 4\",\n      \"quantidade_subtopicos\": 2,\n      \"subtopicos\": [\n        {\n          \"id_subtopico\": \"4a\",\n          \"descricao_objetivo\": \"[In PT-BR] Descrição...\",\n          \"analise_detalhada\": \"[In PT-BR] Conteúdo... (Fonte: https://...)\"\n        },\n        {\n          \"id_subtopico\": \"4b\",\n          \"descricao_objetivo\": \"[In PT-BR] Descrição...\",\n          \"analise_detalhada\": \"[In PT-BR] Conteúdo... (Fonte: https://...)\"\n        }\n      ]\n    },\n    {\n      \"id_topico\": \"5\",\n      \"titulo_topico\": \"[In PT-BR] Nome do Tópico Principal 5\",\n      \"quantidade_subtopicos\": 2,\n      \"subtopicos\": [\n        {\n          \"id_subtopico\": \"5a\",\n          \"descricao_objetivo\": \"[In PT-BR] Descrição...\",\n          \"analise_detalhada\": \"[In PT-BR] Conteúdo com tabela comparativa... (Fonte: https://...)\"\n        },\n        {\n          \"id_subtopico\": \"5b\",\n          \"descricao_objetivo\": \"[In PT-BR] Descrição...\",\n          \"analise_detalhada\": \"[In PT-BR] Conteúdo... (Fonte: https://...)\"\n        }\n      ]\n    },\n    {\n      \"id_topico\": \"6\",\n      \"titulo_topico\": \"[In PT-BR] Nome do Tópico Principal 6 (Opcional - Apenas se existir no input)\",\n      \"quantidade_subtopicos\": 2,\n      \"subtopicos\": [\n        {\n          \"id_subtopico\": \"6a\",\n          \"descricao_objetivo\": \"[In PT-BR] Descrição...\",\n          \"analise_detalhada\": \"[In PT-BR] Conteúdo focado em curiosidades ou edições especiais... (Fonte: https://...)\"\n        },\n        {\n          \"id_subtopico\": \"6b\",\n          \"descricao_objetivo\": \"[In PT-BR] Descrição...\",\n          \"analise_detalhada\": \"[In PT-BR] Conteúdo... (Fonte: https://...)\"\n        }\n      ]\n    }\n  ],\n  \"comportamento_e_dores_discover\": {\n    \"incomodidades_frequentes\": [\n      {\n        \"id\": \"INC-01\",\n        \"dor_cronica\": \"[In PT-BR] Ex: Suspensão bate seco em buracos\",\n        \"descricao_comunidade\": \"[In PT-BR] Explicar a dor real dos usuários...\",\n        \"url_origem\": \"https://...\"\n      }\n    ],\n    \"curiosidades_de_semaforo\": [\n      {\n        \"id\": \"CUR-01\",\n        \"elemento_polarizador\": \"[In PT-BR] Ex: Painel TFT pequeno\",\n        \"descricao_comunidade\": \"[In PT-BR] O que os motociclistas debatem sobre isso...\",\n        \"url_origem\": \"https://...\"\n      },\n      {\n        \"id\": \"CUR-02\",\n        \"elemento_polarizador\": \"O visual agressivo dos faróis em LED e a carenagem frontal.\",\n        \"descricao_comunidade\": \"A moto chama a atenção na rua por parecer maior do que uma 200cc tradicional. Gera debates constantes em grupos de WhatsApp se ela 'vale o investimento' frente às marcas tradicionais pelo quesito presença de estrada.\",\n        \"url_origem\": \"https://instagram.com\"\n      }\n    ]\n  },\n  \"apendice_fontes\": {\n    \"fontes_utilizadas\": [\n      \"https://link1.com\",\n      \"https://link2.com\"\n    ],\n    \"fontes_descartadas\": [\n      \"https://link3-erro-404.com\",\n      \"https://link4-sem-dados.com\"\n    ]\n  }\n}"
+        },
+        "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+        "typeVersion": 1.3,
+        "position": [
+          1616,
+          208
+        ],
+        "id": "49c2e1e7-56c5-43ed-9af9-0e291dc7f6d9",
+        "name": "Structured Output Parser"
+      }
+    ],
+    "connections": {
+      "OpenRouter Chat Model2": {
+        "ai_languageModel": [
+          [
+            {
+              "node": "monta relatorio final",
+              "type": "ai_languageModel",
+              "index": 1
+            }
+          ]
+        ]
+      },
+      "monta relatorio final": {
+        "main": [
+          [
+            {
+              "node": "Update row(s)",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "redator final": {
+        "main": [
+          [
+            {
+              "node": "verifica se é mesmo a fase reatar",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Update row(s)": {
+        "main": [
+          [
+            {
+              "node": "Delete row(s)",
+              "type": "main",
+              "index": 0
+            },
+            {
+              "node": "callback entrega relatorio final",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "obtem relatorio final anterior": {
+        "main": [
+          [
+            {
+              "node": "status diferente de ok1",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Code in JavaScript2": {
+        "main": [
+          [
+            {
+              "node": "monta relatorio final",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "status diferente de ok1": {
+        "main": [
+          [
+            {
+              "node": "Obtem Pesquisas Realizadas",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Obtem Pesquisas Realizadas": {
+        "main": [
+          [
+            {
+              "node": "Code in JavaScript2",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "verifica se é mesmo a fase reatar": {
+        "main": [
+          [
+            {
+              "node": "obtem relatorio final anterior",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "OpenAI Chat Model1": {
+        "ai_languageModel": [
+          [
+            {
+              "node": "monta relatorio final",
+              "type": "ai_languageModel",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Structured Output Parser": {
+        "ai_outputParser": [
+          [
+            {
+              "node": "monta relatorio final",
+              "type": "ai_outputParser",
+              "index": 0
+            }
+          ]
+        ]
+      }
+    },
+    "nodeGroups": [],
+    "authors": "eliezer vargas",
+    "name": "Version 9cdf9c7f",
+    "description": "",
+    "autosaved": true,
+    "createdAt": "2026-09-23T20:09:33.729Z",
+    "updatedAt": "2026-09-23T20:10:01.636Z",
+    "workflowPublishHistory": [
+      {
+        "id": 3354,
+        "workflowId": "WGxdU1MdmoMpdZa3",
+        "versionId": "9cdf9c7f-e5f0-4c1c-af32-ce0ce049858a",
+        "event": "activated",
+        "userId": "a8a2c9ad-2763-4a77-ba81-c27a1ac09067",
+        "createdAt": "2026-09-23T20:10:01.618Z"
+      }
+    ]
+  }
+}

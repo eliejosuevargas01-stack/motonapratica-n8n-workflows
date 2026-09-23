@@ -1,0 +1,3383 @@
+{
+  "id": "Vz7KzzYWavLw3meH",
+  "name": "Deep Research - Auditor",
+  "description": "loop de audição",
+  "active": true,
+  "activeVersionId": "f6b504fc-8fb8-46d8-b7bb-d25cdcf6d14e",
+  "createdAt": "2026-09-23T20:07:44.929Z",
+  "updatedAt": "2026-09-23T20:09:25.965Z",
+  "isArchived": false,
+  "versionId": "f6b504fc-8fb8-46d8-b7bb-d25cdcf6d14e",
+  "versionCounter": 5,
+  "sourceWorkflowId": null,
+  "triggerCount": 1,
+  "nodes": [
+    {
+      "parameters": {
+        "operation": "get",
+        "dataTableId": {
+          "__rl": true,
+          "value": "ckZETOjmwN7qToHV",
+          "mode": "list",
+          "cachedResultName": "deep_research",
+          "cachedResultUrl": "/projects/0m3AYoFvtbqWOB3e/datatables/ckZETOjmwN7qToHV"
+        },
+        "matchType": "allConditions",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "id_pesquisa",
+              "keyValue": "={{ $json.id_pesquisa }}"
+            },
+            {
+              "keyName": "passo_id",
+              "keyValue": "={{ $json.passo_id }}"
+            }
+          ]
+        },
+        "returnAll": true
+      },
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "position": [
+        832,
+        1568
+      ],
+      "id": "11110087-5aab-4564-82d2-357c03fd6c4d",
+      "name": "obtem a informação resumida",
+      "executeOnce": false,
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "model": "nvidia/nemotron-3-ultra-550b-a55b:free",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenRouter",
+      "typeVersion": 1,
+      "position": [
+        1264,
+        1760
+      ],
+      "id": "046e506f-1d93-4649-a6b5-abf9d5e002e6",
+      "name": "OpenRouter Chat Model6",
+      "credentials": {
+        "openRouterApi": {
+          "id": "HSdnSXTZr0ZDrfG2",
+          "name": "EJVG"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsonSchemaExample": "{\n  \"passo_id\": \"1a\",\n  \"status\": \"incompleto\",\n  \"informacao_consolidada\": \"Opcional: preenchido se ok, vazio se incompleto.\",\n  \"queries\": [\n    \"preenchido se incompleto\",\n    \"preenchido se incompleto\"\n  ]\n}"
+      },
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.3,
+      "position": [
+        1440,
+        1728
+      ],
+      "id": "453979a8-e176-4035-988a-11ccb60b198b",
+      "name": "Structured Output Parser2"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=a informação obtida satisfaz todas as partes do subtopico?\nsubtopico:\n{{ $json.subtopico }}\n\ndados coletados:\n{{ $json.informacao_resumida_desse_subtopico }}\n",
+        "hasOutputParser": true,
+        "needsFallback": true,
+        "options": {
+          "systemMessage": "Você é um Auditor de Dados Sênior. Sua função é receber UM único subtópico de pesquisa (passo) e seus respectivos \"dados extraídos\", e avaliar se as informações respondem de forma satisfatória à diretriz.\n\n⚠️ REGRA DE OURO: A MARGEM DE 80% DE CONFIANÇA (CUSTO-BENEFÍCIO)\nPesquisas na internet custam recursos e raramente retornam um consenso perfeito. Seu objetivo NÃO é buscar a perfeição absoluta, mas sim informações altamente úteis.\nSe a informação coletada para este subtópico atingir 80% ou mais de confiança e relevância, você DEVE aprová-lo e marcar o status como \"ok\".\n\nDIRETRIZES DE APROVAÇÃO (O que compõe os 80%):\n1. Variações Naturais: É normal que fontes diferentes apresentem variações em consumo, preços ou pequenas diferenças técnicas. NÃO marque como incompleto por isso. Aceite os dados e consolide-os como uma \"faixa\" ou \"média\".\n2. Anos Aproximados: Se o plano pede um ano específico e os dados trazem anos anteriores recentes, considere válido se as especificações básicas não tiverem sofrido mudanças drásticas.\n3. Economia de Queries: Só solicite novas pesquisas (queries) se a informação for GRAVEMENTE inútil, fugir totalmente do escopo ou faltar uma métrica vital exigida.\n\nFORMATO DE SAÍDA OBRIGATÓRIO (JSON):\nVocê deve retornar ESTRITAMENTE um objeto JSON contendo a avaliação deste único subtópico.\n\nSe os dados atingirem 80% de confiança, retorne:\n{\n  \"passo_id\": \"[Insira o ID do passo avaliado, ex: 1a]\",\n  \"status\": \"ok\",\n  \"informacao_consolidada\": \"Escreva aqui um resumo inteligente agrupando as informações. Se houver divergências, crie uma faixa/média.\",\n  \"queries\": []\n}\n\nSe os dados estiverem abaixo de 80% e faltar algo crítico, retorne:\n{\n  \"passo_id\": \"[Insira o ID do passo avaliado, ex: 1a]\",\n  \"status\": \"pendente\",\n  \"informacao_consolidada\": \"\",\n  \"queries\": [\"query natural e focada 1\", \"query natural e focada 2\"]\n}\n\nRegra Final: Não inclua nenhum texto, explicação ou formatação fora do bloco JSON. Retorne apenas o JSON puro."
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        1216,
+        1568
+      ],
+      "id": "f6543d2b-7e92-4923-a763-79bf7cc060ff",
+      "name": "auditor1",
+      "retryOnFail": true,
+      "executeOnce": false,
+      "waitBetweenTries": 5000,
+      "maxTries": 4
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "93112a02-656b-4ce7-82fc-5e4c274a72bf",
+              "leftValue": "={{ $json.tentativas }}",
+              "rightValue": 3,
+              "operator": {
+                "type": "number",
+                "operation": "lte"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        1808,
+        1568
+      ],
+      "id": "2da006f0-5a27-4675-b5d3-f14e0128f395",
+      "name": "enquanto tentativa for diferente de 3 continua"
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "dataTableId": {
+          "__rl": true,
+          "value": "arAS2xvz1XBxyA57",
+          "mode": "list",
+          "cachedResultName": "status_pesquisa",
+          "cachedResultUrl": "/projects/0m3AYoFvtbqWOB3e/datatables/arAS2xvz1XBxyA57"
+        },
+        "matchType": "allConditions",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "passo_id",
+              "keyValue": "={{ $json.passo_id }}"
+            },
+            {
+              "keyName": "id_pesquisa",
+              "keyValue": "={{ $json.id_pesquisa }}"
+            }
+          ]
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "status": "=ok"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "id_pesquisa",
+              "displayName": "id_pesquisa",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "passo_id",
+              "displayName": "passo_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "topico_principal",
+              "displayName": "topico_principal",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "descricao_subtopico",
+              "displayName": "descricao_subtopico",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "status",
+              "displayName": "status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "ultima_query",
+              "displayName": "ultima_query",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "informacao_consolidada",
+              "displayName": "informacao_consolidada",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "webhook_callback",
+              "displayName": "webhook_callback",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "tentativas",
+              "displayName": "tentativas",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "readOnly": false,
+              "removed": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "position": [
+        1952,
+        1824
+      ],
+      "id": "e8a7fdff-1e6b-4dcb-bda8-78b5be949e21",
+      "name": "atualiza status de auditoria1"
+    },
+    {
+      "parameters": {
+        "amount": "={{ Math.random() * 5 }}"
+      },
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        64,
+        1568
+      ],
+      "id": "dea5d4cf-9c4b-436c-bc99-b7497d70ddbb",
+      "name": "Staggering1",
+      "webhookId": "87ddd6b5-5eb8-428a-9dfe-bbe6e538aa94"
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "dataTableId": {
+          "__rl": true,
+          "value": "arAS2xvz1XBxyA57",
+          "mode": "list",
+          "cachedResultName": "status_pesquisa",
+          "cachedResultUrl": "/projects/0m3AYoFvtbqWOB3e/datatables/arAS2xvz1XBxyA57"
+        },
+        "matchType": "allConditions",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "id_pesquisa",
+              "keyValue": "={{ $json.id_pesquisa }}"
+            },
+            {
+              "keyName": "passo_id",
+              "keyValue": "={{ $json.passo_id }}"
+            },
+            {
+              "keyName": "status",
+              "keyValue": "={{ $json.status }}"
+            },
+            {
+              "keyName": "Processando",
+              "condition": "isFalse"
+            }
+          ]
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "status": "auditando",
+            "Processando": true
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "id_pesquisa",
+              "displayName": "id_pesquisa",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "passo_id",
+              "displayName": "passo_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "topico_principal",
+              "displayName": "topico_principal",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "descricao_subtopico",
+              "displayName": "descricao_subtopico",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "status",
+              "displayName": "status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "ultima_query",
+              "displayName": "ultima_query",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "informacao_consolidada",
+              "displayName": "informacao_consolidada",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "webhook_callback",
+              "displayName": "webhook_callback",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "tentativas",
+              "displayName": "tentativas",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Processando",
+              "displayName": "Processando",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "boolean",
+              "readOnly": false,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "position": [
+        640,
+        1568
+      ],
+      "id": "5b5d682d-e388-4b73-8ea7-cb3fcec18765",
+      "name": "auditando",
+      "executeOnce": false
+    },
+    {
+      "parameters": {
+        "operation": "get",
+        "dataTableId": {
+          "__rl": true,
+          "value": "arAS2xvz1XBxyA57",
+          "mode": "list",
+          "cachedResultName": "status_pesquisa",
+          "cachedResultUrl": "/projects/0m3AYoFvtbqWOB3e/datatables/arAS2xvz1XBxyA57"
+        },
+        "matchType": "allConditions",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "status",
+              "keyValue": "auditar"
+            },
+            {
+              "keyName": "id_pesquisa",
+              "keyValue": "={{ $json.id_pesquisa }}"
+            },
+            {
+              "keyName": "Processando",
+              "condition": "isFalse"
+            }
+          ]
+        },
+        "returnAll": true
+      },
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "position": [
+        448,
+        1568
+      ],
+      "id": "6a84edff-8c50-4be9-b6c5-80ad953f46d7",
+      "name": "obtem items com status auditar",
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "jsCode": "// 1. Pega os 13 subtópicos oficiais da status_pesquisa\nconst subtopicosOriginais = $('obtem items com status auditar').all();\n\nif (subtopicosOriginais.length === 0) {\n  return [];\n}\n\n// 2. Pega as linhas garimpadas da deep_research (se houver)\nconst linhasBrutas = $input.all();\n\n// 3. INICIALIZA O AGRUPADOR COM TODOS OS 13 SUBTÓPICOS OFICIAIS\nconst dadosAgrupados = {};\n\nsubtopicosOriginais.forEach(item => {\n  const pIdRaw = item.json.passo_id;\n  if (pIdRaw) {\n    const match = String(pIdRaw).toLowerCase().match(/\\d+[a-z]/);\n    const key = match ? match[0] : String(pIdRaw).trim().toLowerCase();\n    \n    dadosAgrupados[key] = {\n      passo_id: key,\n      id_pesquisa: item.json.id_pesquisa || null,\n      topico_principal: item.json.topico_principal || \"\",\n      descricao: item.json.descricao_subtopico || \"Descrição não encontrada\",\n      status: item.json.status || \"\",\n      informacoes: []\n    };\n  }\n});\n\n// 4. Popula as informações garimpadas vindas da deep_research nas chaves já existentes\nlinhasBrutas.forEach(item => {\n  const json = item.json;\n  const rawRef = json.passo_id || json.topico_referencia || \"\";\n  const match = String(rawRef).toLowerCase().match(/\\d+[a-z]/);\n  if (!match) return;\n  \n  const ref = match[0];\n  \n  // Adiciona a informação garimpada ao subtópico correspondente\n  if (dadosAgrupados[ref] && json.informacao_resumida) {\n    dadosAgrupados[ref].informacoes.push(json.informacao_resumida);\n  }\n});\n\n// 5. Ordena as chaves dos subtópicos (1a, 1b, 2a, 3a...)\nconst refsOrdenadas = Object.keys(dadosAgrupados).sort((a, b) => {\n  const matchA = a.match(/\\d+/);\n  const matchB = b.match(/\\d+/);\n  \n  const numA = matchA ? parseInt(matchA[0]) : 0;\n  const numB = matchB ? parseInt(matchB[0]) : 0;\n  \n  if (numA !== numB) return numA - numB;\n  return a.localeCompare(b);\n});\n\n// 6. Monta a saída garantindo QUE TODOS OS 13 SUBTÓPICOS VÃO PARA O AUDITOR\nconst outputItems = refsOrdenadas.map(ref => {\n  const sub = dadosAgrupados[ref];\n  \n  let infoFormatada = \"\";\n  if (sub.informacoes.length > 0) {\n    const infoUnicas = [...new Set(sub.informacoes)];\n    infoFormatada = infoUnicas.map(info => `- ${info}`).join('\\n');\n  } else {\n    infoFormatada = \"- Nenhuma informação foi garimpada para este tópico.\";\n  }\n\n  return {\n    json: {\n      id_pesquisa: sub.id_pesquisa,\n      topico_principal: sub.topico_principal,\n      passo_id: sub.passo_id,\n      subtopico: `(${sub.passo_id}) ${sub.descricao}`,\n      status_atual: sub.status,\n      informacao_resumida_desse_subtopico: infoFormatada\n    }\n  };\n});\n\nreturn outputItems;"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1024,
+        1568
+      ],
+      "id": "24368336-507a-43fa-acab-4b7eac2ec301",
+      "name": "agrupa por passo_id para o auditor"
+    },
+    {
+      "parameters": {
+        "path": "auditor",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        -128,
+        1568
+      ],
+      "id": "d4a224c7-8e1b-4214-aaa9-cc1d846dd3fa",
+      "name": "auditor",
+      "webhookId": "bfa6e8bc-6916-46f5-9dd0-73399844824c"
+    },
+    {
+      "parameters": {
+        "operation": "get",
+        "dataTableId": {
+          "__rl": true,
+          "value": "9ltZLFGUXe11LFQk",
+          "mode": "list",
+          "cachedResultName": "Pesquisa",
+          "cachedResultUrl": "/projects/0m3AYoFvtbqWOB3e/datatables/9ltZLFGUXe11LFQk"
+        },
+        "matchType": "allConditions",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "id_pesquisa",
+              "keyValue": "={{ $json.query.id_pesquisa }}"
+            },
+            {
+              "keyName": "Fase",
+              "keyValue": "auditar"
+            }
+          ]
+        },
+        "returnAll": true
+      },
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "position": [
+        256,
+        1568
+      ],
+      "id": "497125d2-ecca-44a1-8658-0cebdd173965",
+      "name": "verifica que a fase seja auditar"
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "dataTableId": {
+          "__rl": true,
+          "value": "arAS2xvz1XBxyA57",
+          "mode": "list",
+          "cachedResultName": "status_pesquisa",
+          "cachedResultUrl": "/projects/0m3AYoFvtbqWOB3e/datatables/arAS2xvz1XBxyA57"
+        },
+        "matchType": "allConditions",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "passo_id",
+              "keyValue": "={{ $json.output.passo_id }}"
+            },
+            {
+              "keyName": "id_pesquisa",
+              "keyValue": "={{ $('agrupa por passo_id para o auditor').item.json.id_pesquisa }}"
+            },
+            {
+              "keyName": "status",
+              "keyValue": "auditando"
+            },
+            {
+              "keyName": "Processando",
+              "condition": "isTrue"
+            }
+          ]
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "status": "={{ $json.output.status }}",
+            "ultima_query": "={{ JSON.stringify($json.output.queries) }}",
+            "informacao_consolidada": "={{ $json.output.informacao_consolidada }}",
+            "Processando": false
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "id_pesquisa",
+              "displayName": "id_pesquisa",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "passo_id",
+              "displayName": "passo_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "topico_principal",
+              "displayName": "topico_principal",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "descricao_subtopico",
+              "displayName": "descricao_subtopico",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "status",
+              "displayName": "status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "ultima_query",
+              "displayName": "ultima_query",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "informacao_consolidada",
+              "displayName": "informacao_consolidada",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "webhook_callback",
+              "displayName": "webhook_callback",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "tentativas",
+              "displayName": "tentativas",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Processando",
+              "displayName": "Processando",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "boolean",
+              "readOnly": false,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "position": [
+        1616,
+        1568
+      ],
+      "id": "94e0c243-0cb5-40a5-9a7f-1b73b00a313e",
+      "name": "atualiza status de auditoria || OK"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "46badbfb-e17e-4023-af4f-74aaa89d1b2e",
+              "leftValue": "={{ $json.id_pesquisa }}",
+              "rightValue": "",
+              "operator": {
+                "type": "number",
+                "operation": "exists",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        2336,
+        1472
+      ],
+      "id": "f1dff802-5fe3-45e6-a2a0-6e9eea02c367",
+      "name": "If2"
+    },
+    {
+      "parameters": {
+        "jsCode": "// 1. Pega todos os itens da entrada (linhas da status_pesquisa)\nconst items = $input.all();\n\nif (items.length === 0) {\n  return [];\n}\n\n// 2. Verifica se 100% dos itens possuem exatamente o status \"auditar\" E não estão processando\nconst todosProntosParaAuditar = items.every(item => \n  item.json.status === 'ok' && \n  item.json.Processando === false\n);\n\n// 3. Se faltar qualquer um (ex: status 'pendente', ou Processando: true), encerra em silêncio (retorna array vazio)\nif (!todosProntosParaAuditar) {\n  return [];\n}\n\n// 4. Se TODOS estiverem como \"auditar\" e Processando false, pega o id_pesquisa do primeiro item\nconst idPesquisa = items[0].json.id_pesquisa;\n\n// 5. Retorna UM ÚNICO ITEM contendo o id_pesquisa para liberar os próximos nós\nreturn [\n  {\n    json: {\n      id_pesquisa: idPesquisa,\n      total_subtopicos: items.length,\n      status_geral: \"todos_prontos_para_auditar\"\n    }\n  }\n];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2144,
+        1472
+      ],
+      "id": "c90bff52-d0b4-484e-a2ef-869131632923",
+      "name": "passa apenas quando todos sejam auditar1",
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "dataTableId": {
+          "__rl": true,
+          "value": "9ltZLFGUXe11LFQk",
+          "mode": "list",
+          "cachedResultName": "Pesquisa",
+          "cachedResultUrl": "/projects/0m3AYoFvtbqWOB3e/datatables/9ltZLFGUXe11LFQk"
+        },
+        "matchType": "allConditions",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "id_pesquisa",
+              "keyValue": "={{ $json.id_pesquisa }}"
+            },
+            {
+              "keyName": "Fase",
+              "keyValue": "auditar"
+            }
+          ]
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Fase": "redatar"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "asssunto",
+              "displayName": "asssunto",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "id_pesquisa",
+              "displayName": "id_pesquisa",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "angulo",
+              "displayName": "angulo",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "gancho",
+              "displayName": "gancho",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "relatorio",
+              "displayName": "relatorio",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "justificativa_angulo",
+              "displayName": "justificativa_angulo",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "justificativa_gancho",
+              "displayName": "justificativa_gancho",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "justificativa_assunto",
+              "displayName": "justificativa_assunto",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "keywords_assunto",
+              "displayName": "keywords_assunto",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "atualizacao",
+              "displayName": "atualizacao",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "boolean",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "webhook_callback",
+              "displayName": "webhook_callback",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Fase",
+              "displayName": "Fase",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "position": [
+        2544,
+        1376
+      ],
+      "id": "2cdaf4b7-527c-4f0c-8167-07d24c7c6b46",
+      "name": "Update fase para redatar"
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "dataTableId": {
+          "__rl": true,
+          "value": "9ltZLFGUXe11LFQk",
+          "mode": "list",
+          "cachedResultName": "Pesquisa",
+          "cachedResultUrl": "/projects/0m3AYoFvtbqWOB3e/datatables/9ltZLFGUXe11LFQk"
+        },
+        "matchType": "allConditions",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "id_pesquisa",
+              "keyValue": "={{ $('verifica que todos sejam ok').first().json.id_pesquisa }}"
+            },
+            {
+              "keyName": "Fase",
+              "keyValue": "auditar"
+            }
+          ]
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Fase": "garimpar"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "asssunto",
+              "displayName": "asssunto",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "id_pesquisa",
+              "displayName": "id_pesquisa",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "angulo",
+              "displayName": "angulo",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "gancho",
+              "displayName": "gancho",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "relatorio",
+              "displayName": "relatorio",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "justificativa_angulo",
+              "displayName": "justificativa_angulo",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "justificativa_gancho",
+              "displayName": "justificativa_gancho",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "justificativa_assunto",
+              "displayName": "justificativa_assunto",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "keywords_assunto",
+              "displayName": "keywords_assunto",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "atualizacao",
+              "displayName": "atualizacao",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "boolean",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "webhook_callback",
+              "displayName": "webhook_callback",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Fase",
+              "displayName": "Fase",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "position": [
+        2544,
+        1536
+      ],
+      "id": "0807b83d-02ba-4f7f-ab8d-2ab993321260",
+      "name": "Update fase para garimpar"
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "dataTableId": {
+          "__rl": true,
+          "value": "9ltZLFGUXe11LFQk",
+          "mode": "list",
+          "cachedResultName": "Pesquisa",
+          "cachedResultUrl": "/projects/0m3AYoFvtbqWOB3e/datatables/9ltZLFGUXe11LFQk"
+        },
+        "matchType": "allConditions",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "id_pesquisa",
+              "keyValue": "={{ $json.id_pesquisa }}"
+            },
+            {
+              "keyName": "Fase",
+              "keyValue": "auditar"
+            }
+          ]
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Fase": "redatar"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "asssunto",
+              "displayName": "asssunto",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "id_pesquisa",
+              "displayName": "id_pesquisa",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "angulo",
+              "displayName": "angulo",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "gancho",
+              "displayName": "gancho",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "relatorio",
+              "displayName": "relatorio",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "justificativa_angulo",
+              "displayName": "justificativa_angulo",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "justificativa_gancho",
+              "displayName": "justificativa_gancho",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "justificativa_assunto",
+              "displayName": "justificativa_assunto",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "keywords_assunto",
+              "displayName": "keywords_assunto",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "atualizacao",
+              "displayName": "atualizacao",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "boolean",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "webhook_callback",
+              "displayName": "webhook_callback",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Fase",
+              "displayName": "Fase",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "position": [
+        2144,
+        1824
+      ],
+      "id": "e76b7baa-6e7b-4924-8ebe-f43d015cb552",
+      "name": "Update fase para redatar1"
+    },
+    {
+      "parameters": {
+        "url": "https://myn8n.seommerce.shop/webhook/gera-relatorio-final",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "id_pesquisa",
+              "value": "={{ $json.id_pesquisa }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        2352,
+        1824
+      ],
+      "id": "dc9980d4-698a-41d1-ae17-52bb7f152f1b",
+      "name": "chama redator"
+    },
+    {
+      "parameters": {
+        "url": "https://myn8n.seommerce.shop/webhook/gera-relatorio-final",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "id_pesquisa",
+              "value": "={{ $json.id_pesquisa }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        2736,
+        1376
+      ],
+      "id": "d6ac25fe-9bca-42ed-8339-faad7cc2c57e",
+      "name": "chama redator1"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "gemini-2.5-flash",
+          "mode": "list",
+          "cachedResultName": "gemini-2.5-flash"
+        },
+        "builtInTools": {},
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.3,
+      "position": [
+        1136,
+        1744
+      ],
+      "id": "8ee56291-c996-4c88-89d3-3d9a639a7ad9",
+      "name": "OpenAI Chat Model3",
+      "credentials": {
+        "openAiApi": {
+          "id": "Su8igitAIxbJpkcY",
+          "name": "litellm api"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "get",
+        "dataTableId": {
+          "__rl": true,
+          "value": "arAS2xvz1XBxyA57",
+          "mode": "list",
+          "cachedResultName": "passos",
+          "cachedResultUrl": "/projects/0m3AYoFvtbqWOB3e/datatables/arAS2xvz1XBxyA57"
+        },
+        "matchType": "allConditions",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "id_pesquisa",
+              "keyValue": "={{ $json.id_pesquisa }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "position": [
+        1952,
+        1472
+      ],
+      "id": "9b726778-cb4f-4ec0-b097-4d64e8d6be90",
+      "name": "verifica que todos sejam ok",
+      "executeOnce": true
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "a7e56c33-d37a-43e9-8741-1b028ab7539d",
+              "leftValue": "={{ $json.status }}",
+              "rightValue": "pendente",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 2.3,
+      "position": [
+        2144,
+        1648
+      ],
+      "id": "bacfa9ea-7c0f-4b5a-900c-5f1fcfaa7f36",
+      "name": "Filter"
+    },
+    {
+      "parameters": {
+        "url": "https://myn8n.seommerce.shop/webhook/Scrapper",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "id_pesquisa",
+              "value": "={{ $json.id_pesquisa }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        2544,
+        1712
+      ],
+      "id": "313c3f5d-e929-4732-9832-16d9d59b0b21",
+      "name": "chama garimpeiro"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        2352,
+        1648
+      ],
+      "id": "7aef9bd1-fb2c-4111-9e29-b47941f844bd",
+      "name": "Wait",
+      "webhookId": "750277df-ccc9-4a2f-a1f7-53b2ebd8c99f"
+    }
+  ],
+  "connections": {
+    "obtem a informação resumida": {
+      "main": [
+        [
+          {
+            "node": "agrupa por passo_id para o auditor",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenRouter Chat Model6": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "auditor1",
+            "type": "ai_languageModel",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Structured Output Parser2": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "auditor1",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "auditor1": {
+      "main": [
+        [
+          {
+            "node": "atualiza status de auditoria || OK",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "enquanto tentativa for diferente de 3 continua": {
+      "main": [
+        [
+          {
+            "node": "verifica que todos sejam ok",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "atualiza status de auditoria1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "atualiza status de auditoria1": {
+      "main": [
+        [
+          {
+            "node": "Update fase para redatar1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Staggering1": {
+      "main": [
+        [
+          {
+            "node": "verifica que a fase seja auditar",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "auditando": {
+      "main": [
+        [
+          {
+            "node": "obtem a informação resumida",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "obtem items com status auditar": {
+      "main": [
+        [
+          {
+            "node": "auditando",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "agrupa por passo_id para o auditor": {
+      "main": [
+        [
+          {
+            "node": "auditor1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "auditor": {
+      "main": [
+        [
+          {
+            "node": "Staggering1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "verifica que a fase seja auditar": {
+      "main": [
+        [
+          {
+            "node": "obtem items com status auditar",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "atualiza status de auditoria || OK": {
+      "main": [
+        [
+          {
+            "node": "enquanto tentativa for diferente de 3 continua",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If2": {
+      "main": [
+        [
+          {
+            "node": "Update fase para redatar",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Update fase para garimpar",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "passa apenas quando todos sejam auditar1": {
+      "main": [
+        [
+          {
+            "node": "If2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update fase para redatar": {
+      "main": [
+        [
+          {
+            "node": "chama redator1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update fase para redatar1": {
+      "main": [
+        [
+          {
+            "node": "chama redator",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model3": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "auditor1",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "verifica que todos sejam ok": {
+      "main": [
+        [
+          {
+            "node": "passa apenas quando todos sejam auditar1",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Filter",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Filter": {
+      "main": [
+        [
+          {
+            "node": "Wait",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait": {
+      "main": [
+        [
+          {
+            "node": "chama garimpeiro",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "nodeGroups": [],
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "staticData": null,
+  "pinData": {},
+  "meta": null,
+  "tags": [
+    {
+      "id": "I1tPTJVmCdtv2spd",
+      "name": "Deep Research",
+      "createdAt": "2026-09-23T20:00:38.358Z",
+      "updatedAt": "2026-09-23T20:00:38.358Z"
+    },
+    {
+      "id": "WWkQSlVovFHP0UDj",
+      "name": "Moto-Na-Pratica",
+      "createdAt": "2026-09-23T17:08:30.993Z",
+      "updatedAt": "2026-09-23T17:08:30.993Z"
+    }
+  ],
+  "shared": [
+    {
+      "role": "workflow:owner",
+      "workflowId": "Vz7KzzYWavLw3meH",
+      "projectId": "0m3AYoFvtbqWOB3e",
+      "project": {
+        "id": "0m3AYoFvtbqWOB3e",
+        "name": "eliezer vargas <eliejosuevargas01@gmail.com>",
+        "type": "personal",
+        "icon": null,
+        "description": null,
+        "customTelemetryTags": [],
+        "creatorId": "a8a2c9ad-2763-4a77-ba81-c27a1ac09067",
+        "createdAt": "2025-12-06T14:56:50.686Z",
+        "updatedAt": "2025-12-06T14:58:20.912Z"
+      },
+      "createdAt": "2026-09-23T20:07:44.929Z",
+      "updatedAt": "2026-09-23T20:07:44.929Z"
+    }
+  ],
+  "activeVersion": {
+    "versionId": "f6b504fc-8fb8-46d8-b7bb-d25cdcf6d14e",
+    "workflowId": "Vz7KzzYWavLw3meH",
+    "nodes": [
+      {
+        "parameters": {
+          "operation": "get",
+          "dataTableId": {
+            "__rl": true,
+            "value": "ckZETOjmwN7qToHV",
+            "mode": "list",
+            "cachedResultName": "deep_research",
+            "cachedResultUrl": "/projects/0m3AYoFvtbqWOB3e/datatables/ckZETOjmwN7qToHV"
+          },
+          "matchType": "allConditions",
+          "filters": {
+            "conditions": [
+              {
+                "keyName": "id_pesquisa",
+                "keyValue": "={{ $json.id_pesquisa }}"
+              },
+              {
+                "keyName": "passo_id",
+                "keyValue": "={{ $json.passo_id }}"
+              }
+            ]
+          },
+          "returnAll": true
+        },
+        "type": "n8n-nodes-base.dataTable",
+        "typeVersion": 1.1,
+        "position": [
+          832,
+          1568
+        ],
+        "id": "11110087-5aab-4564-82d2-357c03fd6c4d",
+        "name": "obtem a informação resumida",
+        "executeOnce": false,
+        "alwaysOutputData": true
+      },
+      {
+        "parameters": {
+          "model": "nvidia/nemotron-3-ultra-550b-a55b:free",
+          "options": {}
+        },
+        "type": "@n8n/n8n-nodes-langchain.lmChatOpenRouter",
+        "typeVersion": 1,
+        "position": [
+          1264,
+          1760
+        ],
+        "id": "046e506f-1d93-4649-a6b5-abf9d5e002e6",
+        "name": "OpenRouter Chat Model6",
+        "credentials": {
+          "openRouterApi": {
+            "id": "HSdnSXTZr0ZDrfG2",
+            "name": "EJVG"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "jsonSchemaExample": "{\n  \"passo_id\": \"1a\",\n  \"status\": \"incompleto\",\n  \"informacao_consolidada\": \"Opcional: preenchido se ok, vazio se incompleto.\",\n  \"queries\": [\n    \"preenchido se incompleto\",\n    \"preenchido se incompleto\"\n  ]\n}"
+        },
+        "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+        "typeVersion": 1.3,
+        "position": [
+          1440,
+          1728
+        ],
+        "id": "453979a8-e176-4035-988a-11ccb60b198b",
+        "name": "Structured Output Parser2"
+      },
+      {
+        "parameters": {
+          "promptType": "define",
+          "text": "=a informação obtida satisfaz todas as partes do subtopico?\nsubtopico:\n{{ $json.subtopico }}\n\ndados coletados:\n{{ $json.informacao_resumida_desse_subtopico }}\n",
+          "hasOutputParser": true,
+          "needsFallback": true,
+          "options": {
+            "systemMessage": "Você é um Auditor de Dados Sênior. Sua função é receber UM único subtópico de pesquisa (passo) e seus respectivos \"dados extraídos\", e avaliar se as informações respondem de forma satisfatória à diretriz.\n\n⚠️ REGRA DE OURO: A MARGEM DE 80% DE CONFIANÇA (CUSTO-BENEFÍCIO)\nPesquisas na internet custam recursos e raramente retornam um consenso perfeito. Seu objetivo NÃO é buscar a perfeição absoluta, mas sim informações altamente úteis.\nSe a informação coletada para este subtópico atingir 80% ou mais de confiança e relevância, você DEVE aprová-lo e marcar o status como \"ok\".\n\nDIRETRIZES DE APROVAÇÃO (O que compõe os 80%):\n1. Variações Naturais: É normal que fontes diferentes apresentem variações em consumo, preços ou pequenas diferenças técnicas. NÃO marque como incompleto por isso. Aceite os dados e consolide-os como uma \"faixa\" ou \"média\".\n2. Anos Aproximados: Se o plano pede um ano específico e os dados trazem anos anteriores recentes, considere válido se as especificações básicas não tiverem sofrido mudanças drásticas.\n3. Economia de Queries: Só solicite novas pesquisas (queries) se a informação for GRAVEMENTE inútil, fugir totalmente do escopo ou faltar uma métrica vital exigida.\n\nFORMATO DE SAÍDA OBRIGATÓRIO (JSON):\nVocê deve retornar ESTRITAMENTE um objeto JSON contendo a avaliação deste único subtópico.\n\nSe os dados atingirem 80% de confiança, retorne:\n{\n  \"passo_id\": \"[Insira o ID do passo avaliado, ex: 1a]\",\n  \"status\": \"ok\",\n  \"informacao_consolidada\": \"Escreva aqui um resumo inteligente agrupando as informações. Se houver divergências, crie uma faixa/média.\",\n  \"queries\": []\n}\n\nSe os dados estiverem abaixo de 80% e faltar algo crítico, retorne:\n{\n  \"passo_id\": \"[Insira o ID do passo avaliado, ex: 1a]\",\n  \"status\": \"pendente\",\n  \"informacao_consolidada\": \"\",\n  \"queries\": [\"query natural e focada 1\", \"query natural e focada 2\"]\n}\n\nRegra Final: Não inclua nenhum texto, explicação ou formatação fora do bloco JSON. Retorne apenas o JSON puro."
+          }
+        },
+        "type": "@n8n/n8n-nodes-langchain.agent",
+        "typeVersion": 3.1,
+        "position": [
+          1216,
+          1568
+        ],
+        "id": "f6543d2b-7e92-4923-a763-79bf7cc060ff",
+        "name": "auditor1",
+        "retryOnFail": true,
+        "executeOnce": false,
+        "waitBetweenTries": 5000,
+        "maxTries": 4
+      },
+      {
+        "parameters": {
+          "conditions": {
+            "options": {
+              "caseSensitive": true,
+              "leftValue": "",
+              "typeValidation": "strict",
+              "version": 3
+            },
+            "conditions": [
+              {
+                "id": "93112a02-656b-4ce7-82fc-5e4c274a72bf",
+                "leftValue": "={{ $json.tentativas }}",
+                "rightValue": 3,
+                "operator": {
+                  "type": "number",
+                  "operation": "lte"
+                }
+              }
+            ],
+            "combinator": "and"
+          },
+          "options": {}
+        },
+        "type": "n8n-nodes-base.if",
+        "typeVersion": 2.3,
+        "position": [
+          1808,
+          1568
+        ],
+        "id": "2da006f0-5a27-4675-b5d3-f14e0128f395",
+        "name": "enquanto tentativa for diferente de 3 continua"
+      },
+      {
+        "parameters": {
+          "operation": "update",
+          "dataTableId": {
+            "__rl": true,
+            "value": "arAS2xvz1XBxyA57",
+            "mode": "list",
+            "cachedResultName": "status_pesquisa",
+            "cachedResultUrl": "/projects/0m3AYoFvtbqWOB3e/datatables/arAS2xvz1XBxyA57"
+          },
+          "matchType": "allConditions",
+          "filters": {
+            "conditions": [
+              {
+                "keyName": "passo_id",
+                "keyValue": "={{ $json.passo_id }}"
+              },
+              {
+                "keyName": "id_pesquisa",
+                "keyValue": "={{ $json.id_pesquisa }}"
+              }
+            ]
+          },
+          "columns": {
+            "mappingMode": "defineBelow",
+            "value": {
+              "status": "=ok"
+            },
+            "matchingColumns": [],
+            "schema": [
+              {
+                "id": "id_pesquisa",
+                "displayName": "id_pesquisa",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "number",
+                "readOnly": false,
+                "removed": true
+              },
+              {
+                "id": "passo_id",
+                "displayName": "passo_id",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "string",
+                "readOnly": false,
+                "removed": true
+              },
+              {
+                "id": "topico_principal",
+                "displayName": "topico_principal",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "string",
+                "readOnly": false,
+                "removed": true
+              },
+              {
+                "id": "descricao_subtopico",
+                "displayName": "descricao_subtopico",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "string",
+                "readOnly": false,
+                "removed": true
+              },
+              {
+                "id": "status",
+                "displayName": "status",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "string",
+                "readOnly": false,
+                "removed": false
+              },
+              {
+                "id": "ultima_query",
+                "displayName": "ultima_query",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "string",
+                "readOnly": false,
+                "removed": true
+              },
+              {
+                "id": "informacao_consolidada",
+                "displayName": "informacao_consolidada",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "string",
+                "readOnly": false,
+                "removed": true
+              },
+              {
+                "id": "webhook_callback",
+                "displayName": "webhook_callback",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "string",
+                "readOnly": false,
+                "removed": true
+              },
+              {
+                "id": "tentativas",
+                "displayName": "tentativas",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "number",
+                "readOnly": false,
+                "removed": true
+              }
+            ],
+            "attemptToConvertTypes": false,
+            "convertFieldsToString": false
+          },
+          "options": {}
+        },
+        "type": "n8n-nodes-base.dataTable",
+        "typeVersion": 1.1,
+        "position": [
+          1952,
+          1824
+        ],
+        "id": "e8a7fdff-1e6b-4dcb-bda8-78b5be949e21",
+        "name": "atualiza status de auditoria1"
+      },
+      {
+        "parameters": {
+          "amount": "={{ Math.random() * 5 }}"
+        },
+        "type": "n8n-nodes-base.wait",
+        "typeVersion": 1.1,
+        "position": [
+          64,
+          1568
+        ],
+        "id": "dea5d4cf-9c4b-436c-bc99-b7497d70ddbb",
+        "name": "Staggering1",
+        "webhookId": "87ddd6b5-5eb8-428a-9dfe-bbe6e538aa94"
+      },
+      {
+        "parameters": {
+          "operation": "update",
+          "dataTableId": {
+            "__rl": true,
+            "value": "arAS2xvz1XBxyA57",
+            "mode": "list",
+            "cachedResultName": "status_pesquisa",
+            "cachedResultUrl": "/projects/0m3AYoFvtbqWOB3e/datatables/arAS2xvz1XBxyA57"
+          },
+          "matchType": "allConditions",
+          "filters": {
+            "conditions": [
+              {
+                "keyName": "id_pesquisa",
+                "keyValue": "={{ $json.id_pesquisa }}"
+              },
+              {
+                "keyName": "passo_id",
+                "keyValue": "={{ $json.passo_id }}"
+              },
+              {
+                "keyName": "status",
+                "keyValue": "={{ $json.status }}"
+              },
+              {
+                "keyName": "Processando",
+                "condition": "isFalse"
+              }
+            ]
+          },
+          "columns": {
+            "mappingMode": "defineBelow",
+            "value": {
+              "status": "auditando",
+              "Processando": true
+            },
+            "matchingColumns": [],
+            "schema": [
+              {
+                "id": "id_pesquisa",
+                "displayName": "id_pesquisa",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "number",
+                "readOnly": false,
+                "removed": true
+              },
+              {
+                "id": "passo_id",
+                "displayName": "passo_id",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "string",
+                "readOnly": false,
+                "removed": true
+              },
+              {
+                "id": "topico_principal",
+                "displayName": "topico_principal",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "string",
+                "readOnly": false,
+                "removed": true
+              },
+              {
+                "id": "descricao_subtopico",
+                "displayName": "descricao_subtopico",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "string",
+                "readOnly": false,
+                "removed": true
+              },
+              {
+                "id": "status",
+                "displayName": "status",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "string",
+                "readOnly": false,
+                "removed": false
+              },
+              {
+                "id": "ultima_query",
+                "displayName": "ultima_query",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "string",
+                "readOnly": false,
+                "removed": true
+              },
+              {
+                "id": "informacao_consolidada",
+                "displayName": "informacao_consolidada",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "string",
+                "readOnly": false,
+                "removed": true
+              },
+              {
+                "id": "webhook_callback",
+                "displayName": "webhook_callback",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "string",
+                "readOnly": false,
+                "removed": true
+              },
+              {
+                "id": "tentativas",
+                "displayName": "tentativas",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "number",
+                "readOnly": false,
+                "removed": true
+              },
+              {
+                "id": "Processando",
+                "displayName": "Processando",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "boolean",
+                "readOnly": false,
+                "removed": false
+              }
+            ],
+            "attemptToConvertTypes": false,
+            "convertFieldsToString": false
+          },
+          "options": {}
+        },
+        "type": "n8n-nodes-base.dataTable",
+        "typeVersion": 1.1,
+        "position": [
+          640,
+          1568
+        ],
+        "id": "5b5d682d-e388-4b73-8ea7-cb3fcec18765",
+        "name": "auditando",
+        "executeOnce": false
+      },
+      {
+        "parameters": {
+          "operation": "get",
+          "dataTableId": {
+            "__rl": true,
+            "value": "arAS2xvz1XBxyA57",
+            "mode": "list",
+            "cachedResultName": "status_pesquisa",
+            "cachedResultUrl": "/projects/0m3AYoFvtbqWOB3e/datatables/arAS2xvz1XBxyA57"
+          },
+          "matchType": "allConditions",
+          "filters": {
+            "conditions": [
+              {
+                "keyName": "status",
+                "keyValue": "auditar"
+              },
+              {
+                "keyName": "id_pesquisa",
+                "keyValue": "={{ $json.id_pesquisa }}"
+              },
+              {
+                "keyName": "Processando",
+                "condition": "isFalse"
+              }
+            ]
+          },
+          "returnAll": true
+        },
+        "type": "n8n-nodes-base.dataTable",
+        "typeVersion": 1.1,
+        "position": [
+          448,
+          1568
+        ],
+        "id": "6a84edff-8c50-4be9-b6c5-80ad953f46d7",
+        "name": "obtem items com status auditar",
+        "alwaysOutputData": true
+      },
+      {
+        "parameters": {
+          "jsCode": "// 1. Pega os 13 subtópicos oficiais da status_pesquisa\nconst subtopicosOriginais = $('obtem items com status auditar').all();\n\nif (subtopicosOriginais.length === 0) {\n  return [];\n}\n\n// 2. Pega as linhas garimpadas da deep_research (se houver)\nconst linhasBrutas = $input.all();\n\n// 3. INICIALIZA O AGRUPADOR COM TODOS OS 13 SUBTÓPICOS OFICIAIS\nconst dadosAgrupados = {};\n\nsubtopicosOriginais.forEach(item => {\n  const pIdRaw = item.json.passo_id;\n  if (pIdRaw) {\n    const match = String(pIdRaw).toLowerCase().match(/\\d+[a-z]/);\n    const key = match ? match[0] : String(pIdRaw).trim().toLowerCase();\n    \n    dadosAgrupados[key] = {\n      passo_id: key,\n      id_pesquisa: item.json.id_pesquisa || null,\n      topico_principal: item.json.topico_principal || \"\",\n      descricao: item.json.descricao_subtopico || \"Descrição não encontrada\",\n      status: item.json.status || \"\",\n      informacoes: []\n    };\n  }\n});\n\n// 4. Popula as informações garimpadas vindas da deep_research nas chaves já existentes\nlinhasBrutas.forEach(item => {\n  const json = item.json;\n  const rawRef = json.passo_id || json.topico_referencia || \"\";\n  const match = String(rawRef).toLowerCase().match(/\\d+[a-z]/);\n  if (!match) return;\n  \n  const ref = match[0];\n  \n  // Adiciona a informação garimpada ao subtópico correspondente\n  if (dadosAgrupados[ref] && json.informacao_resumida) {\n    dadosAgrupados[ref].informacoes.push(json.informacao_resumida);\n  }\n});\n\n// 5. Ordena as chaves dos subtópicos (1a, 1b, 2a, 3a...)\nconst refsOrdenadas = Object.keys(dadosAgrupados).sort((a, b) => {\n  const matchA = a.match(/\\d+/);\n  const matchB = b.match(/\\d+/);\n  \n  const numA = matchA ? parseInt(matchA[0]) : 0;\n  const numB = matchB ? parseInt(matchB[0]) : 0;\n  \n  if (numA !== numB) return numA - numB;\n  return a.localeCompare(b);\n});\n\n// 6. Monta a saída garantindo QUE TODOS OS 13 SUBTÓPICOS VÃO PARA O AUDITOR\nconst outputItems = refsOrdenadas.map(ref => {\n  const sub = dadosAgrupados[ref];\n  \n  let infoFormatada = \"\";\n  if (sub.informacoes.length > 0) {\n    const infoUnicas = [...new Set(sub.informacoes)];\n    infoFormatada = infoUnicas.map(info => `- ${info}`).join('\\n');\n  } else {\n    infoFormatada = \"- Nenhuma informação foi garimpada para este tópico.\";\n  }\n\n  return {\n    json: {\n      id_pesquisa: sub.id_pesquisa,\n      topico_principal: sub.topico_principal,\n      passo_id: sub.passo_id,\n      subtopico: `(${sub.passo_id}) ${sub.descricao}`,\n      status_atual: sub.status,\n      informacao_resumida_desse_subtopico: infoFormatada\n    }\n  };\n});\n\nreturn outputItems;"
+        },
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          1024,
+          1568
+        ],
+        "id": "24368336-507a-43fa-acab-4b7eac2ec301",
+        "name": "agrupa por passo_id para o auditor"
+      },
+      {
+        "parameters": {
+          "path": "auditor",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.webhook",
+        "typeVersion": 2.1,
+        "position": [
+          -128,
+          1568
+        ],
+        "id": "d4a224c7-8e1b-4214-aaa9-cc1d846dd3fa",
+        "name": "auditor",
+        "webhookId": "bfa6e8bc-6916-46f5-9dd0-73399844824c"
+      },
+      {
+        "parameters": {
+          "operation": "get",
+          "dataTableId": {
+            "__rl": true,
+            "value": "9ltZLFGUXe11LFQk",
+            "mode": "list",
+            "cachedResultName": "Pesquisa",
+            "cachedResultUrl": "/projects/0m3AYoFvtbqWOB3e/datatables/9ltZLFGUXe11LFQk"
+          },
+          "matchType": "allConditions",
+          "filters": {
+            "conditions": [
+              {
+                "keyName": "id_pesquisa",
+                "keyValue": "={{ $json.query.id_pesquisa }}"
+              },
+              {
+                "keyName": "Fase",
+                "keyValue": "auditar"
+              }
+            ]
+          },
+          "returnAll": true
+        },
+        "type": "n8n-nodes-base.dataTable",
+        "typeVersion": 1.1,
+        "position": [
+          256,
+          1568
+        ],
+        "id": "497125d2-ecca-44a1-8658-0cebdd173965",
+        "name": "verifica que a fase seja auditar"
+      },
+      {
+        "parameters": {
+          "operation": "update",
+          "dataTableId": {
+            "__rl": true,
+            "value": "arAS2xvz1XBxyA57",
+            "mode": "list",
+            "cachedResultName": "status_pesquisa",
+            "cachedResultUrl": "/projects/0m3AYoFvtbqWOB3e/datatables/arAS2xvz1XBxyA57"
+          },
+          "matchType": "allConditions",
+          "filters": {
+            "conditions": [
+              {
+                "keyName": "passo_id",
+                "keyValue": "={{ $json.output.passo_id }}"
+              },
+              {
+                "keyName": "id_pesquisa",
+                "keyValue": "={{ $('agrupa por passo_id para o auditor').item.json.id_pesquisa }}"
+              },
+              {
+                "keyName": "status",
+                "keyValue": "auditando"
+              },
+              {
+                "keyName": "Processando",
+                "condition": "isTrue"
+              }
+            ]
+          },
+          "columns": {
+            "mappingMode": "defineBelow",
+            "value": {
+              "status": "={{ $json.output.status }}",
+              "ultima_query": "={{ JSON.stringify($json.output.queries) }}",
+              "informacao_consolidada": "={{ $json.output.informacao_consolidada }}",
+              "Processando": false
+            },
+            "matchingColumns": [],
+            "schema": [
+              {
+                "id": "id_pesquisa",
+                "displayName": "id_pesquisa",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "number",
+                "readOnly": false,
+                "removed": true
+              },
+              {
+                "id": "passo_id",
+                "displayName": "passo_id",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "string",
+                "readOnly": false,
+                "removed": true
+              },
+              {
+                "id": "topico_principal",
+                "displayName": "topico_principal",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "string",
+                "readOnly": false,
+                "removed": true
+              },
+              {
+                "id": "descricao_subtopico",
+                "displayName": "descricao_subtopico",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "string",
+                "readOnly": false,
+                "removed": true
+              },
+              {
+                "id": "status",
+                "displayName": "status",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "string",
+                "readOnly": false,
+                "removed": false
+              },
+              {
+                "id": "ultima_query",
+                "displayName": "ultima_query",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "string",
+                "readOnly": false,
+                "removed": false
+              },
+              {
+                "id": "informacao_consolidada",
+                "displayName": "informacao_consolidada",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "string",
+                "readOnly": false,
+                "removed": false
+              },
+              {
+                "id": "webhook_callback",
+                "displayName": "webhook_callback",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "string",
+                "readOnly": false,
+                "removed": true
+              },
+              {
+                "id": "tentativas",
+                "displayName": "tentativas",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "number",
+                "readOnly": false,
+                "removed": true
+              },
+              {
+                "id": "Processando",
+                "displayName": "Processando",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "boolean",
+                "readOnly": false,
+                "removed": false
+              }
+            ],
+            "attemptToConvertTypes": false,
+            "convertFieldsToString": false
+          },
+          "options": {}
+        },
+        "type": "n8n-nodes-base.dataTable",
+        "typeVersion": 1.1,
+        "position": [
+          1616,
+          1568
+        ],
+        "id": "94e0c243-0cb5-40a5-9a7f-1b73b00a313e",
+        "name": "atualiza status de auditoria || OK"
+      },
+      {
+        "parameters": {
+          "conditions": {
+            "options": {
+              "caseSensitive": true,
+              "leftValue": "",
+              "typeValidation": "strict",
+              "version": 3
+            },
+            "conditions": [
+              {
+                "id": "46badbfb-e17e-4023-af4f-74aaa89d1b2e",
+                "leftValue": "={{ $json.id_pesquisa }}",
+                "rightValue": "",
+                "operator": {
+                  "type": "number",
+                  "operation": "exists",
+                  "singleValue": true
+                }
+              }
+            ],
+            "combinator": "and"
+          },
+          "options": {}
+        },
+        "type": "n8n-nodes-base.if",
+        "typeVersion": 2.3,
+        "position": [
+          2336,
+          1472
+        ],
+        "id": "f1dff802-5fe3-45e6-a2a0-6e9eea02c367",
+        "name": "If2"
+      },
+      {
+        "parameters": {
+          "jsCode": "// 1. Pega todos os itens da entrada (linhas da status_pesquisa)\nconst items = $input.all();\n\nif (items.length === 0) {\n  return [];\n}\n\n// 2. Verifica se 100% dos itens possuem exatamente o status \"auditar\" E não estão processando\nconst todosProntosParaAuditar = items.every(item => \n  item.json.status === 'ok' && \n  item.json.Processando === false\n);\n\n// 3. Se faltar qualquer um (ex: status 'pendente', ou Processando: true), encerra em silêncio (retorna array vazio)\nif (!todosProntosParaAuditar) {\n  return [];\n}\n\n// 4. Se TODOS estiverem como \"auditar\" e Processando false, pega o id_pesquisa do primeiro item\nconst idPesquisa = items[0].json.id_pesquisa;\n\n// 5. Retorna UM ÚNICO ITEM contendo o id_pesquisa para liberar os próximos nós\nreturn [\n  {\n    json: {\n      id_pesquisa: idPesquisa,\n      total_subtopicos: items.length,\n      status_geral: \"todos_prontos_para_auditar\"\n    }\n  }\n];"
+        },
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          2144,
+          1472
+        ],
+        "id": "c90bff52-d0b4-484e-a2ef-869131632923",
+        "name": "passa apenas quando todos sejam auditar1",
+        "alwaysOutputData": true
+      },
+      {
+        "parameters": {
+          "operation": "update",
+          "dataTableId": {
+            "__rl": true,
+            "value": "9ltZLFGUXe11LFQk",
+            "mode": "list",
+            "cachedResultName": "Pesquisa",
+            "cachedResultUrl": "/projects/0m3AYoFvtbqWOB3e/datatables/9ltZLFGUXe11LFQk"
+          },
+          "matchType": "allConditions",
+          "filters": {
+            "conditions": [
+              {
+                "keyName": "id_pesquisa",
+                "keyValue": "={{ $json.id_pesquisa }}"
+              },
+              {
+                "keyName": "Fase",
+                "keyValue": "auditar"
+              }
+            ]
+          },
+          "columns": {
+            "mappingMode": "defineBelow",
+            "value": {
+              "Fase": "redatar"
+            },
+            "matchingColumns": [],
+            "schema": [
+              {
+                "id": "asssunto",
+                "displayName": "asssunto",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "string",
+                "readOnly": false,
+                "removed": true
+              },
+              {
+                "id": "id_pesquisa",
+                "displayName": "id_pesquisa",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "number",
+                "readOnly": false,
+                "removed": true
+              },
+              {
+                "id": "angulo",
+                "displayName": "angulo",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "string",
+                "readOnly": false,
+                "removed": true
+              },
+              {
+                "id": "gancho",
+                "displayName": "gancho",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "string",
+                "readOnly": false,
+                "removed": true
+              },
+              {
+                "id": "relatorio",
+                "displayName": "relatorio",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "string",
+                "readOnly": false,
+                "removed": true
+              },
+              {
+                "id": "justificativa_angulo",
+                "displayName": "justificativa_angulo",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "string",
+                "readOnly": false,
+                "removed": true
+              },
+              {
+                "id": "justificativa_gancho",
+                "displayName": "justificativa_gancho",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "string",
+                "readOnly": false,
+                "removed": true
+              },
+              {
+                "id": "justificativa_assunto",
+                "displayName": "justificativa_assunto",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "string",
+                "readOnly": false,
+                "removed": true
+              },
+              {
+                "id": "keywords_assunto",
+                "displayName": "keywords_assunto",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "string",
+                "readOnly": false,
+                "removed": true
+              },
+              {
+                "id": "atualizacao",
+                "displayName": "atualizacao",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "boolean",
+                "readOnly": false,
+                "removed": true
+              },
+              {
+                "id": "webhook_callback",
+                "displayName": "webhook_callback",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "string",
+                "readOnly": false,
+                "removed": true
+              },
+              {
+                "id": "Fase",
+                "displayName": "Fase",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "string",
+                "readOnly": false,
+                "removed": false
+              }
+            ],
+            "attemptToConvertTypes": false,
+            "convertFieldsToString": false
+          },
+          "options": {}
+        },
+        "type": "n8n-nodes-base.dataTable",
+        "typeVersion": 1.1,
+        "position": [
+          2544,
+          1376
+        ],
+        "id": "2cdaf4b7-527c-4f0c-8167-07d24c7c6b46",
+        "name": "Update fase para redatar"
+      },
+      {
+        "parameters": {
+          "operation": "update",
+          "dataTableId": {
+            "__rl": true,
+            "value": "9ltZLFGUXe11LFQk",
+            "mode": "list",
+            "cachedResultName": "Pesquisa",
+            "cachedResultUrl": "/projects/0m3AYoFvtbqWOB3e/datatables/9ltZLFGUXe11LFQk"
+          },
+          "matchType": "allConditions",
+          "filters": {
+            "conditions": [
+              {
+                "keyName": "id_pesquisa",
+                "keyValue": "={{ $('verifica que todos sejam ok').first().json.id_pesquisa }}"
+              },
+              {
+                "keyName": "Fase",
+                "keyValue": "auditar"
+              }
+            ]
+          },
+          "columns": {
+            "mappingMode": "defineBelow",
+            "value": {
+              "Fase": "garimpar"
+            },
+            "matchingColumns": [],
+            "schema": [
+              {
+                "id": "asssunto",
+                "displayName": "asssunto",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "string",
+                "readOnly": false,
+                "removed": true
+              },
+              {
+                "id": "id_pesquisa",
+                "displayName": "id_pesquisa",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "number",
+                "readOnly": false,
+                "removed": true
+              },
+              {
+                "id": "angulo",
+                "displayName": "angulo",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "string",
+                "readOnly": false,
+                "removed": true
+              },
+              {
+                "id": "gancho",
+                "displayName": "gancho",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "string",
+                "readOnly": false,
+                "removed": true
+              },
+              {
+                "id": "relatorio",
+                "displayName": "relatorio",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "string",
+                "readOnly": false,
+                "removed": true
+              },
+              {
+                "id": "justificativa_angulo",
+                "displayName": "justificativa_angulo",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "string",
+                "readOnly": false,
+                "removed": true
+              },
+              {
+                "id": "justificativa_gancho",
+                "displayName": "justificativa_gancho",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "string",
+                "readOnly": false,
+                "removed": true
+              },
+              {
+                "id": "justificativa_assunto",
+                "displayName": "justificativa_assunto",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "string",
+                "readOnly": false,
+                "removed": true
+              },
+              {
+                "id": "keywords_assunto",
+                "displayName": "keywords_assunto",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "string",
+                "readOnly": false,
+                "removed": true
+              },
+              {
+                "id": "atualizacao",
+                "displayName": "atualizacao",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "boolean",
+                "readOnly": false,
+                "removed": true
+              },
+              {
+                "id": "webhook_callback",
+                "displayName": "webhook_callback",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "string",
+                "readOnly": false,
+                "removed": true
+              },
+              {
+                "id": "Fase",
+                "displayName": "Fase",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "string",
+                "readOnly": false,
+                "removed": false
+              }
+            ],
+            "attemptToConvertTypes": false,
+            "convertFieldsToString": false
+          },
+          "options": {}
+        },
+        "type": "n8n-nodes-base.dataTable",
+        "typeVersion": 1.1,
+        "position": [
+          2544,
+          1536
+        ],
+        "id": "0807b83d-02ba-4f7f-ab8d-2ab993321260",
+        "name": "Update fase para garimpar"
+      },
+      {
+        "parameters": {
+          "operation": "update",
+          "dataTableId": {
+            "__rl": true,
+            "value": "9ltZLFGUXe11LFQk",
+            "mode": "list",
+            "cachedResultName": "Pesquisa",
+            "cachedResultUrl": "/projects/0m3AYoFvtbqWOB3e/datatables/9ltZLFGUXe11LFQk"
+          },
+          "matchType": "allConditions",
+          "filters": {
+            "conditions": [
+              {
+                "keyName": "id_pesquisa",
+                "keyValue": "={{ $json.id_pesquisa }}"
+              },
+              {
+                "keyName": "Fase",
+                "keyValue": "auditar"
+              }
+            ]
+          },
+          "columns": {
+            "mappingMode": "defineBelow",
+            "value": {
+              "Fase": "redatar"
+            },
+            "matchingColumns": [],
+            "schema": [
+              {
+                "id": "asssunto",
+                "displayName": "asssunto",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "string",
+                "readOnly": false,
+                "removed": true
+              },
+              {
+                "id": "id_pesquisa",
+                "displayName": "id_pesquisa",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "number",
+                "readOnly": false,
+                "removed": true
+              },
+              {
+                "id": "angulo",
+                "displayName": "angulo",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "string",
+                "readOnly": false,
+                "removed": true
+              },
+              {
+                "id": "gancho",
+                "displayName": "gancho",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "string",
+                "readOnly": false,
+                "removed": true
+              },
+              {
+                "id": "relatorio",
+                "displayName": "relatorio",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "string",
+                "readOnly": false,
+                "removed": true
+              },
+              {
+                "id": "justificativa_angulo",
+                "displayName": "justificativa_angulo",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "string",
+                "readOnly": false,
+                "removed": true
+              },
+              {
+                "id": "justificativa_gancho",
+                "displayName": "justificativa_gancho",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "string",
+                "readOnly": false,
+                "removed": true
+              },
+              {
+                "id": "justificativa_assunto",
+                "displayName": "justificativa_assunto",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "string",
+                "readOnly": false,
+                "removed": true
+              },
+              {
+                "id": "keywords_assunto",
+                "displayName": "keywords_assunto",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "string",
+                "readOnly": false,
+                "removed": true
+              },
+              {
+                "id": "atualizacao",
+                "displayName": "atualizacao",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "boolean",
+                "readOnly": false,
+                "removed": true
+              },
+              {
+                "id": "webhook_callback",
+                "displayName": "webhook_callback",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "string",
+                "readOnly": false,
+                "removed": true
+              },
+              {
+                "id": "Fase",
+                "displayName": "Fase",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "string",
+                "readOnly": false,
+                "removed": false
+              }
+            ],
+            "attemptToConvertTypes": false,
+            "convertFieldsToString": false
+          },
+          "options": {}
+        },
+        "type": "n8n-nodes-base.dataTable",
+        "typeVersion": 1.1,
+        "position": [
+          2144,
+          1824
+        ],
+        "id": "e76b7baa-6e7b-4924-8ebe-f43d015cb552",
+        "name": "Update fase para redatar1"
+      },
+      {
+        "parameters": {
+          "url": "https://myn8n.seommerce.shop/webhook/gera-relatorio-final",
+          "sendQuery": true,
+          "queryParameters": {
+            "parameters": [
+              {
+                "name": "id_pesquisa",
+                "value": "={{ $json.id_pesquisa }}"
+              }
+            ]
+          },
+          "options": {}
+        },
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.4,
+        "position": [
+          2352,
+          1824
+        ],
+        "id": "dc9980d4-698a-41d1-ae17-52bb7f152f1b",
+        "name": "chama redator"
+      },
+      {
+        "parameters": {
+          "url": "https://myn8n.seommerce.shop/webhook/gera-relatorio-final",
+          "sendQuery": true,
+          "queryParameters": {
+            "parameters": [
+              {
+                "name": "id_pesquisa",
+                "value": "={{ $json.id_pesquisa }}"
+              }
+            ]
+          },
+          "options": {}
+        },
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.4,
+        "position": [
+          2736,
+          1376
+        ],
+        "id": "d6ac25fe-9bca-42ed-8339-faad7cc2c57e",
+        "name": "chama redator1"
+      },
+      {
+        "parameters": {
+          "model": {
+            "__rl": true,
+            "value": "gemini-2.5-flash",
+            "mode": "list",
+            "cachedResultName": "gemini-2.5-flash"
+          },
+          "builtInTools": {},
+          "options": {}
+        },
+        "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+        "typeVersion": 1.3,
+        "position": [
+          1136,
+          1744
+        ],
+        "id": "8ee56291-c996-4c88-89d3-3d9a639a7ad9",
+        "name": "OpenAI Chat Model3",
+        "credentials": {
+          "openAiApi": {
+            "id": "Su8igitAIxbJpkcY",
+            "name": "litellm api"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "operation": "get",
+          "dataTableId": {
+            "__rl": true,
+            "value": "arAS2xvz1XBxyA57",
+            "mode": "list",
+            "cachedResultName": "passos",
+            "cachedResultUrl": "/projects/0m3AYoFvtbqWOB3e/datatables/arAS2xvz1XBxyA57"
+          },
+          "matchType": "allConditions",
+          "filters": {
+            "conditions": [
+              {
+                "keyName": "id_pesquisa",
+                "keyValue": "={{ $json.id_pesquisa }}"
+              }
+            ]
+          }
+        },
+        "type": "n8n-nodes-base.dataTable",
+        "typeVersion": 1.1,
+        "position": [
+          1952,
+          1472
+        ],
+        "id": "9b726778-cb4f-4ec0-b097-4d64e8d6be90",
+        "name": "verifica que todos sejam ok",
+        "executeOnce": true
+      },
+      {
+        "parameters": {
+          "conditions": {
+            "options": {
+              "caseSensitive": true,
+              "leftValue": "",
+              "typeValidation": "strict",
+              "version": 3
+            },
+            "conditions": [
+              {
+                "id": "a7e56c33-d37a-43e9-8741-1b028ab7539d",
+                "leftValue": "={{ $json.status }}",
+                "rightValue": "pendente",
+                "operator": {
+                  "type": "string",
+                  "operation": "equals"
+                }
+              }
+            ],
+            "combinator": "and"
+          },
+          "options": {}
+        },
+        "type": "n8n-nodes-base.filter",
+        "typeVersion": 2.3,
+        "position": [
+          2144,
+          1648
+        ],
+        "id": "bacfa9ea-7c0f-4b5a-900c-5f1fcfaa7f36",
+        "name": "Filter"
+      },
+      {
+        "parameters": {
+          "url": "https://myn8n.seommerce.shop/webhook/Scrapper",
+          "sendQuery": true,
+          "queryParameters": {
+            "parameters": [
+              {
+                "name": "id_pesquisa",
+                "value": "={{ $json.id_pesquisa }}"
+              }
+            ]
+          },
+          "options": {}
+        },
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.4,
+        "position": [
+          2544,
+          1712
+        ],
+        "id": "313c3f5d-e929-4732-9832-16d9d59b0b21",
+        "name": "chama garimpeiro"
+      },
+      {
+        "parameters": {},
+        "type": "n8n-nodes-base.wait",
+        "typeVersion": 1.1,
+        "position": [
+          2352,
+          1648
+        ],
+        "id": "7aef9bd1-fb2c-4111-9e29-b47941f844bd",
+        "name": "Wait",
+        "webhookId": "750277df-ccc9-4a2f-a1f7-53b2ebd8c99f"
+      }
+    ],
+    "connections": {
+      "obtem a informação resumida": {
+        "main": [
+          [
+            {
+              "node": "agrupa por passo_id para o auditor",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "OpenRouter Chat Model6": {
+        "ai_languageModel": [
+          [
+            {
+              "node": "auditor1",
+              "type": "ai_languageModel",
+              "index": 1
+            }
+          ]
+        ]
+      },
+      "Structured Output Parser2": {
+        "ai_outputParser": [
+          [
+            {
+              "node": "auditor1",
+              "type": "ai_outputParser",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "auditor1": {
+        "main": [
+          [
+            {
+              "node": "atualiza status de auditoria || OK",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "enquanto tentativa for diferente de 3 continua": {
+        "main": [
+          [
+            {
+              "node": "verifica que todos sejam ok",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "atualiza status de auditoria1",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "atualiza status de auditoria1": {
+        "main": [
+          [
+            {
+              "node": "Update fase para redatar1",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Staggering1": {
+        "main": [
+          [
+            {
+              "node": "verifica que a fase seja auditar",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "auditando": {
+        "main": [
+          [
+            {
+              "node": "obtem a informação resumida",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "obtem items com status auditar": {
+        "main": [
+          [
+            {
+              "node": "auditando",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "agrupa por passo_id para o auditor": {
+        "main": [
+          [
+            {
+              "node": "auditor1",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "auditor": {
+        "main": [
+          [
+            {
+              "node": "Staggering1",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "verifica que a fase seja auditar": {
+        "main": [
+          [
+            {
+              "node": "obtem items com status auditar",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "atualiza status de auditoria || OK": {
+        "main": [
+          [
+            {
+              "node": "enquanto tentativa for diferente de 3 continua",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "If2": {
+        "main": [
+          [
+            {
+              "node": "Update fase para redatar",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "Update fase para garimpar",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "passa apenas quando todos sejam auditar1": {
+        "main": [
+          [
+            {
+              "node": "If2",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Update fase para redatar": {
+        "main": [
+          [
+            {
+              "node": "chama redator1",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Update fase para redatar1": {
+        "main": [
+          [
+            {
+              "node": "chama redator",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "OpenAI Chat Model3": {
+        "ai_languageModel": [
+          [
+            {
+              "node": "auditor1",
+              "type": "ai_languageModel",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "verifica que todos sejam ok": {
+        "main": [
+          [
+            {
+              "node": "passa apenas quando todos sejam auditar1",
+              "type": "main",
+              "index": 0
+            },
+            {
+              "node": "Filter",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Filter": {
+        "main": [
+          [
+            {
+              "node": "Wait",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Wait": {
+        "main": [
+          [
+            {
+              "node": "chama garimpeiro",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      }
+    },
+    "nodeGroups": [],
+    "authors": "eliezer vargas",
+    "name": "Version f6b504fc",
+    "description": "",
+    "autosaved": true,
+    "createdAt": "2026-09-23T20:09:05.487Z",
+    "updatedAt": "2026-09-23T20:10:05.255Z",
+    "workflowPublishHistory": [
+      {
+        "id": 3355,
+        "workflowId": "Vz7KzzYWavLw3meH",
+        "versionId": "f6b504fc-8fb8-46d8-b7bb-d25cdcf6d14e",
+        "event": "activated",
+        "userId": "a8a2c9ad-2763-4a77-ba81-c27a1ac09067",
+        "createdAt": "2026-09-23T20:10:05.245Z"
+      }
+    ]
+  }
+}

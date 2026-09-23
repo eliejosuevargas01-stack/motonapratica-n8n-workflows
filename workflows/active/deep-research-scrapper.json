@@ -1,0 +1,3265 @@
+{
+  "id": "cwLWc2wG6M8IlcqG",
+  "name": "Deep Research - Scrapper",
+  "description": "scrapper",
+  "active": true,
+  "activeVersionId": "3e1acdca-b6a4-4a50-a042-ed5def917410",
+  "createdAt": "2026-09-23T20:08:16.121Z",
+  "updatedAt": "2026-09-23T20:08:39.265Z",
+  "isArchived": false,
+  "versionId": "3e1acdca-b6a4-4a50-a042-ed5def917410",
+  "versionCounter": 2,
+  "sourceWorkflowId": null,
+  "triggerCount": 2,
+  "nodes": [
+    {
+      "parameters": {
+        "path": "google_search_scrapper",
+        "responseMode": "lastNode",
+        "responseData": "allEntries",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        -3232,
+        912
+      ],
+      "id": "de8e3398-b5c9-473d-9ed6-51228c38f20c",
+      "name": "Google Search Scrapper",
+      "webhookId": "ff2980a6-1112-4e33-800d-91d1387f68fd"
+    },
+    {
+      "parameters": {
+        "jsonSchemaExample": "{\n  \"id_pesquisa\": \"46810\",\n  \"passo_id\": \"1b\",\n  \"topico_principal\": \"Festival Interlagos 2026: Análise Prática e Guia de Lançamentos para o Motociclista Real\",\n  \"descricao_subtopico\": \"Analisar dados recentes de emplacamentos...\",\n  \"informacao_resumida\": \"festival....\",\n  \"url_fonte\": [\n    \"https://example.com/v1/example\",\n    \"https://example.com/v1/example\",\n    \"https://example.com/v1/example....\"\n  ]\n}"
+      },
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.3,
+      "position": [
+        -1272,
+        264
+      ],
+      "id": "4bc7b88b-b2d1-4735-afa9-f456b85061fd",
+      "name": "Structured Output Parser3"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Topico Principal:\n{{ $json.topico_principal }}\nSubtopico:\n{{ $json.descricao_subtopico }}",
+        "hasOutputParser": true,
+        "needsFallback": true,
+        "options": {
+          "systemMessage": "=Você é um agente pesquisador especialista em extração de dados precisos. Sua tarefa é analisar a diretriz {{$json.descricao_subtopico}}, DESTRINCHÁ-LA obrigatoriamente em micro-objetivos e realizar buscas encadeadas na internet para resolvê-la.\n\nRetorne um resumo completo dos fatos consolidados e as URLs das fontes.\n\n⚠️ REGRAS CRÍTICAS DE DECOMPOSIÇÃO E BUSCA (VÁ COM CALMA):\n\n    DIVIDA PARA CONQUISTAR: Nunca tente buscar o conceito inteiro de uma vez. Identifique as entidades principais do descricao_subtopico e crie uma linha de raciocínio passo a passo.\n\n    REGRA DAS QUERIES CURTAS (PROIBIDO CAUDA LONGA):\n\n        Suas queries devem ter no máximo de 2 a 4 palavras-chave.\n\n        Remova artigos, preposições e palavras de transição (como, o, a, de, para, por, quais).\n\n        Foque exclusivamente em substantivos, entidades e anos.\n\n        ❌ Errado (Pergunta humana): \"qual o consumo de combustível da yamaha fazer 250 em 2026\"\n\n        ✅ Certo (Tag de busca): \"consumo fazer 250 2026\"\n\n        ❌ Errado (Múltiplos conceitos): \"quais as motos mais vendidas no brasil 2026 preços e comparativos\"\n\n        ✅ Certo (Conceito isolado 1): \"motos mais vendidas 2026\"\n\n        ✅ Certo (Conceito isolado 2 - após descobrir os modelos): \"preço [nome do modelo] 2026\"\n\n    UM CONCEITO POR VEZ: Faça uma query curta para encontrar uma informação primária, aguarde o resultado, e só então faça a próxima query curta para aprofundar os detalhes técnicos ou preços.\n\nREGRAS DE EXECUÇÃO:\n\n    Tolerância a Falhas: Se o scrapper não devolver nenhum resultado, não desista. Simplifique a query para apenas 2 palavras ou tente um sinônimo exato.\n\n    Limite Básico: Se após 10 chamadas de busca (com sucesso) você não conseguir toda a informação, encerre a pesquisa e devolva a resposta com a conclusão parcial que você conseguiu montar.\n\n    Exceção para Tarefas Densas: Se o passo exigir levantamento de muitos dados (como Tabelas de Preços ou Comparativos de Custo-Benefício de vários modelos), você está autorizado a realizar até 20 queries. Faça isso de forma incremental para evitar timeout.\n\nFerramenta de busca:\nGoogle Search Scrapper\n\nFORMATO DE SAÍDA OBRIGATÓRIO:\nRetorne EXCLUSIVAMENTE em formato JSON válido e minificado. Não utilize blocos de código markdown (```json), texto de introdução ou qualquer outro caractere fora das chaves do objeto.\n\n{\n\"id_pesquisa\": \"46810\",\n\"passo_id\": \"1b\",\n\"topico_principal\": \"Festival Interlagos 2026: Análise Prática e Guia de Lançamentos para o Motociclista Real\",\n\"descricao_subtopico\": \"Analisar dados recentes de emplacamentos...\",\n\"informacao_resumida\": \"[Resumo completo e detalhado do que você encontrou na pesquisa, cruzando os dados das múltiplas buscas curtas...]\",\n\"url_fonte\": [\n\"https://example.com/v1/example\",\n\"https://example.com/v1/example\"\n]\n}"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        -1560,
+        32
+      ],
+      "id": "5eb1d775-6e26-4c31-8b05-012242a87db9",
+      "name": "cria as queries para iniciar a busca1",
+      "retryOnFail": true,
+      "maxTries": 5,
+      "waitBetweenTries": 5000
+    },
+    {
+      "parameters": {
+        "operation": "get",
+        "dataTableId": {
+          "__rl": true,
+          "value": "arAS2xvz1XBxyA57",
+          "mode": "list",
+          "cachedResultName": "status_pesquisa",
+          "cachedResultUrl": "/projects/0m3AYoFvtbqWOB3e/datatables/arAS2xvz1XBxyA57"
+        },
+        "matchType": "allConditions",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "status",
+              "keyValue": "pendente"
+            },
+            {
+              "keyName": "id_pesquisa",
+              "keyValue": "={{ $json.id_pesquisa }}"
+            },
+            {
+              "keyName": "Processando",
+              "condition": "isFalse"
+            }
+          ]
+        },
+        "limit": 1
+      },
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "position": [
+        -2560,
+        352
+      ],
+      "id": "bba542ec-290c-49e5-9d3a-6f2bfaa9ef8f",
+      "name": "Get topicos pendentes2",
+      "alwaysOutputData": false
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "dataTableId": {
+          "__rl": true,
+          "value": "arAS2xvz1XBxyA57",
+          "mode": "list",
+          "cachedResultName": "passos",
+          "cachedResultUrl": "/projects/0m3AYoFvtbqWOB3e/datatables/arAS2xvz1XBxyA57"
+        },
+        "matchType": "allConditions",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "passo_id",
+              "keyValue": "={{ $json.passo_id }}"
+            },
+            {
+              "keyName": "id_pesquisa",
+              "keyValue": "={{ $json.id_pesquisa }}"
+            },
+            {
+              "keyName": "status",
+              "keyValue": "={{ $json.status }}"
+            },
+            {
+              "keyName": "Processando",
+              "condition": "isFalse"
+            }
+          ]
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "status": "=processando",
+            "tentativas": "={{ ($json.tentativas || 0) + 1 }}",
+            "Processando": true
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "id_pesquisa",
+              "displayName": "id_pesquisa",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "passo_id",
+              "displayName": "passo_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "topico_principal",
+              "displayName": "topico_principal",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "descricao_subtopico",
+              "displayName": "descricao_subtopico",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "status",
+              "displayName": "status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "ultima_query",
+              "displayName": "ultima_query",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "informacao_consolidada",
+              "displayName": "informacao_consolidada",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "webhook_callback",
+              "displayName": "webhook_callback",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "tentativas",
+              "displayName": "tentativas",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Processando",
+              "displayName": "Processando",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "boolean",
+              "readOnly": false,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "position": [
+        -2112,
+        192
+      ],
+      "id": "528d2d8f-dac5-4e58-9bba-0d7f8a9bc0a1",
+      "name": "Update topicos para processados1",
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "9d906269-96d1-43bc-be0d-a3f6c31d6fd1",
+              "leftValue": "={{ $json.tentativas }}",
+              "rightValue": 3,
+              "operator": {
+                "type": "number",
+                "operation": "lte"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        -2336,
+        288
+      ],
+      "id": "b9e3640c-12b4-4342-9379-2b4e64761acb",
+      "name": "Tentativas <= 3?1"
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "dataTableId": {
+          "__rl": true,
+          "value": "arAS2xvz1XBxyA57",
+          "mode": "list",
+          "cachedResultName": "status_pesquisa",
+          "cachedResultUrl": "/projects/0m3AYoFvtbqWOB3e/datatables/arAS2xvz1XBxyA57"
+        },
+        "matchType": "allConditions",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "passo_id",
+              "keyValue": "={{ $json.passo_id }}"
+            },
+            {
+              "keyName": "id_pesquisa",
+              "keyValue": "={{ $json.id_pesquisa }}"
+            },
+            {
+              "keyName": "status",
+              "keyValue": "={{ $json.status }}"
+            }
+          ]
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "status": "ok"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "id_pesquisa",
+              "displayName": "id_pesquisa",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "passo_id",
+              "displayName": "passo_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "topico_principal",
+              "displayName": "topico_principal",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "descricao_subtopico",
+              "displayName": "descricao_subtopico",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "status",
+              "displayName": "status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "ultima_query",
+              "displayName": "ultima_query",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "informacao_consolidada",
+              "displayName": "informacao_consolidada",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "webhook_callback",
+              "displayName": "webhook_callback",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "tentativas",
+              "displayName": "tentativas",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "readOnly": false,
+              "removed": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "position": [
+        -2112,
+        400
+      ],
+      "id": "d647935a-68d0-443c-98ae-ff6e35682a4b",
+      "name": "muda status para ok2"
+    },
+    {
+      "parameters": {
+        "amount": "={{ Math.random() * 5 }}"
+      },
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        -3008,
+        352
+      ],
+      "id": "d615ba61-532b-4d44-9ef2-208a237a3149",
+      "name": "Staggering2",
+      "webhookId": "87ddd6b5-5eb8-428a-9dfe-bbe6e538aa94"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "003ad3cd-fa14-4ae7-a85e-ee21257eb2aa",
+              "leftValue": "={{ $json.id_pesquisa }}",
+              "rightValue": "",
+              "operator": {
+                "type": "number",
+                "operation": "exists",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        -1888,
+        192
+      ],
+      "id": "a631d372-f49c-478f-9bd1-58a6ff1f4d47",
+      "name": "worker conseguiu atualizar a pesquisa?1"
+    },
+    {
+      "parameters": {
+        "amount": "={{ Math.random() * 9 }}"
+      },
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        -1472,
+        496
+      ],
+      "id": "6e636aeb-ec5f-42d6-bfb8-c3083351996c",
+      "name": "descopasso e repescagem1",
+      "webhookId": "87ddd6b5-5eb8-428a-9dfe-bbe6e538aa94"
+    },
+    {
+      "parameters": {
+        "operation": "get",
+        "dataTableId": {
+          "__rl": true,
+          "value": "9ltZLFGUXe11LFQk",
+          "mode": "list",
+          "cachedResultName": "Pesquisa",
+          "cachedResultUrl": "/projects/0m3AYoFvtbqWOB3e/datatables/9ltZLFGUXe11LFQk"
+        },
+        "matchType": "allConditions",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "id_pesquisa",
+              "keyValue": "={{ $json.query.id_pesquisa }}"
+            },
+            {
+              "keyName": "Fase",
+              "keyValue": "garimpar"
+            }
+          ]
+        },
+        "returnAll": true
+      },
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "position": [
+        -2784,
+        352
+      ],
+      "id": "57bfeca9-7519-4f97-aac2-320a5c86464d",
+      "name": "verifica que a fase seja garimpar1"
+    },
+    {
+      "parameters": {
+        "jsCode": "// 1. Pega os itens de entrada do nó atual (a resposta da Jina)\nconst items = $input.all();\nconst resultadosLimpos = [];\n\n// 2. Resgata a query exata do nó \"Google Search Scrapper\"\n// Usando a sintaxe oficial do n8n para referenciar nós anteriores\nconst queryOriginal = $('Google Search Scrapper').first().json.body.queries || \"\";\n\nfor (const item of items) {\n  // A Jina Search devolve os resultados dentro da array 'data'\n  const searchResults = item.json.data || [];\n\n  if (Array.isArray(searchResults)) {\n    for (const result of searchResults) {\n      \n      // Pula páginas que falharam no scraping (status 400+, 429, 403, etc.)\n      if (result.httpStatus && result.httpStatus >= 400) {\n        continue;\n      }\n\n      let rawMarkdown = result.content || \"\";\n\n      if (rawMarkdown) {\n        // --- A FAXINA (REGEX) ---\n\n        // A. Remove completamente as tags de imagem em Markdown: ![Imagem 1](https://url...)\n        rawMarkdown = rawMarkdown.replace(/!\\[.*?\\]\\(.*?\\)/g, '');\n\n        // B. Remove os links em Markdown, MAS MANTÉM O TEXTO.\n        // Exemplo: [Facebook](https://fb.com) vira apenas \"Facebook\"\n        rawMarkdown = rawMarkdown.replace(/\\[([^\\]]+)\\]\\([^\\)]+\\)/g, '$1');\n\n        // C. Remove links puros \"http...\" jogados no meio do texto\n        rawMarkdown = rawMarkdown.replace(/(https?:\\/\\/[^\\s]+)/g, '');\n\n        // D. Limpa marcas/frases de cookies e popups conhecidos\n        const lixoComum = /Gerir opções|Aceitar Negar|Gerir serviços|Estatísticas|Marketing|Preferências/gi;\n        rawMarkdown = rawMarkdown.replace(lixoComum, '');\n\n        // E. Remove linhas vazias excessivas (3 ou mais sobram apenas 2)\n        rawMarkdown = rawMarkdown.replace(/\\n{3,}/g, '\\n\\n');\n      }\n\n      // Garante que só inclui resultados com conteúdo textual real\n      if (rawMarkdown.trim().length > 0) {\n        resultadosLimpos.push({\n          json: {\n            query: queryOriginal,\n            title: result.title || \"\",\n            url: result.url || \"\",\n            texto_limpo: rawMarkdown.trim()\n          }\n        });\n      }\n    }\n  }\n}\n\nreturn resultadosLimpos;"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -2560,
+        720
+      ],
+      "id": "6439d3b6-8902-4452-8aaa-fa961447b5f0",
+      "name": "texto limpo1"
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "dataTableId": {
+          "__rl": true,
+          "value": "arAS2xvz1XBxyA57",
+          "mode": "list",
+          "cachedResultName": "status_pesquisa",
+          "cachedResultUrl": "/projects/0m3AYoFvtbqWOB3e/datatables/arAS2xvz1XBxyA57"
+        },
+        "matchType": "allConditions",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "id_pesquisa",
+              "keyValue": "={{ $json.id_pesquisa }}"
+            },
+            {
+              "keyName": "passo_id",
+              "keyValue": "={{ $json.passo_id }}"
+            },
+            {
+              "keyName": "Processando",
+              "condition": "isTrue"
+            },
+            {
+              "keyName": "status",
+              "keyValue": "processando"
+            }
+          ]
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "status": "auditar",
+            "Processando": "={{ false }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "id_pesquisa",
+              "displayName": "id_pesquisa",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "passo_id",
+              "displayName": "passo_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "topico_principal",
+              "displayName": "topico_principal",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "descricao_subtopico",
+              "displayName": "descricao_subtopico",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "status",
+              "displayName": "status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "ultima_query",
+              "displayName": "ultima_query",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "informacao_consolidada",
+              "displayName": "informacao_consolidada",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "webhook_callback",
+              "displayName": "webhook_callback",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "tentativas",
+              "displayName": "tentativas",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Processando",
+              "displayName": "Processando",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "boolean",
+              "readOnly": false,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "position": [
+        -848,
+        144
+      ],
+      "id": "73e8c04c-6204-4ca9-9a9c-7c37f141dcf4",
+      "name": "atualiza para auditar1",
+      "executeOnce": true
+    },
+    {
+      "parameters": {
+        "dataTableId": {
+          "__rl": true,
+          "value": "ckZETOjmwN7qToHV",
+          "mode": "list",
+          "cachedResultName": "resultado_scrapper_passos",
+          "cachedResultUrl": "/projects/0m3AYoFvtbqWOB3e/datatables/ckZETOjmwN7qToHV"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "id_pesquisa": "={{ $('worker conseguiu atualizar a pesquisa?1').item.json.id_pesquisa }}",
+            "tema_pesquisa": "={{ $json.output.topico_principal }}\n{{ $json.output.descricao_subtopico }}",
+            "url_fonte": "={{ $json.output.url_fonte.join(', ') }}",
+            "informacao_resumida": "={{ $json.output.informacao_resumida }}",
+            "passo_id": "={{ $('worker conseguiu atualizar a pesquisa?1').item.json.passo_id }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "id_pesquisa",
+              "displayName": "id_pesquisa",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "tema_pesquisa",
+              "displayName": "tema_pesquisa",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "passo_id",
+              "displayName": "passo_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "url_fonte",
+              "displayName": "url_fonte",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "informacao_resumida",
+              "displayName": "informacao_resumida",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "position": [
+        -1072,
+        144
+      ],
+      "id": "f45b0169-1137-4344-a81d-b6e9e995dfa5",
+      "name": "inserta pesquisa no deep research1",
+      "executeOnce": false
+    },
+    {
+      "parameters": {
+        "amount": "={{ Math.random() * 10 }}"
+      },
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        -2336,
+        992
+      ],
+      "id": "dcb11866-38d5-41b9-ba8e-fee4bb500007",
+      "name": "Wait5",
+      "webhookId": "5c32f244-901f-40ca-bb7a-06b561abb055"
+    },
+    {
+      "parameters": {
+        "operation": "get",
+        "dataTableId": {
+          "__rl": true,
+          "value": "arAS2xvz1XBxyA57",
+          "mode": "list",
+          "cachedResultName": "status_pesquisa",
+          "cachedResultUrl": "/projects/0m3AYoFvtbqWOB3e/datatables/arAS2xvz1XBxyA57"
+        },
+        "matchType": "allConditions",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "id_pesquisa",
+              "keyValue": "={{ $json.id_pesquisa }}"
+            }
+          ]
+        },
+        "returnAll": true
+      },
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "position": [
+        -624,
+        144
+      ],
+      "id": "f5ede8dd-a57e-4e7a-b637-6cedc8c8d6a7",
+      "name": "pega todos os subtopicos1",
+      "executeOnce": true
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "46badbfb-e17e-4023-af4f-74aaa89d1b2e",
+              "leftValue": "={{ $json.id_pesquisa }}",
+              "rightValue": "",
+              "operator": {
+                "type": "number",
+                "operation": "exists",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        -176,
+        144
+      ],
+      "id": "e17af03a-d51a-4e61-98c8-6d337533269d",
+      "name": "If3"
+    },
+    {
+      "parameters": {
+        "url": "https://myn8n.seommerce.shop/webhook/Scrapper",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "id_pesquisa",
+              "value": "={{ $('pega todos os subtopicos1').first().json.id_pesquisa }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        48,
+        240
+      ],
+      "id": "8444d50e-3fa3-40f9-b4ca-83343a887be9",
+      "name": "chama garimpeiro7"
+    },
+    {
+      "parameters": {
+        "jsCode": "// 1. Pega todos os itens da entrada (linhas da status_pesquisa)\nconst items = $input.all();\n\nif (items.length === 0) {\n  return [];\n}\n\n// 2. Verifica se 100% dos itens possuem o status \"auditar\" OU \"ok\" E não estão processando\nconst todosProntos = items.every(item => \n  ['auditar', 'ok'].includes(item.json.status) && \n  item.json.Processando === false\n);\n\n// 3. Se faltar qualquer um (ex: status 'pendente', ou Processando: true), encerra em silêncio (retorna array vazio)\nif (!todosProntos) {\n  return [];\n}\n\n// 4. Se TODOS estiverem validados e com Processando false, pega o id_pesquisa do primeiro item\nconst idPesquisa = items[0].json.id_pesquisa;\n\n// 5. Retorna UM ÚNICO ITEM contendo o id_pesquisa para liberar os próximos nós\nreturn [\n  {\n    json: {\n      id_pesquisa: idPesquisa,\n      total_subtopicos: items.length,\n      status_geral: \"todos_prontos\"\n    }\n  }\n];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -400,
+        144
+      ],
+      "id": "0f7dfce3-df71-4a6d-990f-63eaa61f0e9d",
+      "name": "passa apenas quando todos sejam auditar2",
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "dataTableId": {
+          "__rl": true,
+          "value": "9ltZLFGUXe11LFQk",
+          "mode": "list",
+          "cachedResultName": "Pesquisa",
+          "cachedResultUrl": "/projects/0m3AYoFvtbqWOB3e/datatables/9ltZLFGUXe11LFQk"
+        },
+        "matchType": "allConditions",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "id_pesquisa",
+              "keyValue": "={{ $json.id_pesquisa }}"
+            },
+            {
+              "keyName": "Fase",
+              "keyValue": "garimpar"
+            }
+          ]
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Fase": "auditar"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "asssunto",
+              "displayName": "asssunto",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "id_pesquisa",
+              "displayName": "id_pesquisa",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "angulo",
+              "displayName": "angulo",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "gancho",
+              "displayName": "gancho",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "relatorio",
+              "displayName": "relatorio",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "justificativa_angulo",
+              "displayName": "justificativa_angulo",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "justificativa_gancho",
+              "displayName": "justificativa_gancho",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "justificativa_assunto",
+              "displayName": "justificativa_assunto",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "keywords_assunto",
+              "displayName": "keywords_assunto",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "atualizacao",
+              "displayName": "atualizacao",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "boolean",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "webhook_callback",
+              "displayName": "webhook_callback",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Fase",
+              "displayName": "Fase",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "position": [
+        48,
+        48
+      ],
+      "id": "ab1dc70b-af85-4467-99aa-e3760a2cdfbe",
+      "name": "Update fase para auditar1"
+    },
+    {
+      "parameters": {
+        "url": "https://myn8n.seommerce.shop/webhook/auditor",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "id_pesquisa",
+              "value": "={{ $json.id_pesquisa }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        272,
+        48
+      ],
+      "id": "cc12848a-2fa8-441c-9aaa-af8f88d3e857",
+      "name": "chama auditor1"
+    },
+    {
+      "parameters": {
+        "toolDescription": "call Google Search Scrapper to search in the web",
+        "url": "https://myn8n.seommerce.shop/webhook/google_search_scrapper",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "id_pesquisa",
+              "value": "={{ $('worker conseguiu atualizar a pesquisa?1').item.json.id_pesquisa }}"
+            },
+            {
+              "name": "passo_id",
+              "value": "={{ $('worker conseguiu atualizar a pesquisa?1').item.json.passo_id }}"
+            },
+            {
+              "name": "pagina",
+              "value": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('parameters2_Value', `caso voce precise pesquisar a mesma query duas vezes envie o numero da pagina do google que voce deseja, assim evitamos ler links ja lidos anteriormente`, 'string') }}"
+            }
+          ]
+        },
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "queries",
+              "value": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('parameters0_Value', ``, 'string') }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequestTool",
+      "typeVersion": 4.4,
+      "position": [
+        -1400,
+        264
+      ],
+      "id": "5476fd97-dce6-4835-8cf4-6b728cee23b6",
+      "name": "Google Search Scrapper1"
+    },
+    {
+      "parameters": {
+        "path": "Scrapper",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        -3232,
+        352
+      ],
+      "id": "93eed4de-53f1-4d28-904e-b96173c8fe4b",
+      "name": "Scrapper",
+      "webhookId": "bfa6e8bc-6916-46f5-9dd0-73399844824c"
+    },
+    {
+      "parameters": {
+        "model": "openrouter/free",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenRouter",
+      "typeVersion": 1,
+      "position": [
+        -1528,
+        264
+      ],
+      "id": "e4b19a75-be50-4b2b-bc8e-0679a72308cf",
+      "name": "OpenRouter Chat Model1",
+      "credentials": {
+        "openRouterApi": {
+          "id": "6EGfrOZ5n31iTUmN",
+          "name": "VARGASELIEZER112"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "gemini-3.1-flash-lite",
+          "mode": "list",
+          "cachedResultName": "gemini-3.1-flash-lite"
+        },
+        "builtInTools": {},
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.3,
+      "position": [
+        -1656,
+        264
+      ],
+      "id": "0fc7d846-0f4b-461a-b097-c0732701a169",
+      "name": "OpenAI Chat Model2",
+      "credentials": {
+        "openAiApi": {
+          "id": "Su8igitAIxbJpkcY",
+          "name": "litellm api"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "02b47475-749e-4e3b-ae20-b231edc568ea",
+              "leftValue": "={{ $json.error.status }}",
+              "rightValue": 429,
+              "operator": {
+                "type": "number",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        -2560,
+        912
+      ],
+      "id": "96c88836-dda3-41b7-879b-06942f632bb2",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "url": "={{ $json.PROXY_URL }}",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "q",
+              "value": "={{ $('Google Search Scrapper').item.json.body.queries + \" -site:instagram.com -site:facebook.com -site:tiktok.com -site:twitter.com -site:x.com -site:pinterest.com -site:mercadolivre.com.br -site:shopee.com.br -site:amazon.com.br -site:olx.com.br -site:reddit.com\" }}"
+            },
+            {
+              "name": "gl",
+              "value": "BR"
+            }
+          ]
+        },
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Accept",
+              "value": "application/json"
+            },
+            {
+              "name": "Authorization",
+              "value": "=Bearer {{ $json.PROXY_SECRET_KEY }}"
+            },
+            {
+              "name": "X-Engine",
+              "value": "direct"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.5,
+      "position": [
+        -2784,
+        912
+      ],
+      "id": "973795f3-cbf6-47c6-8e3c-f6d3df9aeeef",
+      "name": "HTTP Request",
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "a78d3525-548f-477c-a590-6435f491b676",
+              "name": "PROXY_SECRET_KEY",
+              "value": "3PkpoC6WRHhFTh84tMIlB7rUoXYYPpAsJcI0F6YWrSHpdBB7Ca84pDRctzQmXpAOtskGBg8olQHdLZtDMpYHC8Y5U5yPiFVGSiNPiuGHu89L4qIDRQpRqipIY63pifkQ",
+              "type": "string"
+            },
+            {
+              "id": "881b9b86-1f7e-4ee7-8398-ac3bf90df693",
+              "name": "PROXY_URL",
+              "value": "https://cloudflare-worker.eliejosuevargas01.workers.dev",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.5,
+      "position": [
+        -3008,
+        912
+      ],
+      "id": "cf44c691-7b8a-4af3-b846-7fe12ca6341e",
+      "name": "Edit Fields1"
+    }
+  ],
+  "connections": {
+    "Google Search Scrapper": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Structured Output Parser3": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "cria as queries para iniciar a busca1",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "cria as queries para iniciar a busca1": {
+      "main": [
+        [
+          {
+            "node": "inserta pesquisa no deep research1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get topicos pendentes2": {
+      "main": [
+        [
+          {
+            "node": "Tentativas <= 3?1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update topicos para processados1": {
+      "main": [
+        [
+          {
+            "node": "worker conseguiu atualizar a pesquisa?1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Tentativas <= 3?1": {
+      "main": [
+        [
+          {
+            "node": "Update topicos para processados1",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "muda status para ok2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Staggering2": {
+      "main": [
+        [
+          {
+            "node": "verifica que a fase seja garimpar1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "worker conseguiu atualizar a pesquisa?1": {
+      "main": [
+        [
+          {
+            "node": "cria as queries para iniciar a busca1",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "descopasso e repescagem1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "descopasso e repescagem1": {
+      "main": [
+        [
+          {
+            "node": "Get topicos pendentes2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "verifica que a fase seja garimpar1": {
+      "main": [
+        [
+          {
+            "node": "Get topicos pendentes2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "atualiza para auditar1": {
+      "main": [
+        [
+          {
+            "node": "pega todos os subtopicos1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "inserta pesquisa no deep research1": {
+      "main": [
+        [
+          {
+            "node": "atualiza para auditar1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait5": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "pega todos os subtopicos1": {
+      "main": [
+        [
+          {
+            "node": "passa apenas quando todos sejam auditar2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If3": {
+      "main": [
+        [
+          {
+            "node": "Update fase para auditar1",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "chama garimpeiro7",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "passa apenas quando todos sejam auditar2": {
+      "main": [
+        [
+          {
+            "node": "If3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update fase para auditar1": {
+      "main": [
+        [
+          {
+            "node": "chama auditor1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Search Scrapper1": {
+      "ai_tool": [
+        [
+          {
+            "node": "cria as queries para iniciar a busca1",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Scrapper": {
+      "main": [
+        [
+          {
+            "node": "Staggering2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenRouter Chat Model1": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "cria as queries para iniciar a busca1",
+            "type": "ai_languageModel",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model2": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "cria as queries para iniciar a busca1",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "Wait5",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request": {
+      "main": [
+        [
+          {
+            "node": "texto limpo1",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields1": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "nodeGroups": [],
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "staticData": null,
+  "pinData": {
+    "Google Search Scrapper": [
+      {
+        "json": {
+          "headers": {
+            "host": "myn8n.seommerce.shop",
+            "user-agent": "n8n",
+            "content-length": "58",
+            "accept": "application/json,text/html,application/xhtml+xml,application/xml,text/*;q=0.9, image/*;q=0.8, */*;q=0.7",
+            "accept-encoding": "gzip, compress, deflate, br",
+            "content-type": "application/json",
+            "x-forwarded-for": "10.0.1.1",
+            "x-forwarded-host": "myn8n.seommerce.shop",
+            "x-forwarded-port": "443",
+            "x-forwarded-proto": "https",
+            "x-forwarded-server": "0f31aca31a73",
+            "x-real-ip": "10.0.1.1"
+          },
+          "params": {},
+          "query": {
+            "id_pesquisa": "12642",
+            "passo_id": "4a",
+            "pagina": "1"
+          },
+          "body": {
+            "queries": "seguro moto Yamaha R15 perfil iniciante 2026"
+          },
+          "webhookUrl": "https://myn8n.seommerce.shop/webhook/google_search_scrapper",
+          "executionMode": "production"
+        }
+      }
+    ]
+  },
+  "meta": null,
+  "tags": [
+    {
+      "id": "I1tPTJVmCdtv2spd",
+      "name": "Deep Research",
+      "createdAt": "2026-09-23T20:00:38.358Z",
+      "updatedAt": "2026-09-23T20:00:38.358Z"
+    },
+    {
+      "id": "WWkQSlVovFHP0UDj",
+      "name": "Moto-Na-Pratica",
+      "createdAt": "2026-09-23T17:08:30.993Z",
+      "updatedAt": "2026-09-23T17:08:30.993Z"
+    }
+  ],
+  "shared": [
+    {
+      "role": "workflow:owner",
+      "workflowId": "cwLWc2wG6M8IlcqG",
+      "projectId": "0m3AYoFvtbqWOB3e",
+      "project": {
+        "id": "0m3AYoFvtbqWOB3e",
+        "name": "eliezer vargas <eliejosuevargas01@gmail.com>",
+        "type": "personal",
+        "icon": null,
+        "description": null,
+        "customTelemetryTags": [],
+        "creatorId": "a8a2c9ad-2763-4a77-ba81-c27a1ac09067",
+        "createdAt": "2025-12-06T14:56:50.686Z",
+        "updatedAt": "2025-12-06T14:58:20.912Z"
+      },
+      "createdAt": "2026-09-23T20:08:16.121Z",
+      "updatedAt": "2026-09-23T20:08:16.121Z"
+    }
+  ],
+  "activeVersion": {
+    "versionId": "3e1acdca-b6a4-4a50-a042-ed5def917410",
+    "workflowId": "cwLWc2wG6M8IlcqG",
+    "nodes": [
+      {
+        "parameters": {
+          "path": "google_search_scrapper",
+          "responseMode": "lastNode",
+          "responseData": "allEntries",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.webhook",
+        "typeVersion": 2.1,
+        "position": [
+          -3232,
+          912
+        ],
+        "id": "de8e3398-b5c9-473d-9ed6-51228c38f20c",
+        "name": "Google Search Scrapper",
+        "webhookId": "ff2980a6-1112-4e33-800d-91d1387f68fd"
+      },
+      {
+        "parameters": {
+          "jsonSchemaExample": "{\n  \"id_pesquisa\": \"46810\",\n  \"passo_id\": \"1b\",\n  \"topico_principal\": \"Festival Interlagos 2026: Análise Prática e Guia de Lançamentos para o Motociclista Real\",\n  \"descricao_subtopico\": \"Analisar dados recentes de emplacamentos...\",\n  \"informacao_resumida\": \"festival....\",\n  \"url_fonte\": [\n    \"https://example.com/v1/example\",\n    \"https://example.com/v1/example\",\n    \"https://example.com/v1/example....\"\n  ]\n}"
+        },
+        "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+        "typeVersion": 1.3,
+        "position": [
+          -1272,
+          264
+        ],
+        "id": "4bc7b88b-b2d1-4735-afa9-f456b85061fd",
+        "name": "Structured Output Parser3"
+      },
+      {
+        "parameters": {
+          "promptType": "define",
+          "text": "=Topico Principal:\n{{ $json.topico_principal }}\nSubtopico:\n{{ $json.descricao_subtopico }}",
+          "hasOutputParser": true,
+          "needsFallback": true,
+          "options": {
+            "systemMessage": "=Você é um agente pesquisador especialista em extração de dados precisos. Sua tarefa é analisar a diretriz {{$json.descricao_subtopico}}, DESTRINCHÁ-LA obrigatoriamente em micro-objetivos e realizar buscas encadeadas na internet para resolvê-la.\n\nRetorne um resumo completo dos fatos consolidados e as URLs das fontes.\n\n⚠️ REGRAS CRÍTICAS DE DECOMPOSIÇÃO E BUSCA (VÁ COM CALMA):\n\n    DIVIDA PARA CONQUISTAR: Nunca tente buscar o conceito inteiro de uma vez. Identifique as entidades principais do descricao_subtopico e crie uma linha de raciocínio passo a passo.\n\n    REGRA DAS QUERIES CURTAS (PROIBIDO CAUDA LONGA):\n\n        Suas queries devem ter no máximo de 2 a 4 palavras-chave.\n\n        Remova artigos, preposições e palavras de transição (como, o, a, de, para, por, quais).\n\n        Foque exclusivamente em substantivos, entidades e anos.\n\n        ❌ Errado (Pergunta humana): \"qual o consumo de combustível da yamaha fazer 250 em 2026\"\n\n        ✅ Certo (Tag de busca): \"consumo fazer 250 2026\"\n\n        ❌ Errado (Múltiplos conceitos): \"quais as motos mais vendidas no brasil 2026 preços e comparativos\"\n\n        ✅ Certo (Conceito isolado 1): \"motos mais vendidas 2026\"\n\n        ✅ Certo (Conceito isolado 2 - após descobrir os modelos): \"preço [nome do modelo] 2026\"\n\n    UM CONCEITO POR VEZ: Faça uma query curta para encontrar uma informação primária, aguarde o resultado, e só então faça a próxima query curta para aprofundar os detalhes técnicos ou preços.\n\nREGRAS DE EXECUÇÃO:\n\n    Tolerância a Falhas: Se o scrapper não devolver nenhum resultado, não desista. Simplifique a query para apenas 2 palavras ou tente um sinônimo exato.\n\n    Limite Básico: Se após 10 chamadas de busca (com sucesso) você não conseguir toda a informação, encerre a pesquisa e devolva a resposta com a conclusão parcial que você conseguiu montar.\n\n    Exceção para Tarefas Densas: Se o passo exigir levantamento de muitos dados (como Tabelas de Preços ou Comparativos de Custo-Benefício de vários modelos), você está autorizado a realizar até 20 queries. Faça isso de forma incremental para evitar timeout.\n\nFerramenta de busca:\nGoogle Search Scrapper\n\nFORMATO DE SAÍDA OBRIGATÓRIO:\nRetorne EXCLUSIVAMENTE em formato JSON válido e minificado. Não utilize blocos de código markdown (```json), texto de introdução ou qualquer outro caractere fora das chaves do objeto.\n\n{\n\"id_pesquisa\": \"46810\",\n\"passo_id\": \"1b\",\n\"topico_principal\": \"Festival Interlagos 2026: Análise Prática e Guia de Lançamentos para o Motociclista Real\",\n\"descricao_subtopico\": \"Analisar dados recentes de emplacamentos...\",\n\"informacao_resumida\": \"[Resumo completo e detalhado do que você encontrou na pesquisa, cruzando os dados das múltiplas buscas curtas...]\",\n\"url_fonte\": [\n\"https://example.com/v1/example\",\n\"https://example.com/v1/example\"\n]\n}"
+          }
+        },
+        "type": "@n8n/n8n-nodes-langchain.agent",
+        "typeVersion": 3.1,
+        "position": [
+          -1560,
+          32
+        ],
+        "id": "5eb1d775-6e26-4c31-8b05-012242a87db9",
+        "name": "cria as queries para iniciar a busca1",
+        "retryOnFail": true,
+        "maxTries": 5,
+        "waitBetweenTries": 5000
+      },
+      {
+        "parameters": {
+          "operation": "get",
+          "dataTableId": {
+            "__rl": true,
+            "value": "arAS2xvz1XBxyA57",
+            "mode": "list",
+            "cachedResultName": "status_pesquisa",
+            "cachedResultUrl": "/projects/0m3AYoFvtbqWOB3e/datatables/arAS2xvz1XBxyA57"
+          },
+          "matchType": "allConditions",
+          "filters": {
+            "conditions": [
+              {
+                "keyName": "status",
+                "keyValue": "pendente"
+              },
+              {
+                "keyName": "id_pesquisa",
+                "keyValue": "={{ $json.id_pesquisa }}"
+              },
+              {
+                "keyName": "Processando",
+                "condition": "isFalse"
+              }
+            ]
+          },
+          "limit": 1
+        },
+        "type": "n8n-nodes-base.dataTable",
+        "typeVersion": 1.1,
+        "position": [
+          -2560,
+          352
+        ],
+        "id": "bba542ec-290c-49e5-9d3a-6f2bfaa9ef8f",
+        "name": "Get topicos pendentes2",
+        "alwaysOutputData": false
+      },
+      {
+        "parameters": {
+          "operation": "update",
+          "dataTableId": {
+            "__rl": true,
+            "value": "arAS2xvz1XBxyA57",
+            "mode": "list",
+            "cachedResultName": "passos",
+            "cachedResultUrl": "/projects/0m3AYoFvtbqWOB3e/datatables/arAS2xvz1XBxyA57"
+          },
+          "matchType": "allConditions",
+          "filters": {
+            "conditions": [
+              {
+                "keyName": "passo_id",
+                "keyValue": "={{ $json.passo_id }}"
+              },
+              {
+                "keyName": "id_pesquisa",
+                "keyValue": "={{ $json.id_pesquisa }}"
+              },
+              {
+                "keyName": "status",
+                "keyValue": "={{ $json.status }}"
+              },
+              {
+                "keyName": "Processando",
+                "condition": "isFalse"
+              }
+            ]
+          },
+          "columns": {
+            "mappingMode": "defineBelow",
+            "value": {
+              "status": "=processando",
+              "tentativas": "={{ ($json.tentativas || 0) + 1 }}",
+              "Processando": true
+            },
+            "matchingColumns": [],
+            "schema": [
+              {
+                "id": "id_pesquisa",
+                "displayName": "id_pesquisa",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "number",
+                "readOnly": false,
+                "removed": true
+              },
+              {
+                "id": "passo_id",
+                "displayName": "passo_id",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "string",
+                "readOnly": false,
+                "removed": true
+              },
+              {
+                "id": "topico_principal",
+                "displayName": "topico_principal",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "string",
+                "readOnly": false,
+                "removed": true
+              },
+              {
+                "id": "descricao_subtopico",
+                "displayName": "descricao_subtopico",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "string",
+                "readOnly": false,
+                "removed": true
+              },
+              {
+                "id": "status",
+                "displayName": "status",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "string",
+                "readOnly": false,
+                "removed": false
+              },
+              {
+                "id": "ultima_query",
+                "displayName": "ultima_query",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "string",
+                "readOnly": false,
+                "removed": true
+              },
+              {
+                "id": "informacao_consolidada",
+                "displayName": "informacao_consolidada",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "string",
+                "readOnly": false,
+                "removed": true
+              },
+              {
+                "id": "webhook_callback",
+                "displayName": "webhook_callback",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "string",
+                "readOnly": false,
+                "removed": true
+              },
+              {
+                "id": "tentativas",
+                "displayName": "tentativas",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "number",
+                "readOnly": false,
+                "removed": false
+              },
+              {
+                "id": "Processando",
+                "displayName": "Processando",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "boolean",
+                "readOnly": false,
+                "removed": false
+              }
+            ],
+            "attemptToConvertTypes": false,
+            "convertFieldsToString": false
+          },
+          "options": {}
+        },
+        "type": "n8n-nodes-base.dataTable",
+        "typeVersion": 1.1,
+        "position": [
+          -2112,
+          192
+        ],
+        "id": "528d2d8f-dac5-4e58-9bba-0d7f8a9bc0a1",
+        "name": "Update topicos para processados1",
+        "alwaysOutputData": true
+      },
+      {
+        "parameters": {
+          "conditions": {
+            "options": {
+              "caseSensitive": true,
+              "leftValue": "",
+              "typeValidation": "strict",
+              "version": 3
+            },
+            "conditions": [
+              {
+                "id": "9d906269-96d1-43bc-be0d-a3f6c31d6fd1",
+                "leftValue": "={{ $json.tentativas }}",
+                "rightValue": 3,
+                "operator": {
+                  "type": "number",
+                  "operation": "lte"
+                }
+              }
+            ],
+            "combinator": "and"
+          },
+          "options": {}
+        },
+        "type": "n8n-nodes-base.if",
+        "typeVersion": 2.3,
+        "position": [
+          -2336,
+          288
+        ],
+        "id": "b9e3640c-12b4-4342-9379-2b4e64761acb",
+        "name": "Tentativas <= 3?1"
+      },
+      {
+        "parameters": {
+          "operation": "update",
+          "dataTableId": {
+            "__rl": true,
+            "value": "arAS2xvz1XBxyA57",
+            "mode": "list",
+            "cachedResultName": "status_pesquisa",
+            "cachedResultUrl": "/projects/0m3AYoFvtbqWOB3e/datatables/arAS2xvz1XBxyA57"
+          },
+          "matchType": "allConditions",
+          "filters": {
+            "conditions": [
+              {
+                "keyName": "passo_id",
+                "keyValue": "={{ $json.passo_id }}"
+              },
+              {
+                "keyName": "id_pesquisa",
+                "keyValue": "={{ $json.id_pesquisa }}"
+              },
+              {
+                "keyName": "status",
+                "keyValue": "={{ $json.status }}"
+              }
+            ]
+          },
+          "columns": {
+            "mappingMode": "defineBelow",
+            "value": {
+              "status": "ok"
+            },
+            "matchingColumns": [],
+            "schema": [
+              {
+                "id": "id_pesquisa",
+                "displayName": "id_pesquisa",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "number",
+                "readOnly": false,
+                "removed": true
+              },
+              {
+                "id": "passo_id",
+                "displayName": "passo_id",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "string",
+                "readOnly": false,
+                "removed": true
+              },
+              {
+                "id": "topico_principal",
+                "displayName": "topico_principal",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "string",
+                "readOnly": false,
+                "removed": true
+              },
+              {
+                "id": "descricao_subtopico",
+                "displayName": "descricao_subtopico",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "string",
+                "readOnly": false,
+                "removed": true
+              },
+              {
+                "id": "status",
+                "displayName": "status",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "string",
+                "readOnly": false,
+                "removed": false
+              },
+              {
+                "id": "ultima_query",
+                "displayName": "ultima_query",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "string",
+                "readOnly": false,
+                "removed": true
+              },
+              {
+                "id": "informacao_consolidada",
+                "displayName": "informacao_consolidada",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "string",
+                "readOnly": false,
+                "removed": true
+              },
+              {
+                "id": "webhook_callback",
+                "displayName": "webhook_callback",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "string",
+                "readOnly": false,
+                "removed": true
+              },
+              {
+                "id": "tentativas",
+                "displayName": "tentativas",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "number",
+                "readOnly": false,
+                "removed": true
+              }
+            ],
+            "attemptToConvertTypes": false,
+            "convertFieldsToString": false
+          },
+          "options": {}
+        },
+        "type": "n8n-nodes-base.dataTable",
+        "typeVersion": 1.1,
+        "position": [
+          -2112,
+          400
+        ],
+        "id": "d647935a-68d0-443c-98ae-ff6e35682a4b",
+        "name": "muda status para ok2"
+      },
+      {
+        "parameters": {
+          "amount": "={{ Math.random() * 5 }}"
+        },
+        "type": "n8n-nodes-base.wait",
+        "typeVersion": 1.1,
+        "position": [
+          -3008,
+          352
+        ],
+        "id": "d615ba61-532b-4d44-9ef2-208a237a3149",
+        "name": "Staggering2",
+        "webhookId": "87ddd6b5-5eb8-428a-9dfe-bbe6e538aa94"
+      },
+      {
+        "parameters": {
+          "conditions": {
+            "options": {
+              "caseSensitive": true,
+              "leftValue": "",
+              "typeValidation": "strict",
+              "version": 3
+            },
+            "conditions": [
+              {
+                "id": "003ad3cd-fa14-4ae7-a85e-ee21257eb2aa",
+                "leftValue": "={{ $json.id_pesquisa }}",
+                "rightValue": "",
+                "operator": {
+                  "type": "number",
+                  "operation": "exists",
+                  "singleValue": true
+                }
+              }
+            ],
+            "combinator": "and"
+          },
+          "options": {}
+        },
+        "type": "n8n-nodes-base.if",
+        "typeVersion": 2.3,
+        "position": [
+          -1888,
+          192
+        ],
+        "id": "a631d372-f49c-478f-9bd1-58a6ff1f4d47",
+        "name": "worker conseguiu atualizar a pesquisa?1"
+      },
+      {
+        "parameters": {
+          "amount": "={{ Math.random() * 9 }}"
+        },
+        "type": "n8n-nodes-base.wait",
+        "typeVersion": 1.1,
+        "position": [
+          -1472,
+          496
+        ],
+        "id": "6e636aeb-ec5f-42d6-bfb8-c3083351996c",
+        "name": "descopasso e repescagem1",
+        "webhookId": "87ddd6b5-5eb8-428a-9dfe-bbe6e538aa94"
+      },
+      {
+        "parameters": {
+          "operation": "get",
+          "dataTableId": {
+            "__rl": true,
+            "value": "9ltZLFGUXe11LFQk",
+            "mode": "list",
+            "cachedResultName": "Pesquisa",
+            "cachedResultUrl": "/projects/0m3AYoFvtbqWOB3e/datatables/9ltZLFGUXe11LFQk"
+          },
+          "matchType": "allConditions",
+          "filters": {
+            "conditions": [
+              {
+                "keyName": "id_pesquisa",
+                "keyValue": "={{ $json.query.id_pesquisa }}"
+              },
+              {
+                "keyName": "Fase",
+                "keyValue": "garimpar"
+              }
+            ]
+          },
+          "returnAll": true
+        },
+        "type": "n8n-nodes-base.dataTable",
+        "typeVersion": 1.1,
+        "position": [
+          -2784,
+          352
+        ],
+        "id": "57bfeca9-7519-4f97-aac2-320a5c86464d",
+        "name": "verifica que a fase seja garimpar1"
+      },
+      {
+        "parameters": {
+          "jsCode": "// 1. Pega os itens de entrada do nó atual (a resposta da Jina)\nconst items = $input.all();\nconst resultadosLimpos = [];\n\n// 2. Resgata a query exata do nó \"Google Search Scrapper\"\n// Usando a sintaxe oficial do n8n para referenciar nós anteriores\nconst queryOriginal = $('Google Search Scrapper').first().json.body.queries || \"\";\n\nfor (const item of items) {\n  // A Jina Search devolve os resultados dentro da array 'data'\n  const searchResults = item.json.data || [];\n\n  if (Array.isArray(searchResults)) {\n    for (const result of searchResults) {\n      \n      // Pula páginas que falharam no scraping (status 400+, 429, 403, etc.)\n      if (result.httpStatus && result.httpStatus >= 400) {\n        continue;\n      }\n\n      let rawMarkdown = result.content || \"\";\n\n      if (rawMarkdown) {\n        // --- A FAXINA (REGEX) ---\n\n        // A. Remove completamente as tags de imagem em Markdown: ![Imagem 1](https://url...)\n        rawMarkdown = rawMarkdown.replace(/!\\[.*?\\]\\(.*?\\)/g, '');\n\n        // B. Remove os links em Markdown, MAS MANTÉM O TEXTO.\n        // Exemplo: [Facebook](https://fb.com) vira apenas \"Facebook\"\n        rawMarkdown = rawMarkdown.replace(/\\[([^\\]]+)\\]\\([^\\)]+\\)/g, '$1');\n\n        // C. Remove links puros \"http...\" jogados no meio do texto\n        rawMarkdown = rawMarkdown.replace(/(https?:\\/\\/[^\\s]+)/g, '');\n\n        // D. Limpa marcas/frases de cookies e popups conhecidos\n        const lixoComum = /Gerir opções|Aceitar Negar|Gerir serviços|Estatísticas|Marketing|Preferências/gi;\n        rawMarkdown = rawMarkdown.replace(lixoComum, '');\n\n        // E. Remove linhas vazias excessivas (3 ou mais sobram apenas 2)\n        rawMarkdown = rawMarkdown.replace(/\\n{3,}/g, '\\n\\n');\n      }\n\n      // Garante que só inclui resultados com conteúdo textual real\n      if (rawMarkdown.trim().length > 0) {\n        resultadosLimpos.push({\n          json: {\n            query: queryOriginal,\n            title: result.title || \"\",\n            url: result.url || \"\",\n            texto_limpo: rawMarkdown.trim()\n          }\n        });\n      }\n    }\n  }\n}\n\nreturn resultadosLimpos;"
+        },
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          -2560,
+          720
+        ],
+        "id": "6439d3b6-8902-4452-8aaa-fa961447b5f0",
+        "name": "texto limpo1"
+      },
+      {
+        "parameters": {
+          "operation": "update",
+          "dataTableId": {
+            "__rl": true,
+            "value": "arAS2xvz1XBxyA57",
+            "mode": "list",
+            "cachedResultName": "status_pesquisa",
+            "cachedResultUrl": "/projects/0m3AYoFvtbqWOB3e/datatables/arAS2xvz1XBxyA57"
+          },
+          "matchType": "allConditions",
+          "filters": {
+            "conditions": [
+              {
+                "keyName": "id_pesquisa",
+                "keyValue": "={{ $json.id_pesquisa }}"
+              },
+              {
+                "keyName": "passo_id",
+                "keyValue": "={{ $json.passo_id }}"
+              },
+              {
+                "keyName": "Processando",
+                "condition": "isTrue"
+              },
+              {
+                "keyName": "status",
+                "keyValue": "processando"
+              }
+            ]
+          },
+          "columns": {
+            "mappingMode": "defineBelow",
+            "value": {
+              "status": "auditar",
+              "Processando": "={{ false }}"
+            },
+            "matchingColumns": [],
+            "schema": [
+              {
+                "id": "id_pesquisa",
+                "displayName": "id_pesquisa",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "number",
+                "readOnly": false,
+                "removed": true
+              },
+              {
+                "id": "passo_id",
+                "displayName": "passo_id",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "string",
+                "readOnly": false,
+                "removed": true
+              },
+              {
+                "id": "topico_principal",
+                "displayName": "topico_principal",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "string",
+                "readOnly": false,
+                "removed": true
+              },
+              {
+                "id": "descricao_subtopico",
+                "displayName": "descricao_subtopico",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "string",
+                "readOnly": false,
+                "removed": true
+              },
+              {
+                "id": "status",
+                "displayName": "status",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "string",
+                "readOnly": false,
+                "removed": false
+              },
+              {
+                "id": "ultima_query",
+                "displayName": "ultima_query",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "string",
+                "readOnly": false,
+                "removed": true
+              },
+              {
+                "id": "informacao_consolidada",
+                "displayName": "informacao_consolidada",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "string",
+                "readOnly": false,
+                "removed": true
+              },
+              {
+                "id": "webhook_callback",
+                "displayName": "webhook_callback",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "string",
+                "readOnly": false,
+                "removed": true
+              },
+              {
+                "id": "tentativas",
+                "displayName": "tentativas",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "number",
+                "readOnly": false,
+                "removed": true
+              },
+              {
+                "id": "Processando",
+                "displayName": "Processando",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "boolean",
+                "readOnly": false,
+                "removed": false
+              }
+            ],
+            "attemptToConvertTypes": false,
+            "convertFieldsToString": false
+          },
+          "options": {}
+        },
+        "type": "n8n-nodes-base.dataTable",
+        "typeVersion": 1.1,
+        "position": [
+          -848,
+          144
+        ],
+        "id": "73e8c04c-6204-4ca9-9a9c-7c37f141dcf4",
+        "name": "atualiza para auditar1",
+        "executeOnce": true
+      },
+      {
+        "parameters": {
+          "dataTableId": {
+            "__rl": true,
+            "value": "ckZETOjmwN7qToHV",
+            "mode": "list",
+            "cachedResultName": "resultado_scrapper_passos",
+            "cachedResultUrl": "/projects/0m3AYoFvtbqWOB3e/datatables/ckZETOjmwN7qToHV"
+          },
+          "columns": {
+            "mappingMode": "defineBelow",
+            "value": {
+              "id_pesquisa": "={{ $('worker conseguiu atualizar a pesquisa?1').item.json.id_pesquisa }}",
+              "tema_pesquisa": "={{ $json.output.topico_principal }}\n{{ $json.output.descricao_subtopico }}",
+              "url_fonte": "={{ $json.output.url_fonte.join(', ') }}",
+              "informacao_resumida": "={{ $json.output.informacao_resumida }}",
+              "passo_id": "={{ $('worker conseguiu atualizar a pesquisa?1').item.json.passo_id }}"
+            },
+            "matchingColumns": [],
+            "schema": [
+              {
+                "id": "id_pesquisa",
+                "displayName": "id_pesquisa",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "number",
+                "readOnly": false,
+                "removed": false
+              },
+              {
+                "id": "tema_pesquisa",
+                "displayName": "tema_pesquisa",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "string",
+                "readOnly": false,
+                "removed": false
+              },
+              {
+                "id": "passo_id",
+                "displayName": "passo_id",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "string",
+                "readOnly": false,
+                "removed": false
+              },
+              {
+                "id": "url_fonte",
+                "displayName": "url_fonte",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "string",
+                "readOnly": false,
+                "removed": false
+              },
+              {
+                "id": "informacao_resumida",
+                "displayName": "informacao_resumida",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "string",
+                "readOnly": false,
+                "removed": false
+              }
+            ],
+            "attemptToConvertTypes": false,
+            "convertFieldsToString": false
+          },
+          "options": {}
+        },
+        "type": "n8n-nodes-base.dataTable",
+        "typeVersion": 1.1,
+        "position": [
+          -1072,
+          144
+        ],
+        "id": "f45b0169-1137-4344-a81d-b6e9e995dfa5",
+        "name": "inserta pesquisa no deep research1",
+        "executeOnce": false
+      },
+      {
+        "parameters": {
+          "amount": "={{ Math.random() * 10 }}"
+        },
+        "type": "n8n-nodes-base.wait",
+        "typeVersion": 1.1,
+        "position": [
+          -2336,
+          992
+        ],
+        "id": "dcb11866-38d5-41b9-ba8e-fee4bb500007",
+        "name": "Wait5",
+        "webhookId": "5c32f244-901f-40ca-bb7a-06b561abb055"
+      },
+      {
+        "parameters": {
+          "operation": "get",
+          "dataTableId": {
+            "__rl": true,
+            "value": "arAS2xvz1XBxyA57",
+            "mode": "list",
+            "cachedResultName": "status_pesquisa",
+            "cachedResultUrl": "/projects/0m3AYoFvtbqWOB3e/datatables/arAS2xvz1XBxyA57"
+          },
+          "matchType": "allConditions",
+          "filters": {
+            "conditions": [
+              {
+                "keyName": "id_pesquisa",
+                "keyValue": "={{ $json.id_pesquisa }}"
+              }
+            ]
+          },
+          "returnAll": true
+        },
+        "type": "n8n-nodes-base.dataTable",
+        "typeVersion": 1.1,
+        "position": [
+          -624,
+          144
+        ],
+        "id": "f5ede8dd-a57e-4e7a-b637-6cedc8c8d6a7",
+        "name": "pega todos os subtopicos1",
+        "executeOnce": true
+      },
+      {
+        "parameters": {
+          "conditions": {
+            "options": {
+              "caseSensitive": true,
+              "leftValue": "",
+              "typeValidation": "strict",
+              "version": 3
+            },
+            "conditions": [
+              {
+                "id": "46badbfb-e17e-4023-af4f-74aaa89d1b2e",
+                "leftValue": "={{ $json.id_pesquisa }}",
+                "rightValue": "",
+                "operator": {
+                  "type": "number",
+                  "operation": "exists",
+                  "singleValue": true
+                }
+              }
+            ],
+            "combinator": "and"
+          },
+          "options": {}
+        },
+        "type": "n8n-nodes-base.if",
+        "typeVersion": 2.3,
+        "position": [
+          -176,
+          144
+        ],
+        "id": "e17af03a-d51a-4e61-98c8-6d337533269d",
+        "name": "If3"
+      },
+      {
+        "parameters": {
+          "url": "https://myn8n.seommerce.shop/webhook/Scrapper",
+          "sendQuery": true,
+          "queryParameters": {
+            "parameters": [
+              {
+                "name": "id_pesquisa",
+                "value": "={{ $('pega todos os subtopicos1').first().json.id_pesquisa }}"
+              }
+            ]
+          },
+          "options": {}
+        },
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.4,
+        "position": [
+          48,
+          240
+        ],
+        "id": "8444d50e-3fa3-40f9-b4ca-83343a887be9",
+        "name": "chama garimpeiro7"
+      },
+      {
+        "parameters": {
+          "jsCode": "// 1. Pega todos os itens da entrada (linhas da status_pesquisa)\nconst items = $input.all();\n\nif (items.length === 0) {\n  return [];\n}\n\n// 2. Verifica se 100% dos itens possuem o status \"auditar\" OU \"ok\" E não estão processando\nconst todosProntos = items.every(item => \n  ['auditar', 'ok'].includes(item.json.status) && \n  item.json.Processando === false\n);\n\n// 3. Se faltar qualquer um (ex: status 'pendente', ou Processando: true), encerra em silêncio (retorna array vazio)\nif (!todosProntos) {\n  return [];\n}\n\n// 4. Se TODOS estiverem validados e com Processando false, pega o id_pesquisa do primeiro item\nconst idPesquisa = items[0].json.id_pesquisa;\n\n// 5. Retorna UM ÚNICO ITEM contendo o id_pesquisa para liberar os próximos nós\nreturn [\n  {\n    json: {\n      id_pesquisa: idPesquisa,\n      total_subtopicos: items.length,\n      status_geral: \"todos_prontos\"\n    }\n  }\n];"
+        },
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          -400,
+          144
+        ],
+        "id": "0f7dfce3-df71-4a6d-990f-63eaa61f0e9d",
+        "name": "passa apenas quando todos sejam auditar2",
+        "alwaysOutputData": true
+      },
+      {
+        "parameters": {
+          "operation": "update",
+          "dataTableId": {
+            "__rl": true,
+            "value": "9ltZLFGUXe11LFQk",
+            "mode": "list",
+            "cachedResultName": "Pesquisa",
+            "cachedResultUrl": "/projects/0m3AYoFvtbqWOB3e/datatables/9ltZLFGUXe11LFQk"
+          },
+          "matchType": "allConditions",
+          "filters": {
+            "conditions": [
+              {
+                "keyName": "id_pesquisa",
+                "keyValue": "={{ $json.id_pesquisa }}"
+              },
+              {
+                "keyName": "Fase",
+                "keyValue": "garimpar"
+              }
+            ]
+          },
+          "columns": {
+            "mappingMode": "defineBelow",
+            "value": {
+              "Fase": "auditar"
+            },
+            "matchingColumns": [],
+            "schema": [
+              {
+                "id": "asssunto",
+                "displayName": "asssunto",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "string",
+                "readOnly": false,
+                "removed": true
+              },
+              {
+                "id": "id_pesquisa",
+                "displayName": "id_pesquisa",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "number",
+                "readOnly": false,
+                "removed": true
+              },
+              {
+                "id": "angulo",
+                "displayName": "angulo",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "string",
+                "readOnly": false,
+                "removed": true
+              },
+              {
+                "id": "gancho",
+                "displayName": "gancho",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "string",
+                "readOnly": false,
+                "removed": true
+              },
+              {
+                "id": "relatorio",
+                "displayName": "relatorio",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "string",
+                "readOnly": false,
+                "removed": true
+              },
+              {
+                "id": "justificativa_angulo",
+                "displayName": "justificativa_angulo",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "string",
+                "readOnly": false,
+                "removed": true
+              },
+              {
+                "id": "justificativa_gancho",
+                "displayName": "justificativa_gancho",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "string",
+                "readOnly": false,
+                "removed": true
+              },
+              {
+                "id": "justificativa_assunto",
+                "displayName": "justificativa_assunto",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "string",
+                "readOnly": false,
+                "removed": true
+              },
+              {
+                "id": "keywords_assunto",
+                "displayName": "keywords_assunto",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "string",
+                "readOnly": false,
+                "removed": true
+              },
+              {
+                "id": "atualizacao",
+                "displayName": "atualizacao",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "boolean",
+                "readOnly": false,
+                "removed": true
+              },
+              {
+                "id": "webhook_callback",
+                "displayName": "webhook_callback",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "string",
+                "readOnly": false,
+                "removed": true
+              },
+              {
+                "id": "Fase",
+                "displayName": "Fase",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "string",
+                "readOnly": false,
+                "removed": false
+              }
+            ],
+            "attemptToConvertTypes": false,
+            "convertFieldsToString": false
+          },
+          "options": {}
+        },
+        "type": "n8n-nodes-base.dataTable",
+        "typeVersion": 1.1,
+        "position": [
+          48,
+          48
+        ],
+        "id": "ab1dc70b-af85-4467-99aa-e3760a2cdfbe",
+        "name": "Update fase para auditar1"
+      },
+      {
+        "parameters": {
+          "url": "https://myn8n.seommerce.shop/webhook/auditor",
+          "sendQuery": true,
+          "queryParameters": {
+            "parameters": [
+              {
+                "name": "id_pesquisa",
+                "value": "={{ $json.id_pesquisa }}"
+              }
+            ]
+          },
+          "options": {}
+        },
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.4,
+        "position": [
+          272,
+          48
+        ],
+        "id": "cc12848a-2fa8-441c-9aaa-af8f88d3e857",
+        "name": "chama auditor1"
+      },
+      {
+        "parameters": {
+          "toolDescription": "call Google Search Scrapper to search in the web",
+          "url": "https://myn8n.seommerce.shop/webhook/google_search_scrapper",
+          "sendQuery": true,
+          "queryParameters": {
+            "parameters": [
+              {
+                "name": "id_pesquisa",
+                "value": "={{ $('worker conseguiu atualizar a pesquisa?1').item.json.id_pesquisa }}"
+              },
+              {
+                "name": "passo_id",
+                "value": "={{ $('worker conseguiu atualizar a pesquisa?1').item.json.passo_id }}"
+              },
+              {
+                "name": "pagina",
+                "value": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('parameters2_Value', `caso voce precise pesquisar a mesma query duas vezes envie o numero da pagina do google que voce deseja, assim evitamos ler links ja lidos anteriormente`, 'string') }}"
+              }
+            ]
+          },
+          "sendBody": true,
+          "bodyParameters": {
+            "parameters": [
+              {
+                "name": "queries",
+                "value": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('parameters0_Value', ``, 'string') }}"
+              }
+            ]
+          },
+          "options": {}
+        },
+        "type": "n8n-nodes-base.httpRequestTool",
+        "typeVersion": 4.4,
+        "position": [
+          -1400,
+          264
+        ],
+        "id": "5476fd97-dce6-4835-8cf4-6b728cee23b6",
+        "name": "Google Search Scrapper1"
+      },
+      {
+        "parameters": {
+          "path": "Scrapper",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.webhook",
+        "typeVersion": 2.1,
+        "position": [
+          -3232,
+          352
+        ],
+        "id": "93eed4de-53f1-4d28-904e-b96173c8fe4b",
+        "name": "Scrapper",
+        "webhookId": "bfa6e8bc-6916-46f5-9dd0-73399844824c"
+      },
+      {
+        "parameters": {
+          "model": "openrouter/free",
+          "options": {}
+        },
+        "type": "@n8n/n8n-nodes-langchain.lmChatOpenRouter",
+        "typeVersion": 1,
+        "position": [
+          -1528,
+          264
+        ],
+        "id": "e4b19a75-be50-4b2b-bc8e-0679a72308cf",
+        "name": "OpenRouter Chat Model1",
+        "credentials": {
+          "openRouterApi": {
+            "id": "6EGfrOZ5n31iTUmN",
+            "name": "VARGASELIEZER112"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "model": {
+            "__rl": true,
+            "value": "gemini-3.1-flash-lite",
+            "mode": "list",
+            "cachedResultName": "gemini-3.1-flash-lite"
+          },
+          "builtInTools": {},
+          "options": {}
+        },
+        "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+        "typeVersion": 1.3,
+        "position": [
+          -1656,
+          264
+        ],
+        "id": "0fc7d846-0f4b-461a-b097-c0732701a169",
+        "name": "OpenAI Chat Model2",
+        "credentials": {
+          "openAiApi": {
+            "id": "Su8igitAIxbJpkcY",
+            "name": "litellm api"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "conditions": {
+            "options": {
+              "caseSensitive": true,
+              "leftValue": "",
+              "typeValidation": "strict",
+              "version": 3
+            },
+            "conditions": [
+              {
+                "id": "02b47475-749e-4e3b-ae20-b231edc568ea",
+                "leftValue": "={{ $json.error.status }}",
+                "rightValue": 429,
+                "operator": {
+                  "type": "number",
+                  "operation": "equals"
+                }
+              }
+            ],
+            "combinator": "and"
+          },
+          "options": {}
+        },
+        "type": "n8n-nodes-base.if",
+        "typeVersion": 2.3,
+        "position": [
+          -2560,
+          912
+        ],
+        "id": "96c88836-dda3-41b7-879b-06942f632bb2",
+        "name": "If"
+      },
+      {
+        "parameters": {
+          "url": "={{ $json.PROXY_URL }}",
+          "sendQuery": true,
+          "queryParameters": {
+            "parameters": [
+              {
+                "name": "q",
+                "value": "={{ $('Google Search Scrapper').item.json.body.queries + \" -site:instagram.com -site:facebook.com -site:tiktok.com -site:twitter.com -site:x.com -site:pinterest.com -site:mercadolivre.com.br -site:shopee.com.br -site:amazon.com.br -site:olx.com.br -site:reddit.com\" }}"
+              },
+              {
+                "name": "gl",
+                "value": "BR"
+              }
+            ]
+          },
+          "sendHeaders": true,
+          "headerParameters": {
+            "parameters": [
+              {
+                "name": "Accept",
+                "value": "application/json"
+              },
+              {
+                "name": "Authorization",
+                "value": "=Bearer {{ $json.PROXY_SECRET_KEY }}"
+              },
+              {
+                "name": "X-Engine",
+                "value": "direct"
+              }
+            ]
+          },
+          "options": {}
+        },
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.5,
+        "position": [
+          -2784,
+          912
+        ],
+        "id": "973795f3-cbf6-47c6-8e3c-f6d3df9aeeef",
+        "name": "HTTP Request",
+        "onError": "continueErrorOutput"
+      },
+      {
+        "parameters": {
+          "assignments": {
+            "assignments": [
+              {
+                "id": "a78d3525-548f-477c-a590-6435f491b676",
+                "name": "PROXY_SECRET_KEY",
+                "value": "3PkpoC6WRHhFTh84tMIlB7rUoXYYPpAsJcI0F6YWrSHpdBB7Ca84pDRctzQmXpAOtskGBg8olQHdLZtDMpYHC8Y5U5yPiFVGSiNPiuGHu89L4qIDRQpRqipIY63pifkQ",
+                "type": "string"
+              },
+              {
+                "id": "881b9b86-1f7e-4ee7-8398-ac3bf90df693",
+                "name": "PROXY_URL",
+                "value": "https://cloudflare-worker.eliejosuevargas01.workers.dev",
+                "type": "string"
+              }
+            ]
+          },
+          "options": {}
+        },
+        "type": "n8n-nodes-base.set",
+        "typeVersion": 3.5,
+        "position": [
+          -3008,
+          912
+        ],
+        "id": "cf44c691-7b8a-4af3-b846-7fe12ca6341e",
+        "name": "Edit Fields1"
+      }
+    ],
+    "connections": {
+      "Google Search Scrapper": {
+        "main": [
+          [
+            {
+              "node": "Edit Fields1",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Structured Output Parser3": {
+        "ai_outputParser": [
+          [
+            {
+              "node": "cria as queries para iniciar a busca1",
+              "type": "ai_outputParser",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "cria as queries para iniciar a busca1": {
+        "main": [
+          [
+            {
+              "node": "inserta pesquisa no deep research1",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Get topicos pendentes2": {
+        "main": [
+          [
+            {
+              "node": "Tentativas <= 3?1",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Update topicos para processados1": {
+        "main": [
+          [
+            {
+              "node": "worker conseguiu atualizar a pesquisa?1",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Tentativas <= 3?1": {
+        "main": [
+          [
+            {
+              "node": "Update topicos para processados1",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "muda status para ok2",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Staggering2": {
+        "main": [
+          [
+            {
+              "node": "verifica que a fase seja garimpar1",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "worker conseguiu atualizar a pesquisa?1": {
+        "main": [
+          [
+            {
+              "node": "cria as queries para iniciar a busca1",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "descopasso e repescagem1",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "descopasso e repescagem1": {
+        "main": [
+          [
+            {
+              "node": "Get topicos pendentes2",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "verifica que a fase seja garimpar1": {
+        "main": [
+          [
+            {
+              "node": "Get topicos pendentes2",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "atualiza para auditar1": {
+        "main": [
+          [
+            {
+              "node": "pega todos os subtopicos1",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "inserta pesquisa no deep research1": {
+        "main": [
+          [
+            {
+              "node": "atualiza para auditar1",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Wait5": {
+        "main": [
+          [
+            {
+              "node": "HTTP Request",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "pega todos os subtopicos1": {
+        "main": [
+          [
+            {
+              "node": "passa apenas quando todos sejam auditar2",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "If3": {
+        "main": [
+          [
+            {
+              "node": "Update fase para auditar1",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "chama garimpeiro7",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "passa apenas quando todos sejam auditar2": {
+        "main": [
+          [
+            {
+              "node": "If3",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Update fase para auditar1": {
+        "main": [
+          [
+            {
+              "node": "chama auditor1",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Google Search Scrapper1": {
+        "ai_tool": [
+          [
+            {
+              "node": "cria as queries para iniciar a busca1",
+              "type": "ai_tool",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Scrapper": {
+        "main": [
+          [
+            {
+              "node": "Staggering2",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "OpenRouter Chat Model1": {
+        "ai_languageModel": [
+          [
+            {
+              "node": "cria as queries para iniciar a busca1",
+              "type": "ai_languageModel",
+              "index": 1
+            }
+          ]
+        ]
+      },
+      "OpenAI Chat Model2": {
+        "ai_languageModel": [
+          [
+            {
+              "node": "cria as queries para iniciar a busca1",
+              "type": "ai_languageModel",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "If": {
+        "main": [
+          [
+            {
+              "node": "Wait5",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "HTTP Request": {
+        "main": [
+          [
+            {
+              "node": "texto limpo1",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "If",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Edit Fields1": {
+        "main": [
+          [
+            {
+              "node": "HTTP Request",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      }
+    },
+    "nodeGroups": [],
+    "authors": "eliezer vargas",
+    "name": "Version 3e1acdca",
+    "description": "",
+    "autosaved": true,
+    "createdAt": "2026-09-23T20:08:28.252Z",
+    "updatedAt": "2026-09-23T20:08:41.619Z",
+    "workflowPublishHistory": [
+      {
+        "id": 3353,
+        "workflowId": "cwLWc2wG6M8IlcqG",
+        "versionId": "3e1acdca-b6a4-4a50-a042-ed5def917410",
+        "event": "activated",
+        "userId": "a8a2c9ad-2763-4a77-ba81-c27a1ac09067",
+        "createdAt": "2026-09-23T20:08:41.613Z"
+      }
+    ]
+  }
+}

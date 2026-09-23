@@ -1,14 +1,1215 @@
 {
-  "name": "Moto Na Pratica - Events Scrapper & Results",
-  "description": "Busca diária dos resultados dos eventos de MotoGP, podendo ser expandido para outros eventos do mundo motociclístico.",
-  "nodes": [],
-  "connections": {},
+  "id": "WagAbrHMEF7s0RuH",
+  "name": "Mono na Pratica - Events Scrapper & Results",
+  "description": "este fluxo faz a busca diaria dos resultados dos eventos de MotoGP, podendo ser expandido para outros eventos realmente interessantes sobre o mundo Motociclistico",
+  "active": true,
+  "activeVersionId": "3af2019f-9707-4676-8740-8e142ff2f04f",
+  "createdAt": "2026-09-23T17:07:18.747Z",
+  "updatedAt": "2026-09-23T17:12:13.839Z",
+  "isArchived": false,
+  "versionId": "3af2019f-9707-4676-8740-8e142ff2f04f",
+  "versionCounter": 2,
+  "sourceWorkflowId": null,
+  "triggerCount": 1,
+  "nodes": [
+    {
+      "parameters": {
+        "url": "https://r.jina.ai/https://api.motogp.pulselive.com/motogp/v1/results/seasons",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {}
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        -896,
+        96
+      ],
+      "id": "25a16cd8-4ddf-46e1-b418-0fb19c074c4e",
+      "name": "jina devolve o markdown da motogp"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Captura a string de entrada vinda do node anterior\nconst rawString = $input.first().json.data;\n\n// Recorta o JSON de dentro da string do Jina\nconst jsonString = rawString.split('Markdown Content:\\n')[1].trim();\nconst seasons = JSON.parse(jsonString);\n\n// Pega o objeto onde \"current\" é igual a true\nconst latestSeason = seasons.find(season => season.current === true);\n\n// O n8n EXIGE que o retorno seja um array de objetos, contendo a chave \"json\"\nreturn [\n  {\n    json: {\n      season_id: latestSeason.id,\n      season_year: latestSeason.year\n    }\n  }\n];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -672,
+        96
+      ],
+      "id": "b66ddcc6-66da-4ac5-9175-bc424343566d",
+      "name": "extrai o id da temporada mais recente"
+    },
+    {
+      "parameters": {
+        "url": "=https://api.motogp.pulselive.com/motogp/v1/results/events?seasonUuid={{ $json.season_id }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        -448,
+        96
+      ],
+      "id": "88341b78-7da9-412a-b4f3-99eec9a13556",
+      "name": "extrai calendario de eventos"
+    },
+    {
+      "parameters": {
+        "jsCode": "// O n8n entrega os itens do node anterior na variável $input.all()\nconst rawItems = $input.all();\n\n// Mapeia os dados e filtra ao mesmo tempo\nconst mappedEvents = rawItems.map(item => {\n    const event = item.json;\n\n    // Se for um evento de teste, retornamos null (ignoramos)\n    if (event.test === true) {\n        return null;\n    }\n\n    // Estrutura o Payload Universal padronizado\n    return {\n        json: {\n            championship: \"MotoGP\",\n            season_year: event.season.year,\n            external_id: event.id,\n            event_name: event.name,\n            circuit_name: event.circuit.name,\n            country_code: event.country.iso,\n            date_start: event.date_start,\n            date_end: event.date_end,\n            // Padroniza o status para o seu frontend entender melhor\n            status: event.status === 'NOT-STARTED' ? 'UPCOMING' : event.status,\n            is_test: event.test\n        }\n    };\n}).filter(item => item !== null); // Remove todos os itens nulos (os testes)\n\nreturn mappedEvents;"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -224,
+        96
+      ],
+      "id": "17680258-2e2a-4b7e-8f70-40f16ee0bed1",
+      "name": "Code in JavaScript"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "bb72717e-caec-4d8c-9275-2f5e69dfb413",
+              "leftValue": "={{ $json.status }}",
+              "rightValue": "FINISHED",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        224,
+        128
+      ],
+      "id": "4747a28f-2c0a-47dd-94f5-7933436aefca",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        0,
+        192
+      ],
+      "id": "c1d4fc01-1493-4548-a36c-38387dfc9b49",
+      "name": "Loop Over Items"
+    },
+    {
+      "parameters": {
+        "url": "https://api.motogp.pulselive.com/motogp/v1/results/sessions",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "eventUuid",
+              "value": "={{ $json.external_id }}"
+            },
+            {
+              "name": "categoryUuid",
+              "value": "e8c110ad-64aa-4e8e-8a86-f2f152f6a942"
+            }
+          ]
+        },
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Accept",
+              "value": "application/json"
+            },
+            {
+              "name": "Origin",
+              "value": "https://www.motogp.com"
+            },
+            {
+              "name": "Referer",
+              "value": "https://www.motogp.com/"
+            },
+            {
+              "name": "User-Agent",
+              "value": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        448,
+        128
+      ],
+      "id": "d0225df3-237e-497c-8179-00f29c3b8891",
+      "name": "extrai os dados do evento especifico"
+    },
+    {
+      "parameters": {
+        "url": "=https://api.motogp.pulselive.com/motogp/v1/results/session/{{ $json.id }}/classification",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Accept",
+              "value": "application/json"
+            },
+            {
+              "name": "Origin",
+              "value": "https://www.motogp.com"
+            },
+            {
+              "name": "Referer",
+              "value": "https://www.motogp.com/"
+            },
+            {
+              "name": "User-Agent",
+              "value": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        672,
+        128
+      ],
+      "id": "c7c3598a-d003-4c43-9cdb-23233b2928e4",
+      "name": "classificação do evento"
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.session_type }}",
+                    "rightValue": "RAC",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "id": "5189896e-6511-4ab6-90ab-34744b26e30e"
+                  }
+                ],
+                "combinator": "and"
+              }
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.4,
+      "position": [
+        1120,
+        128
+      ],
+      "id": "9b834e78-9f8b-4efb-8538-d5df5ba718c9",
+      "name": "Switch"
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "tableId": "resultados_etapas",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "rider_external_id",
+              "condition": "eq",
+              "keyValue": "={{ $json.rider_external_id }}"
+            }
+          ]
+        },
+        "fieldsUi": {
+          "fieldValues": [
+            {
+              "fieldId": "session_type",
+              "fieldValue": "={{ $json.session_type }}"
+            },
+            {
+              "fieldId": "position",
+              "fieldValue": "={{ $json.position }}"
+            },
+            {
+              "fieldId": "rider_name",
+              "fieldValue": "={{ $json.rider_name }}"
+            },
+            {
+              "fieldId": "team_name",
+              "fieldValue": "={{ $json.team_name }}"
+            },
+            {
+              "fieldId": "constructor_name",
+              "fieldValue": "={{ $json[\"constructor_name\"] }}"
+            },
+            {
+              "fieldId": "time_result",
+              "fieldValue": "={{ $json.time_result }}"
+            },
+            {
+              "fieldId": "time_gap",
+              "fieldValue": "={{ $json.time_gap }}"
+            },
+            {
+              "fieldId": "points_earned",
+              "fieldValue": "={{ $json.points }}"
+            },
+            {
+              "fieldId": "total_laps",
+              "fieldValue": "={{ $json.total_laps }}"
+            },
+            {
+              "fieldId": "top_speed",
+              "fieldValue": "={{ $json.top_speed }}"
+            },
+            {
+              "fieldId": "status",
+              "fieldValue": "={{ $json.status }}"
+            },
+            {
+              "fieldId": "event_external_id",
+              "fieldValue": "={{ $json.event_external_id }}"
+            },
+            {
+              "fieldId": "rider_external_id",
+              "fieldValue": "={{ $json.rider_external_id }}"
+            },
+            {
+              "fieldId": "rider_number",
+              "fieldValue": "={{ $json.rider_number }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        1344,
+        192
+      ],
+      "id": "8ec273b5-5d26-43d1-8001-47d07868af93",
+      "name": "Update a row",
+      "executeOnce": false,
+      "credentials": {
+        "supabaseApi": {
+          "id": "efnIKCQ0HjTfCSVW",
+          "name": "moto na pratica"
+        }
+      },
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "tableId": "calendario_eventos",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "external_id",
+              "condition": "eq",
+              "keyValue": "={{ $json.external_id }}"
+            }
+          ]
+        },
+        "fieldsUi": {
+          "fieldValues": [
+            {
+              "fieldId": "external_id",
+              "fieldValue": "={{ $json.external_id }}"
+            },
+            {
+              "fieldId": "championship",
+              "fieldValue": "={{ $json.championship }}"
+            },
+            {
+              "fieldId": "season_year",
+              "fieldValue": "={{ $json.season_year }}"
+            },
+            {
+              "fieldId": "event_name",
+              "fieldValue": "={{ $json.event_name }}"
+            },
+            {
+              "fieldId": "circuit_name",
+              "fieldValue": "={{ $json.circuit_name }}"
+            },
+            {
+              "fieldId": "country_code",
+              "fieldValue": "={{ $json.country_code }}"
+            },
+            {
+              "fieldId": "date_start",
+              "fieldValue": "={{ $json.date_start }}"
+            },
+            {
+              "fieldId": "date_end",
+              "fieldValue": "={{ $json.date_end }}"
+            },
+            {
+              "fieldId": "status",
+              "fieldValue": "={{ $json.status }}"
+            },
+            {
+              "fieldId": "updated_at",
+              "fieldValue": "={{ $now }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "a076e637-1761-46f4-8800-8d80c53f5705",
+      "name": "salva o calendario no banco",
+      "executeOnce": false,
+      "credentials": {
+        "supabaseApi": {
+          "id": "efnIKCQ0HjTfCSVW",
+          "name": "moto na pratica"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "triggerAtHour": 6
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.3,
+      "position": [
+        -1120,
+        96
+      ],
+      "id": "1c59ff57-20cb-4b0d-a1f4-a8adf90a7f47",
+      "name": "calendario e resultado dos eventos finalizados"
+    },
+    {
+      "parameters": {
+        "jsCode": "const sessions = $input.all();\nlet flattenedResults = [];\n\nfunction calculatePoints(sessionType, position, entryPoints) {\n  if (entryPoints !== undefined && entryPoints !== null && entryPoints !== \"\") {\n    return Number(entryPoints);\n  }\n  \n  const pos = Number(position);\n  if (isNaN(pos) || pos < 1) return 0;\n\n  const session = String(sessionType).toUpperCase();\n  \n  if (session === \"RAC\" || session === \"RACE\" || session.includes(\"RAC\")) {\n    const mainRacePoints = [25, 20, 16, 13, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1];\n    return mainRacePoints[pos - 1] || 0;\n  }\n\n  if (session === \"SPR\" || session === \"SPRINT\" || session.includes(\"SPR\")) {\n    const sprintPoints = [12, 9, 7, 6, 5, 4, 3, 2, 1];\n    return sprintPoints[pos - 1] || 0;\n  }\n\n  return 0;\n}\n\nfunction getConstructorFallback(teamName) {\n  if (!teamName) return null;\n  const team = teamName.toLowerCase();\n  if (team.includes('aprilia')) return 'Aprilia';\n  if (team.includes('ducati') || team.includes('vr46') || team.includes('gresini') || team.includes('pramac')) return 'Ducati';\n  if (team.includes('ktm') || team.includes('tech3')) return 'KTM';\n  if (team.includes('honda') || team.includes('lcr')) return 'Honda';\n  if (team.includes('yamaha')) return 'Yamaha';\n  return null;\n}\n\n// 1. RESOLUÇÃO DO TRAVAMENTO: Buscar as variáveis externas FORA do loop\nlet baseEventExternalId = null;\ntry {\n  baseEventExternalId = $('Loop Over Items').item.json.external_id || $('Loop Over Items').item.json.id;\n} catch (err) {\n  // Ignora o erro se o nó não existir no momento do teste\n}\n\nfor (let i = 0; i < sessions.length; i++) {\n  const sessionItem = sessions[i];\n  const sessionData = sessionItem.json;\n  const fileUrl = sessionData.file || \"\";\n  \n  const urlMatch = fileUrl.match(/\\/results\\/(\\d{4})\\/([^\\/]+)\\/([^\\/]+)\\/([^\\/]+)\\/Classification\\.pdf/i);\n  const sessionType = urlMatch ? urlMatch[4] : \"RAC\";\n\n  // Usa o valor pré-processado fora do loop ou as chaves do item atual\n  const eventExternalId = baseEventExternalId || sessionData.external_id || sessionData.id;\n\n  if (sessionData.classification && Array.isArray(sessionData.classification)) {\n    for (const entry of sessionData.classification) {\n      \n      // 2. RESOLUÇÃO DO BUG DO CONSTRUTOR: Checar explicitamente com hasOwnProperty\n      let constructorName = null;\n      if (entry.hasOwnProperty('constructor') && entry.constructor) {\n        constructorName = entry.constructor.name || entry.constructor;\n      }\n\n      // Se não veio no JSON (caiu no prototype nativo) ou não encontrou, aplica o Fallback\n      if (!constructorName || constructorName === 'Object') {\n        constructorName = getConstructorFallback(entry.team?.name);\n      }\n\n      const parsedPosition = entry.position !== undefined && entry.position !== null ? Number(entry.position) : null;\n      const pointsEarned = calculatePoints(sessionType, parsedPosition, entry.points);\n\n      const riderExternalId = entry.rider?.id || entry.rider?.riders_id || null;\n\n      flattenedResults.push({\n        json: {\n          event_external_id: eventExternalId,\n          rider_external_id: riderExternalId,\n          session_type: sessionType,\n          position: parsedPosition,\n          rider_name: entry.rider?.full_name || null,\n          rider_number: entry.rider?.number || null,\n          team_name: entry.team?.name || null,\n          constructor_name: constructorName,\n          time_result: entry.best_lap?.time || entry.time || null,\n          time_gap: entry.gap?.first || null,\n          points: pointsEarned,\n          total_laps: entry.total_laps || null,\n          top_speed: entry.top_speed ? String(entry.top_speed) : null,\n          status: entry.status || \"INSTND\"\n        }\n      });\n    }\n  }\n}\n\nreturn flattenedResults;"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        896,
+        128
+      ],
+      "id": "db1de7e8-d782-43c5-bbc3-8cffe3af30c1",
+      "name": "trata os dados e extrai o mais importante"
+    }
+  ],
+  "connections": {
+    "jina devolve o markdown da motogp": {
+      "main": [
+        [
+          {
+            "node": "extrai o id da temporada mais recente",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "extrai o id da temporada mais recente": {
+      "main": [
+        [
+          {
+            "node": "extrai calendario de eventos",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "extrai calendario de eventos": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript": {
+      "main": [
+        [
+          {
+            "node": "salva o calendario no banco",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "extrai os dados do evento especifico",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Loop Over Items": {
+      "main": [
+        [],
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "extrai os dados do evento especifico": {
+      "main": [
+        [
+          {
+            "node": "classificação do evento",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "classificação do evento": {
+      "main": [
+        [
+          {
+            "node": "trata os dados e extrai o mais importante",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Switch": {
+      "main": [
+        [
+          {
+            "node": "Update a row",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update a row": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "calendario e resultado dos eventos finalizados": {
+      "main": [
+        [
+          {
+            "node": "jina devolve o markdown da motogp",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "trata os dados e extrai o mais importante": {
+      "main": [
+        [
+          {
+            "node": "Switch",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "nodeGroups": [],
   "settings": {
     "executionOrder": "v1",
-    "callerPolicy": "workflowsFromSameOwner"
+    "binaryMode": "separate",
+    "availableInMCP": true
   },
+  "staticData": {
+    "node:calendario e resultado dos eventos finalizados": {
+      "recurrenceRules": [
+        null
+      ],
+      "recurrenceRuleSignatures": [
+        null
+      ]
+    }
+  },
+  "pinData": {},
+  "meta": null,
   "tags": [
-    {"name": "Moto-Na-Pratica"}
+    {
+      "id": "WWkQSlVovFHP0UDj",
+      "name": "Moto-Na-Pratica",
+      "createdAt": "2026-09-23T17:08:30.993Z",
+      "updatedAt": "2026-09-23T17:08:30.993Z"
+    }
   ],
-  "staticData": null
+  "shared": [
+    {
+      "role": "workflow:owner",
+      "workflowId": "WagAbrHMEF7s0RuH",
+      "projectId": "0m3AYoFvtbqWOB3e",
+      "project": {
+        "id": "0m3AYoFvtbqWOB3e",
+        "name": "eliezer vargas <eliejosuevargas01@gmail.com>",
+        "type": "personal",
+        "icon": null,
+        "description": null,
+        "customTelemetryTags": [],
+        "creatorId": "a8a2c9ad-2763-4a77-ba81-c27a1ac09067",
+        "createdAt": "2025-12-06T14:56:50.686Z",
+        "updatedAt": "2025-12-06T14:58:20.912Z"
+      },
+      "createdAt": "2026-09-23T17:07:18.747Z",
+      "updatedAt": "2026-09-23T17:07:18.747Z"
+    }
+  ],
+  "activeVersion": {
+    "versionId": "3af2019f-9707-4676-8740-8e142ff2f04f",
+    "workflowId": "WagAbrHMEF7s0RuH",
+    "nodes": [
+      {
+        "parameters": {
+          "url": "https://r.jina.ai/https://api.motogp.pulselive.com/motogp/v1/results/seasons",
+          "sendHeaders": true,
+          "headerParameters": {
+            "parameters": [
+              {}
+            ]
+          },
+          "options": {}
+        },
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.4,
+        "position": [
+          -896,
+          96
+        ],
+        "id": "25a16cd8-4ddf-46e1-b418-0fb19c074c4e",
+        "name": "jina devolve o markdown da motogp"
+      },
+      {
+        "parameters": {
+          "jsCode": "// Captura a string de entrada vinda do node anterior\nconst rawString = $input.first().json.data;\n\n// Recorta o JSON de dentro da string do Jina\nconst jsonString = rawString.split('Markdown Content:\\n')[1].trim();\nconst seasons = JSON.parse(jsonString);\n\n// Pega o objeto onde \"current\" é igual a true\nconst latestSeason = seasons.find(season => season.current === true);\n\n// O n8n EXIGE que o retorno seja um array de objetos, contendo a chave \"json\"\nreturn [\n  {\n    json: {\n      season_id: latestSeason.id,\n      season_year: latestSeason.year\n    }\n  }\n];"
+        },
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          -672,
+          96
+        ],
+        "id": "b66ddcc6-66da-4ac5-9175-bc424343566d",
+        "name": "extrai o id da temporada mais recente"
+      },
+      {
+        "parameters": {
+          "url": "=https://api.motogp.pulselive.com/motogp/v1/results/events?seasonUuid={{ $json.season_id }}",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.4,
+        "position": [
+          -448,
+          96
+        ],
+        "id": "88341b78-7da9-412a-b4f3-99eec9a13556",
+        "name": "extrai calendario de eventos"
+      },
+      {
+        "parameters": {
+          "jsCode": "// O n8n entrega os itens do node anterior na variável $input.all()\nconst rawItems = $input.all();\n\n// Mapeia os dados e filtra ao mesmo tempo\nconst mappedEvents = rawItems.map(item => {\n    const event = item.json;\n\n    // Se for um evento de teste, retornamos null (ignoramos)\n    if (event.test === true) {\n        return null;\n    }\n\n    // Estrutura o Payload Universal padronizado\n    return {\n        json: {\n            championship: \"MotoGP\",\n            season_year: event.season.year,\n            external_id: event.id,\n            event_name: event.name,\n            circuit_name: event.circuit.name,\n            country_code: event.country.iso,\n            date_start: event.date_start,\n            date_end: event.date_end,\n            // Padroniza o status para o seu frontend entender melhor\n            status: event.status === 'NOT-STARTED' ? 'UPCOMING' : event.status,\n            is_test: event.test\n        }\n    };\n}).filter(item => item !== null); // Remove todos os itens nulos (os testes)\n\nreturn mappedEvents;"
+        },
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          -224,
+          96
+        ],
+        "id": "17680258-2e2a-4b7e-8f70-40f16ee0bed1",
+        "name": "Code in JavaScript"
+      },
+      {
+        "parameters": {
+          "conditions": {
+            "options": {
+              "caseSensitive": true,
+              "leftValue": "",
+              "typeValidation": "strict",
+              "version": 3
+            },
+            "conditions": [
+              {
+                "id": "bb72717e-caec-4d8c-9275-2f5e69dfb413",
+                "leftValue": "={{ $json.status }}",
+                "rightValue": "FINISHED",
+                "operator": {
+                  "type": "string",
+                  "operation": "equals"
+                }
+              }
+            ],
+            "combinator": "and"
+          },
+          "options": {}
+        },
+        "type": "n8n-nodes-base.if",
+        "typeVersion": 2.3,
+        "position": [
+          224,
+          128
+        ],
+        "id": "4747a28f-2c0a-47dd-94f5-7933436aefca",
+        "name": "If"
+      },
+      {
+        "parameters": {
+          "options": {}
+        },
+        "type": "n8n-nodes-base.splitInBatches",
+        "typeVersion": 3,
+        "position": [
+          0,
+          192
+        ],
+        "id": "c1d4fc01-1493-4548-a36c-38387dfc9b49",
+        "name": "Loop Over Items"
+      },
+      {
+        "parameters": {
+          "url": "https://api.motogp.pulselive.com/motogp/v1/results/sessions",
+          "sendQuery": true,
+          "queryParameters": {
+            "parameters": [
+              {
+                "name": "eventUuid",
+                "value": "={{ $json.external_id }}"
+              },
+              {
+                "name": "categoryUuid",
+                "value": "e8c110ad-64aa-4e8e-8a86-f2f152f6a942"
+              }
+            ]
+          },
+          "sendHeaders": true,
+          "headerParameters": {
+            "parameters": [
+              {
+                "name": "Accept",
+                "value": "application/json"
+              },
+              {
+                "name": "Origin",
+                "value": "https://www.motogp.com"
+              },
+              {
+                "name": "Referer",
+                "value": "https://www.motogp.com/"
+              },
+              {
+                "name": "User-Agent",
+                "value": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
+              }
+            ]
+          },
+          "options": {}
+        },
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.4,
+        "position": [
+          448,
+          128
+        ],
+        "id": "d0225df3-237e-497c-8179-00f29c3b8891",
+        "name": "extrai os dados do evento especifico"
+      },
+      {
+        "parameters": {
+          "url": "=https://api.motogp.pulselive.com/motogp/v1/results/session/{{ $json.id }}/classification",
+          "sendHeaders": true,
+          "headerParameters": {
+            "parameters": [
+              {
+                "name": "Accept",
+                "value": "application/json"
+              },
+              {
+                "name": "Origin",
+                "value": "https://www.motogp.com"
+              },
+              {
+                "name": "Referer",
+                "value": "https://www.motogp.com/"
+              },
+              {
+                "name": "User-Agent",
+                "value": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
+              }
+            ]
+          },
+          "options": {}
+        },
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.4,
+        "position": [
+          672,
+          128
+        ],
+        "id": "c7c3598a-d003-4c43-9cdb-23233b2928e4",
+        "name": "classificação do evento"
+      },
+      {
+        "parameters": {
+          "rules": {
+            "values": [
+              {
+                "conditions": {
+                  "options": {
+                    "caseSensitive": true,
+                    "leftValue": "",
+                    "typeValidation": "strict",
+                    "version": 3
+                  },
+                  "conditions": [
+                    {
+                      "leftValue": "={{ $json.session_type }}",
+                      "rightValue": "RAC",
+                      "operator": {
+                        "type": "string",
+                        "operation": "equals"
+                      },
+                      "id": "5189896e-6511-4ab6-90ab-34744b26e30e"
+                    }
+                  ],
+                  "combinator": "and"
+                }
+              }
+            ]
+          },
+          "options": {}
+        },
+        "type": "n8n-nodes-base.switch",
+        "typeVersion": 3.4,
+        "position": [
+          1120,
+          128
+        ],
+        "id": "9b834e78-9f8b-4efb-8538-d5df5ba718c9",
+        "name": "Switch"
+      },
+      {
+        "parameters": {
+          "operation": "update",
+          "tableId": "resultados_etapas",
+          "filters": {
+            "conditions": [
+              {
+                "keyName": "rider_external_id",
+                "condition": "eq",
+                "keyValue": "={{ $json.rider_external_id }}"
+              }
+            ]
+          },
+          "fieldsUi": {
+            "fieldValues": [
+              {
+                "fieldId": "session_type",
+                "fieldValue": "={{ $json.session_type }}"
+              },
+              {
+                "fieldId": "position",
+                "fieldValue": "={{ $json.position }}"
+              },
+              {
+                "fieldId": "rider_name",
+                "fieldValue": "={{ $json.rider_name }}"
+              },
+              {
+                "fieldId": "team_name",
+                "fieldValue": "={{ $json.team_name }}"
+              },
+              {
+                "fieldId": "constructor_name",
+                "fieldValue": "={{ $json[\"constructor_name\"] }}"
+              },
+              {
+                "fieldId": "time_result",
+                "fieldValue": "={{ $json.time_result }}"
+              },
+              {
+                "fieldId": "time_gap",
+                "fieldValue": "={{ $json.time_gap }}"
+              },
+              {
+                "fieldId": "points_earned",
+                "fieldValue": "={{ $json.points }}"
+              },
+              {
+                "fieldId": "total_laps",
+                "fieldValue": "={{ $json.total_laps }}"
+              },
+              {
+                "fieldId": "top_speed",
+                "fieldValue": "={{ $json.top_speed }}"
+              },
+              {
+                "fieldId": "status",
+                "fieldValue": "={{ $json.status }}"
+              },
+              {
+                "fieldId": "event_external_id",
+                "fieldValue": "={{ $json.event_external_id }}"
+              },
+              {
+                "fieldId": "rider_external_id",
+                "fieldValue": "={{ $json.rider_external_id }}"
+              },
+              {
+                "fieldId": "rider_number",
+                "fieldValue": "={{ $json.rider_number }}"
+              }
+            ]
+          }
+        },
+        "type": "n8n-nodes-base.supabase",
+        "typeVersion": 1,
+        "position": [
+          1344,
+          192
+        ],
+        "id": "8ec273b5-5d26-43d1-8001-47d07868af93",
+        "name": "Update a row",
+        "executeOnce": false,
+        "credentials": {
+          "supabaseApi": {
+            "id": "efnIKCQ0HjTfCSVW",
+            "name": "moto na pratica"
+          }
+        },
+        "onError": "continueErrorOutput"
+      },
+      {
+        "parameters": {
+          "operation": "update",
+          "tableId": "calendario_eventos",
+          "filters": {
+            "conditions": [
+              {
+                "keyName": "external_id",
+                "condition": "eq",
+                "keyValue": "={{ $json.external_id }}"
+              }
+            ]
+          },
+          "fieldsUi": {
+            "fieldValues": [
+              {
+                "fieldId": "external_id",
+                "fieldValue": "={{ $json.external_id }}"
+              },
+              {
+                "fieldId": "championship",
+                "fieldValue": "={{ $json.championship }}"
+              },
+              {
+                "fieldId": "season_year",
+                "fieldValue": "={{ $json.season_year }}"
+              },
+              {
+                "fieldId": "event_name",
+                "fieldValue": "={{ $json.event_name }}"
+              },
+              {
+                "fieldId": "circuit_name",
+                "fieldValue": "={{ $json.circuit_name }}"
+              },
+              {
+                "fieldId": "country_code",
+                "fieldValue": "={{ $json.country_code }}"
+              },
+              {
+                "fieldId": "date_start",
+                "fieldValue": "={{ $json.date_start }}"
+              },
+              {
+                "fieldId": "date_end",
+                "fieldValue": "={{ $json.date_end }}"
+              },
+              {
+                "fieldId": "status",
+                "fieldValue": "={{ $json.status }}"
+              },
+              {
+                "fieldId": "updated_at",
+                "fieldValue": "={{ $now }}"
+              }
+            ]
+          }
+        },
+        "type": "n8n-nodes-base.supabase",
+        "typeVersion": 1,
+        "position": [
+          0,
+          0
+        ],
+        "id": "a076e637-1761-46f4-8800-8d80c53f5705",
+        "name": "salva o calendario no banco",
+        "executeOnce": false,
+        "credentials": {
+          "supabaseApi": {
+            "id": "efnIKCQ0HjTfCSVW",
+            "name": "moto na pratica"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "rule": {
+            "interval": [
+              {
+                "triggerAtHour": 6
+              }
+            ]
+          }
+        },
+        "type": "n8n-nodes-base.scheduleTrigger",
+        "typeVersion": 1.3,
+        "position": [
+          -1120,
+          96
+        ],
+        "id": "1c59ff57-20cb-4b0d-a1f4-a8adf90a7f47",
+        "name": "calendario e resultado dos eventos finalizados"
+      },
+      {
+        "parameters": {
+          "jsCode": "const sessions = $input.all();\nlet flattenedResults = [];\n\nfunction calculatePoints(sessionType, position, entryPoints) {\n  if (entryPoints !== undefined && entryPoints !== null && entryPoints !== \"\") {\n    return Number(entryPoints);\n  }\n  \n  const pos = Number(position);\n  if (isNaN(pos) || pos < 1) return 0;\n\n  const session = String(sessionType).toUpperCase();\n  \n  if (session === \"RAC\" || session === \"RACE\" || session.includes(\"RAC\")) {\n    const mainRacePoints = [25, 20, 16, 13, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1];\n    return mainRacePoints[pos - 1] || 0;\n  }\n\n  if (session === \"SPR\" || session === \"SPRINT\" || session.includes(\"SPR\")) {\n    const sprintPoints = [12, 9, 7, 6, 5, 4, 3, 2, 1];\n    return sprintPoints[pos - 1] || 0;\n  }\n\n  return 0;\n}\n\nfunction getConstructorFallback(teamName) {\n  if (!teamName) return null;\n  const team = teamName.toLowerCase();\n  if (team.includes('aprilia')) return 'Aprilia';\n  if (team.includes('ducati') || team.includes('vr46') || team.includes('gresini') || team.includes('pramac')) return 'Ducati';\n  if (team.includes('ktm') || team.includes('tech3')) return 'KTM';\n  if (team.includes('honda') || team.includes('lcr')) return 'Honda';\n  if (team.includes('yamaha')) return 'Yamaha';\n  return null;\n}\n\n// 1. RESOLUÇÃO DO TRAVAMENTO: Buscar as variáveis externas FORA do loop\nlet baseEventExternalId = null;\ntry {\n  baseEventExternalId = $('Loop Over Items').item.json.external_id || $('Loop Over Items').item.json.id;\n} catch (err) {\n  // Ignora o erro se o nó não existir no momento do teste\n}\n\nfor (let i = 0; i < sessions.length; i++) {\n  const sessionItem = sessions[i];\n  const sessionData = sessionItem.json;\n  const fileUrl = sessionData.file || \"\";\n  \n  const urlMatch = fileUrl.match(/\\/results\\/(\\d{4})\\/([^\\/]+)\\/([^\\/]+)\\/([^\\/]+)\\/Classification\\.pdf/i);\n  const sessionType = urlMatch ? urlMatch[4] : \"RAC\";\n\n  // Usa o valor pré-processado fora do loop ou as chaves do item atual\n  const eventExternalId = baseEventExternalId || sessionData.external_id || sessionData.id;\n\n  if (sessionData.classification && Array.isArray(sessionData.classification)) {\n    for (const entry of sessionData.classification) {\n      \n      // 2. RESOLUÇÃO DO BUG DO CONSTRUTOR: Checar explicitamente com hasOwnProperty\n      let constructorName = null;\n      if (entry.hasOwnProperty('constructor') && entry.constructor) {\n        constructorName = entry.constructor.name || entry.constructor;\n      }\n\n      // Se não veio no JSON (caiu no prototype nativo) ou não encontrou, aplica o Fallback\n      if (!constructorName || constructorName === 'Object') {\n        constructorName = getConstructorFallback(entry.team?.name);\n      }\n\n      const parsedPosition = entry.position !== undefined && entry.position !== null ? Number(entry.position) : null;\n      const pointsEarned = calculatePoints(sessionType, parsedPosition, entry.points);\n\n      const riderExternalId = entry.rider?.id || entry.rider?.riders_id || null;\n\n      flattenedResults.push({\n        json: {\n          event_external_id: eventExternalId,\n          rider_external_id: riderExternalId,\n          session_type: sessionType,\n          position: parsedPosition,\n          rider_name: entry.rider?.full_name || null,\n          rider_number: entry.rider?.number || null,\n          team_name: entry.team?.name || null,\n          constructor_name: constructorName,\n          time_result: entry.best_lap?.time || entry.time || null,\n          time_gap: entry.gap?.first || null,\n          points: pointsEarned,\n          total_laps: entry.total_laps || null,\n          top_speed: entry.top_speed ? String(entry.top_speed) : null,\n          status: entry.status || \"INSTND\"\n        }\n      });\n    }\n  }\n}\n\nreturn flattenedResults;"
+        },
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          896,
+          128
+        ],
+        "id": "db1de7e8-d782-43c5-bbc3-8cffe3af30c1",
+        "name": "trata os dados e extrai o mais importante"
+      }
+    ],
+    "connections": {
+      "jina devolve o markdown da motogp": {
+        "main": [
+          [
+            {
+              "node": "extrai o id da temporada mais recente",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "extrai o id da temporada mais recente": {
+        "main": [
+          [
+            {
+              "node": "extrai calendario de eventos",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "extrai calendario de eventos": {
+        "main": [
+          [
+            {
+              "node": "Code in JavaScript",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Code in JavaScript": {
+        "main": [
+          [
+            {
+              "node": "salva o calendario no banco",
+              "type": "main",
+              "index": 0
+            },
+            {
+              "node": "Loop Over Items",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "If": {
+        "main": [
+          [
+            {
+              "node": "extrai os dados do evento especifico",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Loop Over Items": {
+        "main": [
+          [],
+          [
+            {
+              "node": "If",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "extrai os dados do evento especifico": {
+        "main": [
+          [
+            {
+              "node": "classificação do evento",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "classificação do evento": {
+        "main": [
+          [
+            {
+              "node": "trata os dados e extrai o mais importante",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Switch": {
+        "main": [
+          [
+            {
+              "node": "Update a row",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Update a row": {
+        "main": [
+          [
+            {
+              "node": "Loop Over Items",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "calendario e resultado dos eventos finalizados": {
+        "main": [
+          [
+            {
+              "node": "jina devolve o markdown da motogp",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "trata os dados e extrai o mais importante": {
+        "main": [
+          [
+            {
+              "node": "Switch",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      }
+    },
+    "nodeGroups": [],
+    "authors": "eliezer vargas",
+    "name": "Version 3af2019f",
+    "description": "",
+    "autosaved": true,
+    "createdAt": "2026-09-23T17:07:18.747Z",
+    "updatedAt": "2026-09-23T17:08:04.163Z",
+    "workflowPublishHistory": [
+      {
+        "id": 3341,
+        "workflowId": "WagAbrHMEF7s0RuH",
+        "versionId": "3af2019f-9707-4676-8740-8e142ff2f04f",
+        "event": "activated",
+        "userId": "a8a2c9ad-2763-4a77-ba81-c27a1ac09067",
+        "createdAt": "2026-09-23T17:08:04.135Z"
+      }
+    ]
+  }
 }

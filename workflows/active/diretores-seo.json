@@ -1,14 +1,1875 @@
 {
+  "id": "uaE0rGAbVVxkpD1o",
   "name": "Moto Na Pratica - Diretores SEO",
-  "description": "Diretores SEO que decidem o que vai ser publicado. Encontram a melhor notícia e chamam o Deep Research via Tool Call.",
-  "nodes": [],
-  "connections": {},
+  "description": "Estes são os Diretores SEO que decidem oq vai ser publicado, um para os eventos especificos e outro para noticias sobre motos em geral\neles não devem entregar uma resposta final mirabolante, o objetivo deles é apenas encontrar a melhor noticia e chamar o Deep Research via Tool Call",
+  "active": true,
+  "activeVersionId": "8b70f683-89b0-416f-b2fc-321c88b0caee",
+  "createdAt": "2026-09-23T17:10:17.173Z",
+  "updatedAt": "2026-09-23T17:13:13.367Z",
+  "isArchived": false,
+  "versionId": "8b70f683-89b0-416f-b2fc-321c88b0caee",
+  "versionCounter": 2,
+  "sourceWorkflowId": null,
+  "triggerCount": 2,
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "triggerAtHour": 6,
+              "triggerAtMinute": 10
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.3,
+      "position": [
+        -304,
+        256
+      ],
+      "id": "dbaab6a3-8f58-4ec2-90ca-768c8e2d2438",
+      "name": "noticias"
+    },
+    {
+      "parameters": {
+        "url": "https://www.motorsport.com/rss/motogp/news",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Accept",
+              "value": "application/rss+xml, application/xml, text/xml"
+            },
+            {
+              "name": "User-Agent",
+              "value": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        144,
+        256
+      ],
+      "id": "bdf5a532-e18c-4630-8d7d-a79b1cccb42a",
+      "name": "scrapping de motosport"
+    },
+    {
+      "parameters": {
+        "jsonSchemaExample": "{\n  \"artigo_vencedor\": \"[Título direto, chamativo e otimizado para SEO da pauta escolhida com base nos dados]\",\n  \"keywords_validadas\": [\n    \"[palavra-chave principal extraída do Trends]\",\n    \"[termo secundário relevante]\",\n    \"[pergunta exata extraída do People Also Ask]\"\n  ],\n  \"justificativa\": \"[Explicação lógica detalhada de por que este tema venceu, citando o volume de buscas do Trends, a dor real mapeada no People Also Ask e a aderência ao tom de voz 'papo reto' do blog]\"\n}"
+      },
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.3,
+      "position": [
+        1568,
+        496
+      ],
+      "id": "157d636c-8003-405c-8430-4a2ddcca65d3",
+      "name": "Structured Output Parser1"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "openrouter/poolside/laguna-xs-2.1:free",
+          "mode": "list",
+          "cachedResultName": "openrouter/poolside/laguna-xs-2.1:free"
+        },
+        "responsesApiEnabled": false,
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.3,
+      "position": [
+        1056,
+        496
+      ],
+      "id": "0b27bf53-5db5-45f6-bf40-4f4b4f27ad26",
+      "name": "OpenAI Chat Model",
+      "credentials": {
+        "openAiApi": {
+          "id": "ni5SGSoVdackq86c",
+          "name": "test"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "description": "Use this tool specifically to collect quantitative data about public interest via Google Trends. Trigger it when you need to analyze search volumes, compare relative popularity between keywords, or track trends over time. \n\n⚠️ CRITICAL LIMITATION: Google Trends fails and returns empty data for long-tail keywords or specific phrases. \n- You MUST NOT generate full questions, sentences, or highly specific long-tail phrases.\n- KEEP IT SHORT: You MUST strictly use broad, high-volume terms consisting of 1 to 3 words maximum per term.\n- WRONG EXAMPLES (DO NOT USE): \"como funciona consórcio de motos\", \"vantagens consórcio moto\".\n- CORRECT EXAMPLES (USE THESE): \"consórcio moto\", \"Yamaha FZ25\", \"Honda CG 160\", \"MotoGP\".\n- Limit the array to a maximum of 5 terms.\n\nJSON Example:\n\n[\n  {\n    \"keywords_to_search\": [\n      \"Yamaha FZ25\",\n      \"Fazer 250\",\n      \"Honda CB Twister\",\n      \"consórcio moto\"\n    ]\n  }\n]",
+        "workflowId": {
+          "__rl": true,
+          "value": "kzsJmLkAWtfy7d6k",
+          "mode": "list",
+          "cachedResultUrl": "/workflow/kzsJmLkAWtfy7d6k",
+          "cachedResultName": "moto na pratica tools"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {},
+          "matchingColumns": [],
+          "schema": [],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.toolWorkflow",
+      "typeVersion": 2.2,
+      "position": [
+        1184,
+        496
+      ],
+      "id": "6b561ce6-ad17-4731-98ec-fa0a80fbe546",
+      "name": "Call 'Moto na pratica - Google Trends'"
+    },
+    {
+      "parameters": {
+        "toolDescription": "Moto na pratica - Deep Research\nUse this tool specifically to search for qualitative, factual, and in-depth information on the web. Trigger it when you need to read multiple sources, extract complex narratives, investigate specific news, market rumors, contract changes, technical details, and synthesize dense texts into comprehensive analytical reports.\n\nJSON Example:\n\n{\n  \"tema\": \"The exact topic the writer needs to research\",\n  \"webhook_callback\": \"https://myn8n.seommerce.shop/webhook/deep-research-callback\"\n}",
+        "method": "POST",
+        "url": "https://myn8n.seommerce.shop/webhook/deep-research",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "id",
+              "value": "={{ $('cria um id unico').item.json.id_pesquisa }}"
+            }
+          ]
+        },
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "x-apify-secret",
+              "value": "bowT7Vwgclr4bUcJd80xZXgyVmI2HzjQdCRYNKX8rjiq3TorPWyw3EiHezLK7hygLlsah6ZLvZmuZf2XIjFmwk6UrtWT26a8OnKGwwje9aDEGLiHMU9N6FYhcO04326B"
+            }
+          ]
+        },
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('parameters0_Name', ``, 'string') }}",
+              "value": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('parameters0_Value', ``, 'string') }}"
+            },
+            {
+              "name": "callbackUrl",
+              "value": "https://myn8n.seommerce.shop/webhook/deep-research-callback"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequestTool",
+      "typeVersion": 4.4,
+      "position": [
+        1312,
+        496
+      ],
+      "id": "3ca99b4f-da97-42fd-a1b8-8496bd96537d",
+      "name": "Call 'Moto na Pratica'"
+    },
+    {
+      "parameters": {
+        "operation": "google_news",
+        "q": "={{ $json.query }} after:2026-07-01",
+        "additionalFields": {
+          "gl": "br"
+        },
+        "requestOptions": {}
+      },
+      "type": "n8n-nodes-serpapi.serpApi",
+      "typeVersion": 1,
+      "position": [
+        144,
+        64
+      ],
+      "id": "fa6ef862-6716-4895-b13e-84e0913a45b5",
+      "name": "Google_news search",
+      "credentials": {
+        "serpApi": {
+          "id": "o4HuNHTVVkpS8N8V",
+          "name": "SerpAPI account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "return [\n  { json: { query: \"lancamento motos 2026 Brasil\" } },\n  { json: { query: \"recalls motos recentes Brasil\" } },\n  { json: { query: \"Moto GP\" } },\n  { json: { query: \"Honda motos mercado 2026\" } },\n  { json: { query: \"mercado de duas rodas noticias\" } },\n  { json: { query: \"TT ilha de man\" } }\n];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -80,
+        64
+      ],
+      "id": "607af1e6-d077-4a10-b19a-9a5c6098da81",
+      "name": "queries para google news"
+    },
+    {
+      "parameters": {
+        "operation": "google_trends_trending_now",
+        "geo": "BR",
+        "additionalFields": {
+          "category_id": "1",
+          "cat": "s"
+        },
+        "requestOptions": {}
+      },
+      "type": "n8n-nodes-serpapi.serpApi",
+      "typeVersion": 1,
+      "position": [
+        144,
+        448
+      ],
+      "id": "0de6dd3a-90ba-416c-b9fe-44842102974e",
+      "name": "Google_trends_trending_now Automobilismo",
+      "credentials": {
+        "serpApi": {
+          "id": "o4HuNHTVVkpS8N8V",
+          "name": "SerpAPI account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const xmlString = $input.first().json.data;\nconst now = new Date();\nconst noticias = [];\n\n// Regex para capturar cada bloco <item>\nconst itemRegex = /<item>([\\s\\S]*?)<\\/item>/g;\nlet match;\n\nwhile ((match = itemRegex.exec(xmlString)) !== null) {\n  const itemContent = match[1];\n\n  // Função auxiliar para extrair tags XML (ignora CDATA automaticamente)\n  const extractTag = (tag) => {\n    const regex = new RegExp(`<${tag}[^>]*>(?:<!\\\\[CDATA\\\\[([\\\\s\\\\S]*?)\\\\]\\\\]>)?([\\\\s\\\\S]*?)<\\\\/${tag}>`, 'i');\n    const tagMatch = itemContent.match(regex);\n    if (!tagMatch) return '';\n    return (tagMatch[1] || tagMatch[2] || '').trim();\n  };\n\n  const title = extractTag('title');\n  const link = extractTag('link');\n  const pubDateStr = extractTag('pubDate');\n\n  let pubDate = new Date(pubDateStr);\n  let daysAgo = 999;\n  \n  if (!isNaN(pubDate)) {\n    // Calcula a diferença em dias (1000ms * 60s * 60m * 24h)\n    daysAgo = (now - pubDate) / (1000 * 60 * 60 * 24);\n  }\n\n  // Filtra APENAS notícias dos últimos 30 dias\n  if (daysAgo <= 30) {\n    noticias.push({\n      titulo: title,\n      link: link,\n      data_publicacao: pubDateStr\n    });\n  }\n}\n\n// Retorna os dados mastigados e organizados\nreturn [{\n  json: {\n    noticias_motogp: noticias,\n    total_encontrado: noticias.length\n  }\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        368,
+        256
+      ],
+      "id": "23229c05-55b8-4b0c-921e-3bea1a5a859c",
+      "name": "parser motosport"
+    },
+    {
+      "parameters": {
+        "jsCode": "const dados = $input.first().json;\nconst tendencias = [];\n\n// Verifica se existe o array de buscas em alta\nif (dados.trending_searches) {\n    dados.trending_searches.forEach(item => {\n        tendencias.push({\n            termo_buscado: item.query,\n            volume_busca: item.search_volume,\n            crescimento: `${item.increase_percentage}%`\n        });\n    });\n}\n\n// Retorna os dados organizados na mesma estrutura do Motorsport\nreturn [{\n    json: {\n        tendencias_brasil: tendencias,\n        total_encontrado: tendencias.length\n    }\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        368,
+        448
+      ],
+      "id": "9ee17f5f-e508-42a5-95de-3aa04060a716",
+      "name": "parser google trends"
+    },
+    {
+      "parameters": {
+        "jsCode": "const items = $input.all();\nlet newsData = [];\nlet linksVistos = new Set(); // Para evitar notícias duplicadas\n\nitems.forEach(item => {\n    // Verifica se o item possui a estrutura de resultados do Google News\n    if (item.json && item.json.news_results) {\n        \n        // Pega os 5 primeiros resultados de cada uma das 6 queries para não sobrecarregar a IA\n        let resultados = item.json.news_results.slice(0, 5);\n        \n        resultados.forEach(n => {\n            // Checa se a notícia já foi adicionada (evita repetições de pautas iguais)\n            if (!linksVistos.has(n.link)) {\n                linksVistos.add(n.link);\n                \n                newsData.push({\n                    titulo: n.title,\n                    fonte: n.source?.name || 'Desconhecido',\n                    link: n.link,\n                    data_publicacao: n.date\n                });\n            }\n        });\n    }\n});\n\n// Ordena as notícias da mais recente para a mais antiga (baseado na string de data do Google)\nnewsData.sort((a, b) => new Date(b.data_publicacao) - new Date(a.data_publicacao));\n\n// Retorna o payload estruturado para se juntar ao Merge final\nreturn [{\n    json: {\n        manchetes_google_news: newsData,\n        total_encontrado: newsData.length\n    }\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        368,
+        64
+      ],
+      "id": "57a78544-635a-4d2c-ba78-d99f5e4f34f3",
+      "name": "parser para google news"
+    },
+    {
+      "parameters": {
+        "mode": "combine",
+        "combineBy": "combineByPosition",
+        "numberInputs": 3,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        592,
+        240
+      ],
+      "id": "c03776ec-5f2f-4dfa-a63d-c61d85f59296",
+      "name": "Merge"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Google News: {{ JSON.stringify($json.manchetes_google_news) }}\n\nTrending Now: {{ JSON.stringify($json.tendencias_brasil) }}\n\nMotoGP News: {{ JSON.stringify($json.noticias_motogp) }}\n\nGoogle Search & PAA: {{ JSON.stringify($json.pesquisa_profunda_google) }} use the google trends news to know",
+        "hasOutputParser": true,
+        "options": {
+          "systemMessage": "=You are the Autonomous Editor-in-Chief of the \"Moto na Prática\" portal.\nYour sole objective is to analyze a raw feed of news, select the absolute best topic for an article, and dispatch a research task. YOU DO NOT WRITE ARTICLES.\n\nCurrent year context: 2026. Always base your timeline, dates, and season references strictly on the current year 2026 and 2027, 2028 etc.\n\nEDITORIAL TONE & CRITERIA (MANDATORY):\n\nCore Focus & Intent Preservation: You must maintain the exact focus, tone, and format of the original article. Never force a drastic shift in the narrative angle. Mirror the source material's primary intent:\n\n    Reviews/Listicles: Focus strictly on evaluating the products or items.\n\n    Events: Center the narrative exclusively on the specific event details.\n\n    News: Stick directly to the factual reporting of the news.\n    Avoid diverging from the article's fundamental subject.\"\n\nO tom de voz do blog é \"papo reto\", amigável e com fascinação por 2 rodas. É uma conversa de amigos no posto de gasolina ou na oficina.\nO público-alvo é o motociclista real (ex: o cara que pega sua FZ25 ou moto naked média para ir trampar, pra faculdade ou pegar uma estrada no fim de semana).\nA pauta vencedora deve unir duas coisas: ALTO volume de busca atual E responder a uma dor/dúvida real do leitor (People Also Ask).\n\nTool Usage & Capabilities:\nYou have access to specialized tools and must use them strategically.\n\nCRITICAL TOOL EXECUTION PROTOCOL (MANDATORY ORDER):\nYou are STRICTLY FORBIDDEN from generating final content or calling tools out of order. Each tool can only be called EXACTLY ONCE and in this exact sequence:\n\nSTEP 1: Call 'Moto na pratica - Google Trends' (EXACTLY ONCE).\n    Read the user input (JSON with news, MotoGP, and general trends).\n    Formulate a diverse list of keywords covering the most interesting subjects from the input.\n    Call the tool to gather quantitative data about public interest, search volumes, PAA (People Also Ask), and top competitor titles. Wait for it to finish.\n    **CRITICAL:** You must identify at least 3 distinct candidate topics here to ensure you have backups in case of duplication.\n\nSTEP 2: Call 'Posts Ja Escritos' (EXACTLY ONCE).\n    Take your top candidate topics discovered in STEP 1 and query this tool to check the blog's archive.\n    **ANTI-DUPLICATION PROTOCOL (ABSOLUTE RULE):** You MUST cross-reference your candidates with existing articles. If the tool shows that a topic, a specific motorcycle review, or a core subject has ALREADY been covered on the blog, you MUST DISCARD IT IMMEDIATELY.\n    Do not try to invent a \"new angle\" for an old topic. The ONLY exception allowed is a brand-new model year launch (e.g., writing about the completely new 2027 model when the blog only has a post about the 2024 model). Otherwise, if there is a match, the topic is DEAD. Move to your next backup candidate.\n\nSTEP 3: Evaluate and Decide.\n    Analyze the data returned by the Trends tool AND the archive status from 'Posts Ja Escritos'.\n    Select the ONE Winning Pitch based on highest search trend and engaging PAA. \n    **VERIFICATION:** Before confirming, double-check: Is this topic 100% INÉDITO (unpublished) on the blog? If yes, proceed. If no, select your backup topic.\n\nSTEP 4: Call 'Moto na pratica - Deep Research' (EXACTLY ONCE).\n    Use the trends and PAA discovered in STEP 1 to construct your research queries for the confirmed, UNPUBLISHED winning pitch.\n    When calling the tool, use this exact structure:\n    {\n    \"tema\": \"The exact topic the writer needs to research, including specific PAA questions to cover and the exact angle/focus for the article.\"\n    }\n\nSTEP 5: Final Output & Justification.\n    After the Deep Research tool has been successfully triggered, output your final decision to the user.\n    You MUST provide a clear justification explaining WHY this specific topic was chosen (explicitly citing the search volume, the PAA questions that validated it, why it fits the blog's tone).\n    **MANDATORY STATEMENT:** You must explicitly state in your justification: \"I have verified the archive via 'Posts Ja Escritos', and I confirm this topic has NEVER been published on the blog.\"\n    Conclude your execution. DO NOT WRITE THE ARTICLE.\n\nO que mudou e por que vai funcionar melhor:\n\n    Step 1: Agora exige que a IA levante pelo menos 3 tópicos candidatos. Isso é crucial. Se ela tiver apenas um, e ele for repetido, a IA vai forçar a barra para aprová-lo porque não tem uma \"carta na manga\".\n\n    Step 2: Foi renomeado para ANTI-DUPLICATION PROTOCOL. Deixei claro que se houver colisão de tema, o tópico está MORTO (DEAD) e ela deve DESCARTAR IMEDIATAMENTE (DISCARD IT IMMEDIATELY). Removi a brecha do \"novo ângulo\" e deixei apenas a exceção para motos de anos novos, que é uma regra de negócio real.\n\n    Step 3: Adicionado um passo de VERIFICATION, forçando a IA a fazer uma auto-checagem mental antes de seguir.\n\n    Step 5: Adicionada a MANDATORY STATEMENT. Obrigar a IA a escrever com todas as letras \"eu verifiquei o arquivo e confirmo que nunca foi postado\" diminui drasticamente as chances de alucinação e repetição, pois força o modelo a alinhar sua saída de texto com os dados retornados pela ferramenta do Step 2."
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        1232,
+        256
+      ],
+      "id": "1d8903d9-9e4d-451c-97c2-d1245cc9acb4",
+      "name": "Diretor SEO Escolhe a pauta a ser produzida",
+      "retryOnFail": true
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "38af00c6-1832-48b3-80e6-15b46ada30d2",
+              "name": "manchetes_google_news",
+              "value": "={{ $json.manchetes_google_news }}",
+              "type": "array"
+            },
+            {
+              "id": "4dc2b942-7af6-4d0b-aa08-2867f21a6a5c",
+              "name": "noticias_motogp",
+              "value": "={{ $json.noticias_motogp }}",
+              "type": "array"
+            },
+            {
+              "id": "90cf8498-209e-4364-b37e-f55fda67fe85",
+              "name": "tendencias_brasil",
+              "value": "={{ $json.tendencias_brasil }}",
+              "type": "array"
+            },
+            {
+              "id": "945b31c8-1f71-4359-9a88-129b2f491822",
+              "name": "id_pesquisa",
+              "value": "={{ Math.floor(Math.random() * 1000000) }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.5,
+      "position": [
+        816,
+        256
+      ],
+      "id": "b6acc876-b42c-4c5b-861f-498491862c0c",
+      "name": "cria um id unico"
+    },
+    {
+      "parameters": {
+        "url": "https://myn8n.seommerce.shop/webhook/posts-slug",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "action",
+              "value": "get_posts_ja_gerados"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequestTool",
+      "typeVersion": 4.4,
+      "position": [
+        1440,
+        496
+      ],
+      "id": "69deae3f-03cf-4ae9-b826-0744da572ac7",
+      "name": "Call 'Posts Ja Escritos'"
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "triggerAtHour": 6,
+              "triggerAtMinute": 10
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.3,
+      "position": [
+        -304,
+        784
+      ],
+      "id": "0a177849-92bf-40f5-80f7-c64c12e2f78e",
+      "name": "noticias1"
+    },
+    {
+      "parameters": {
+        "url": "https://www.motorsport.com/rss/motogp/news",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Accept",
+              "value": "application/rss+xml, application/xml, text/xml"
+            },
+            {
+              "name": "User-Agent",
+              "value": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        -80,
+        784
+      ],
+      "id": "3ffc5627-7ece-42e6-a621-553549fbb4a7",
+      "name": "scrapping de motosport1"
+    },
+    {
+      "parameters": {
+        "jsCode": "const xmlString = $input.first().json.data;\nconst now = new Date();\nconst noticias = [];\n\n// Regex para capturar cada bloco <item>\nconst itemRegex = /<item>([\\s\\S]*?)<\\/item>/g;\nlet match;\n\nwhile ((match = itemRegex.exec(xmlString)) !== null) {\n  const itemContent = match[1];\n\n  // Função auxiliar para extrair tags XML (ignora CDATA automaticamente)\n  const extractTag = (tag) => {\n    const regex = new RegExp(`<${tag}[^>]*>(?:<!\\\\[CDATA\\\\[([\\\\s\\\\S]*?)\\\\]\\\\]>)?([\\\\s\\\\S]*?)<\\\\/${tag}>`, 'i');\n    const tagMatch = itemContent.match(regex);\n    if (!tagMatch) return '';\n    return (tagMatch[1] || tagMatch[2] || '').trim();\n  };\n\n  const title = extractTag('title');\n  const link = extractTag('link');\n  const pubDateStr = extractTag('pubDate');\n\n  let pubDate = new Date(pubDateStr);\n  let daysAgo = 999;\n  \n  if (!isNaN(pubDate)) {\n    // Calcula a diferença em dias (1000ms * 60s * 60m * 24h)\n    daysAgo = (now - pubDate) / (1000 * 60 * 60 * 24);\n  }\n\n  // Filtra APENAS notícias dos últimos 30 dias\n  if (daysAgo <= 30) {\n    noticias.push({\n      titulo: title,\n      link: link,\n      data_publicacao: pubDateStr\n    });\n  }\n}\n\n// Retorna os dados mastigados e organizados\nreturn [{\n  json: {\n    noticias_motogp: noticias,\n    total_encontrado: noticias.length\n  }\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        144,
+        784
+      ],
+      "id": "81af0145-f0d4-4f48-a61e-ef8aa100fa6e",
+      "name": "parser motosport1"
+    },
+    {
+      "parameters": {
+        "jsonSchemaExample": "{\n  \"artigo_vencedor\": \"[Título direto, chamativo e otimizado para SEO da pauta escolhida com base nos dados]\",\n  \"keywords_validadas\": [\n    \"[palavra-chave principal extraída do Trends]\",\n    \"[termo secundário relevante]\",\n    \"[pergunta exata extraída do People Also Ask]\"\n  ],\n  \"justificativa\": \"[Explicação lógica detalhada de por que este tema venceu, citando o volume de buscas do Trends, a dor real mapeada no People Also Ask e a aderência ao tom de voz 'papo reto' do blog]\"\n}"
+      },
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.3,
+      "position": [
+        1120,
+        1008
+      ],
+      "id": "7fa92efc-a867-4ce2-94b3-166476ba1efc",
+      "name": "Structured Output Parser5"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "vertex_ai/gemini-3.6-flash",
+          "mode": "list",
+          "cachedResultName": "vertex_ai/gemini-3.6-flash"
+        },
+        "responsesApiEnabled": false,
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.3,
+      "position": [
+        608,
+        1008
+      ],
+      "id": "0dc3470c-e956-41ae-824e-d5bf3322415d",
+      "name": "OpenAI Chat Model6",
+      "credentials": {
+        "openAiApi": {
+          "id": "ni5SGSoVdackq86c",
+          "name": "test"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "description": "Use this tool specifically to collect quantitative data about public interest via Google Trends. Trigger it when you need to analyze search volumes, compare relative popularity between keywords, or track trends over time. \n\n⚠️ CRITICAL LIMITATION: Google Trends fails and returns empty data for long-tail keywords or specific phrases. \n- You MUST NOT generate full questions, sentences, or highly specific long-tail phrases.\n- KEEP IT SHORT: You MUST strictly use broad, high-volume terms consisting of 1 to 3 words maximum per term.\n- WRONG EXAMPLES (DO NOT USE): \"como funciona consórcio de motos\", \"vantagens consórcio moto\".\n- CORRECT EXAMPLES (USE THESE): \"consórcio moto\", \"Yamaha FZ25\", \"Honda CG 160\", \"MotoGP\".\n- Limit the array to a maximum of 5 terms.\n\nJSON Example:\n\n[\n  {\n    \"keywords_to_search\": [\n      \"Yamaha FZ25\",\n      \"Fazer 250\",\n      \"Honda CB Twister\",\n      \"consórcio moto\"\n    ]\n  }\n]",
+        "workflowId": {
+          "__rl": true,
+          "value": "kzsJmLkAWtfy7d6k",
+          "mode": "list",
+          "cachedResultUrl": "/workflow/kzsJmLkAWtfy7d6k",
+          "cachedResultName": "moto na pratica tools"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {},
+          "matchingColumns": [],
+          "schema": [],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.toolWorkflow",
+      "typeVersion": 2.2,
+      "position": [
+        736,
+        1008
+      ],
+      "id": "bb030526-7c13-4db5-88b4-c8c4ebfddc73",
+      "name": "Call 'Moto na pratica - Google Trends'2"
+    },
+    {
+      "parameters": {
+        "toolDescription": "Moto na pratica - Deep Research\nUse this tool specifically to search for qualitative, factual, and in-depth information on the web. Trigger it when you need to read multiple sources, extract complex narratives, investigate specific news, market rumors, contract changes, technical details, and synthesize dense texts into comprehensive analytical reports.\n\nJSON Example:\n\n{\n  \"tema\": \"The exact topic the writer needs to research\",\n  \"webhook_callback\": \"https://myn8n.seommerce.shop/webhook/deep-research-callback\"\n}",
+        "method": "POST",
+        "url": "https://myn8n.seommerce.shop/webhook/deep-research",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "id",
+              "value": "={{ $('cria um id unico2').item.json.id_pesquisa }}"
+            }
+          ]
+        },
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "x-apify-secret",
+              "value": "bowT7Vwgclr4bUcJd80xZXgyVmI2HzjQdCRYNKX8rjiq3TorPWyw3EiHezLK7hygLlsah6ZLvZmuZf2XIjFmwk6UrtWT26a8OnKGwwje9aDEGLiHMU9N6FYhcO04326B"
+            }
+          ]
+        },
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('parameters0_Name', ``, 'string') }}",
+              "value": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('parameters0_Value', ``, 'string') }}"
+            },
+            {
+              "name": "callbackUrl",
+              "value": "https://myn8n.seommerce.shop/webhook/deep-research-callback"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequestTool",
+      "typeVersion": 4.4,
+      "position": [
+        864,
+        1008
+      ],
+      "id": "fcb18660-4cc3-4fb4-a7ff-799da75b55fc",
+      "name": "Call 'Moto na Pratica'2"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=MotoGP News: {{ JSON.stringify($json.noticias_motogp) }}\n",
+        "hasOutputParser": true,
+        "options": {
+          "systemMessage": "=You are the Autonomous Editor-in-Chief of the \"Moto na Prática\" portal.\nYour sole objective is to analyze a raw feed of news, select the absolute best topic for an article, and dispatch a research task. YOU DO NOT WRITE ARTICLES.\n\nCurrent year context: 2026. Always base your timeline, dates, and season references strictly on the current year 2026 and 2027, 2028 etc.\n\nEDITORIAL TONE & CRITERIA (MANDATORY):\n\nCore Focus & Intent Preservation: You must maintain the exact focus, tone, and format of the original article. Never force a drastic shift in the narrative angle. Mirror the source material's primary intent:\n\n    Reviews/Listicles: Focus strictly on evaluating the products or items.\n\n    Events: Center the narrative exclusively on the specific event details.\n\n    News: Stick directly to the factual reporting of the news.\n    Avoid diverging from the article's fundamental subject.\"\n\nO tom de voz do blog é \"papo reto\", amigável e com fascinação por 2 rodas. É uma conversa de amigos no posto de gasolina ou na oficina.\nO público-alvo é o motociclista real (ex: o cara que pega sua FZ25 ou moto naked média para ir trampar, pra faculdade ou pegar uma estrada no fim de semana).\nA pauta vencedora deve unir duas coisas: ALTO volume de busca atual E responder a uma dor/dúvida real do leitor (People Also Ask).\n\nTool Usage & Capabilities:\nYou have access to specialized tools and must use them strategically.\n\nCRITICAL TOOL EXECUTION PROTOCOL (MANDATORY ORDER):\nYou are STRICTLY FORBIDDEN from generating final content or calling tools out of order. Each tool can only be called EXACTLY ONCE and in this exact sequence:\n\nSTEP 1: Call 'Moto na pratica - Google Trends' (EXACTLY ONCE).\n    Read the user input (JSON with news, MotoGP, and general trends).\n    Formulate a diverse list of keywords covering the most interesting subjects from the input.\n    Call the tool to gather quantitative data about public interest, search volumes, PAA (People Also Ask), and top competitor titles. Wait for it to finish.\n    **CRITICAL:** You must identify at least 3 distinct candidate topics here to ensure you have backups in case of duplication.\n\nSTEP 2: Call 'Posts Ja Escritos' (EXACTLY ONCE).\n    Take your top candidate topics discovered in STEP 1 and query this tool to check the blog's archive.\n    **ANTI-DUPLICATION PROTOCOL (ABSOLUTE RULE):** You MUST cross-reference your candidates with existing articles. If the tool shows that a topic, a specific motorcycle review, or a core subject has ALREADY been covered on the blog, you MUST DISCARD IT IMMEDIATELY.\n    Do not try to invent a \"new angle\" for an old topic. The ONLY exception allowed is a brand-new model year launch (e.g., writing about the completely new 2027 model when the blog only has a post about the 2024 model). Otherwise, if there is a match, the topic is DEAD. Move to your next backup candidate.\n\nSTEP 3: Evaluate and Decide.\n    Analyze the data returned by the Trends tool AND the archive status from 'Posts Ja Escritos'.\n    Select the ONE Winning Pitch based on highest search trend and engaging PAA. \n    **VERIFICATION:** Before confirming, double-check: Is this topic 100% INÉDITO (unpublished) on the blog? If yes, proceed. If no, select your backup topic.\n\nSTEP 4: Call 'Moto na pratica - Deep Research' (EXACTLY ONCE).\n    Use the trends and PAA discovered in STEP 1 to construct your research queries for the confirmed, UNPUBLISHED winning pitch.\n    When calling the tool, use this exact structure:\n    {\n    \"tema\": \"The exact topic the writer needs to research, including specific PAA questions to cover and the exact angle/focus for the article.\"\n    }\n\nSTEP 5: Final Output & Justification.\n    After the Deep Research tool has been successfully triggered, output your final decision to the user.\n    You MUST provide a clear justification explaining WHY this specific topic was chosen (explicitly citing the search volume, the PAA questions that validated it, why it fits the blog's tone).\n    **MANDATORY STATEMENT:** You must explicitly state in your justification: \"I have verified the archive via 'Posts Ja Escritos', and I confirm this topic has NEVER been published on the blog.\"\n    Conclude your execution. DO NOT WRITE THE ARTICLE.\n\nO que mudou e por que vai funcionar melhor:\n\n    Step 1: Agora exige que a IA levante pelo menos 3 tópicos candidatos. Isso é crucial. Se ela tiver apenas um, e ele for repetido, a IA vai forçar a barra para aprová-lo porque não tem uma \"carta na manga\".\n\n    Step 2: Foi renomeado para ANTI-DUPLICATION PROTOCOL. Deixei claro que se houver colisão de tema, o tópico está MORTO (DEAD) e ela deve DESCARTAR IMEDIATAMENTE (DISCARD IT IMMEDIATELY). Removi a brecha do \"novo ângulo\" e deixei apenas a exceção para motos de anos novos, que é uma regra de negócio real.\n\n    Step 3: Adicionado um passo de VERIFICATION, forçando a IA a fazer uma auto-checagem mental antes de seguir.\n\n    Step 5: Adicionada a MANDATORY STATEMENT. Obrigar a IA a escrever com todas as letras \"eu verifiquei o arquivo e confirmo que nunca foi postado\" diminui drasticamente as chances de alucinação e repetição, pois força o modelo a alinhar sua saída de texto com os dados retornados pela ferramenta do Step 2."
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        784,
+        784
+      ],
+      "id": "638954b3-a803-4eb4-8725-1e5badea4fa2",
+      "name": "Diretor SEO Escolhe a pauta a ser produzida2",
+      "retryOnFail": true
+    },
+    {
+      "parameters": {
+        "url": "https://myn8n.seommerce.shop/webhook/posts-slug",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "action",
+              "value": "get_posts_ja_gerados"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequestTool",
+      "typeVersion": 4.4,
+      "position": [
+        992,
+        1008
+      ],
+      "id": "b25fd2a9-9c16-4b91-9579-08ea17f2fbf9",
+      "name": "Call 'Posts Ja Escritos'2"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "4dc2b942-7af6-4d0b-aa08-2867f21a6a5c",
+              "name": "noticias_motogp",
+              "value": "={{ $json.noticias_motogp }}",
+              "type": "array"
+            },
+            {
+              "id": "945b31c8-1f71-4359-9a88-129b2f491822",
+              "name": "id_pesquisa",
+              "value": "={{ Math.floor(Math.random() * 1000000) }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.5,
+      "position": [
+        368,
+        784
+      ],
+      "id": "edc83a16-05f1-40a4-8fac-b29f5c059724",
+      "name": "cria um id unico2"
+    }
+  ],
+  "connections": {
+    "noticias": {
+      "main": [
+        [
+          {
+            "node": "scrapping de motosport",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "queries para google news",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Google_trends_trending_now Automobilismo",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "scrapping de motosport": {
+      "main": [
+        [
+          {
+            "node": "parser motosport",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Structured Output Parser1": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "Diretor SEO Escolhe a pauta a ser produzida",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Diretor SEO Escolhe a pauta a ser produzida",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Call 'Moto na pratica - Google Trends'": {
+      "ai_tool": [
+        [
+          {
+            "node": "Diretor SEO Escolhe a pauta a ser produzida",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Call 'Moto na Pratica'": {
+      "ai_tool": [
+        [
+          {
+            "node": "Diretor SEO Escolhe a pauta a ser produzida",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google_news search": {
+      "main": [
+        [
+          {
+            "node": "parser para google news",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "queries para google news": {
+      "main": [
+        [
+          {
+            "node": "Google_news search",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google_trends_trending_now Automobilismo": {
+      "main": [
+        [
+          {
+            "node": "parser google trends",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "parser motosport": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "parser google trends": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 2
+          }
+        ]
+      ]
+    },
+    "parser para google news": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge": {
+      "main": [
+        [
+          {
+            "node": "cria um id unico",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "cria um id unico": {
+      "main": [
+        [
+          {
+            "node": "Diretor SEO Escolhe a pauta a ser produzida",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Call 'Posts Ja Escritos'": {
+      "ai_tool": [
+        [
+          {
+            "node": "Diretor SEO Escolhe a pauta a ser produzida",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "noticias1": {
+      "main": [
+        [
+          {
+            "node": "scrapping de motosport1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "scrapping de motosport1": {
+      "main": [
+        [
+          {
+            "node": "parser motosport1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "parser motosport1": {
+      "main": [
+        [
+          {
+            "node": "cria um id unico2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Structured Output Parser5": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "Diretor SEO Escolhe a pauta a ser produzida2",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model6": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Diretor SEO Escolhe a pauta a ser produzida2",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Call 'Moto na pratica - Google Trends'2": {
+      "ai_tool": [
+        [
+          {
+            "node": "Diretor SEO Escolhe a pauta a ser produzida2",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Call 'Moto na Pratica'2": {
+      "ai_tool": [
+        [
+          {
+            "node": "Diretor SEO Escolhe a pauta a ser produzida2",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Call 'Posts Ja Escritos'2": {
+      "ai_tool": [
+        [
+          {
+            "node": "Diretor SEO Escolhe a pauta a ser produzida2",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "cria um id unico2": {
+      "main": [
+        [
+          {
+            "node": "Diretor SEO Escolhe a pauta a ser produzida2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "nodeGroups": [],
   "settings": {
     "executionOrder": "v1",
-    "callerPolicy": "workflowsFromSameOwner"
+    "binaryMode": "separate",
+    "availableInMCP": true
   },
+  "staticData": {
+    "node:noticias": {
+      "recurrenceRules": [
+        null
+      ],
+      "recurrenceRuleSignatures": [
+        null
+      ]
+    },
+    "node:noticias1": {
+      "recurrenceRules": [
+        null
+      ],
+      "recurrenceRuleSignatures": [
+        null
+      ]
+    }
+  },
+  "pinData": {
+    "noticias1": [
+      {
+        "json": {
+          "timestamp": "2026-08-12T06:10:27.041-03:00",
+          "Readable date": "August 12th 2026, 6:10:27 am",
+          "Readable time": "6:10:27 am",
+          "Day of week": "Wednesday",
+          "Year": "2026",
+          "Month": "August",
+          "Day of month": "12",
+          "Hour": "06",
+          "Minute": "10",
+          "Second": "27",
+          "Timezone": "America/Sao_Paulo (UTC-03:00)"
+        }
+      }
+    ]
+  },
+  "meta": null,
   "tags": [
-    {"name": "Moto-Na-Pratica"}
+    {
+      "id": "WWkQSlVovFHP0UDj",
+      "name": "Moto-Na-Pratica",
+      "createdAt": "2026-09-23T17:08:30.993Z",
+      "updatedAt": "2026-09-23T17:08:30.993Z"
+    }
   ],
-  "staticData": null
+  "shared": [
+    {
+      "role": "workflow:owner",
+      "workflowId": "uaE0rGAbVVxkpD1o",
+      "projectId": "0m3AYoFvtbqWOB3e",
+      "project": {
+        "id": "0m3AYoFvtbqWOB3e",
+        "name": "eliezer vargas <eliejosuevargas01@gmail.com>",
+        "type": "personal",
+        "icon": null,
+        "description": null,
+        "customTelemetryTags": [],
+        "creatorId": "a8a2c9ad-2763-4a77-ba81-c27a1ac09067",
+        "createdAt": "2025-12-06T14:56:50.686Z",
+        "updatedAt": "2025-12-06T14:58:20.912Z"
+      },
+      "createdAt": "2026-09-23T17:10:17.173Z",
+      "updatedAt": "2026-09-23T17:10:17.173Z"
+    }
+  ],
+  "activeVersion": {
+    "versionId": "8b70f683-89b0-416f-b2fc-321c88b0caee",
+    "workflowId": "uaE0rGAbVVxkpD1o",
+    "nodes": [
+      {
+        "parameters": {
+          "rule": {
+            "interval": [
+              {
+                "triggerAtHour": 6,
+                "triggerAtMinute": 10
+              }
+            ]
+          }
+        },
+        "type": "n8n-nodes-base.scheduleTrigger",
+        "typeVersion": 1.3,
+        "position": [
+          -304,
+          256
+        ],
+        "id": "dbaab6a3-8f58-4ec2-90ca-768c8e2d2438",
+        "name": "noticias"
+      },
+      {
+        "parameters": {
+          "url": "https://www.motorsport.com/rss/motogp/news",
+          "sendHeaders": true,
+          "headerParameters": {
+            "parameters": [
+              {
+                "name": "Accept",
+                "value": "application/rss+xml, application/xml, text/xml"
+              },
+              {
+                "name": "User-Agent",
+                "value": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
+              }
+            ]
+          },
+          "options": {}
+        },
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.4,
+        "position": [
+          144,
+          256
+        ],
+        "id": "bdf5a532-e18c-4630-8d7d-a79b1cccb42a",
+        "name": "scrapping de motosport"
+      },
+      {
+        "parameters": {
+          "jsonSchemaExample": "{\n  \"artigo_vencedor\": \"[Título direto, chamativo e otimizado para SEO da pauta escolhida com base nos dados]\",\n  \"keywords_validadas\": [\n    \"[palavra-chave principal extraída do Trends]\",\n    \"[termo secundário relevante]\",\n    \"[pergunta exata extraída do People Also Ask]\"\n  ],\n  \"justificativa\": \"[Explicação lógica detalhada de por que este tema venceu, citando o volume de buscas do Trends, a dor real mapeada no People Also Ask e a aderência ao tom de voz 'papo reto' do blog]\"\n}"
+        },
+        "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+        "typeVersion": 1.3,
+        "position": [
+          1568,
+          496
+        ],
+        "id": "157d636c-8003-405c-8430-4a2ddcca65d3",
+        "name": "Structured Output Parser1"
+      },
+      {
+        "parameters": {
+          "model": {
+            "__rl": true,
+            "value": "openrouter/poolside/laguna-xs-2.1:free",
+            "mode": "list",
+            "cachedResultName": "openrouter/poolside/laguna-xs-2.1:free"
+          },
+          "responsesApiEnabled": false,
+          "options": {}
+        },
+        "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+        "typeVersion": 1.3,
+        "position": [
+          1056,
+          496
+        ],
+        "id": "0b27bf53-5db5-45f6-bf40-4f4b4f27ad26",
+        "name": "OpenAI Chat Model",
+        "credentials": {
+          "openAiApi": {
+            "id": "ni5SGSoVdackq86c",
+            "name": "test"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "description": "Use this tool specifically to collect quantitative data about public interest via Google Trends. Trigger it when you need to analyze search volumes, compare relative popularity between keywords, or track trends over time. \n\n⚠️ CRITICAL LIMITATION: Google Trends fails and returns empty data for long-tail keywords or specific phrases. \n- You MUST NOT generate full questions, sentences, or highly specific long-tail phrases.\n- KEEP IT SHORT: You MUST strictly use broad, high-volume terms consisting of 1 to 3 words maximum per term.\n- WRONG EXAMPLES (DO NOT USE): \"como funciona consórcio de motos\", \"vantagens consórcio moto\".\n- CORRECT EXAMPLES (USE THESE): \"consórcio moto\", \"Yamaha FZ25\", \"Honda CG 160\", \"MotoGP\".\n- Limit the array to a maximum of 5 terms.\n\nJSON Example:\n\n[\n  {\n    \"keywords_to_search\": [\n      \"Yamaha FZ25\",\n      \"Fazer 250\",\n      \"Honda CB Twister\",\n      \"consórcio moto\"\n    ]\n  }\n]",
+          "workflowId": {
+            "__rl": true,
+            "value": "kzsJmLkAWtfy7d6k",
+            "mode": "list",
+            "cachedResultUrl": "/workflow/kzsJmLkAWtfy7d6k",
+            "cachedResultName": "moto na pratica tools"
+          },
+          "workflowInputs": {
+            "mappingMode": "defineBelow",
+            "value": {},
+            "matchingColumns": [],
+            "schema": [],
+            "attemptToConvertTypes": false,
+            "convertFieldsToString": false
+          }
+        },
+        "type": "@n8n/n8n-nodes-langchain.toolWorkflow",
+        "typeVersion": 2.2,
+        "position": [
+          1184,
+          496
+        ],
+        "id": "6b561ce6-ad17-4731-98ec-fa0a80fbe546",
+        "name": "Call 'Moto na pratica - Google Trends'"
+      },
+      {
+        "parameters": {
+          "toolDescription": "Moto na pratica - Deep Research\nUse this tool specifically to search for qualitative, factual, and in-depth information on the web. Trigger it when you need to read multiple sources, extract complex narratives, investigate specific news, market rumors, contract changes, technical details, and synthesize dense texts into comprehensive analytical reports.\n\nJSON Example:\n\n{\n  \"tema\": \"The exact topic the writer needs to research\",\n  \"webhook_callback\": \"https://myn8n.seommerce.shop/webhook/deep-research-callback\"\n}",
+          "method": "POST",
+          "url": "https://myn8n.seommerce.shop/webhook/deep-research",
+          "sendQuery": true,
+          "queryParameters": {
+            "parameters": [
+              {
+                "name": "id",
+                "value": "={{ $('cria um id unico').item.json.id_pesquisa }}"
+              }
+            ]
+          },
+          "sendHeaders": true,
+          "headerParameters": {
+            "parameters": [
+              {
+                "name": "x-apify-secret",
+                "value": "bowT7Vwgclr4bUcJd80xZXgyVmI2HzjQdCRYNKX8rjiq3TorPWyw3EiHezLK7hygLlsah6ZLvZmuZf2XIjFmwk6UrtWT26a8OnKGwwje9aDEGLiHMU9N6FYhcO04326B"
+              }
+            ]
+          },
+          "sendBody": true,
+          "bodyParameters": {
+            "parameters": [
+              {
+                "name": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('parameters0_Name', ``, 'string') }}",
+                "value": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('parameters0_Value', ``, 'string') }}"
+              },
+              {
+                "name": "callbackUrl",
+                "value": "https://myn8n.seommerce.shop/webhook/deep-research-callback"
+              }
+            ]
+          },
+          "options": {}
+        },
+        "type": "n8n-nodes-base.httpRequestTool",
+        "typeVersion": 4.4,
+        "position": [
+          1312,
+          496
+        ],
+        "id": "3ca99b4f-da97-42fd-a1b8-8496bd96537d",
+        "name": "Call 'Moto na Pratica'"
+      },
+      {
+        "parameters": {
+          "operation": "google_news",
+          "q": "={{ $json.query }} after:2026-07-01",
+          "additionalFields": {
+            "gl": "br"
+          },
+          "requestOptions": {}
+        },
+        "type": "n8n-nodes-serpapi.serpApi",
+        "typeVersion": 1,
+        "position": [
+          144,
+          64
+        ],
+        "id": "fa6ef862-6716-4895-b13e-84e0913a45b5",
+        "name": "Google_news search",
+        "credentials": {
+          "serpApi": {
+            "id": "o4HuNHTVVkpS8N8V",
+            "name": "SerpAPI account"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "jsCode": "return [\n  { json: { query: \"lancamento motos 2026 Brasil\" } },\n  { json: { query: \"recalls motos recentes Brasil\" } },\n  { json: { query: \"Moto GP\" } },\n  { json: { query: \"Honda motos mercado 2026\" } },\n  { json: { query: \"mercado de duas rodas noticias\" } },\n  { json: { query: \"TT ilha de man\" } }\n];"
+        },
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          -80,
+          64
+        ],
+        "id": "607af1e6-d077-4a10-b19a-9a5c6098da81",
+        "name": "queries para google news"
+      },
+      {
+        "parameters": {
+          "operation": "google_trends_trending_now",
+          "geo": "BR",
+          "additionalFields": {
+            "category_id": "1",
+            "cat": "s"
+          },
+          "requestOptions": {}
+        },
+        "type": "n8n-nodes-serpapi.serpApi",
+        "typeVersion": 1,
+        "position": [
+          144,
+          448
+        ],
+        "id": "0de6dd3a-90ba-416c-b9fe-44842102974e",
+        "name": "Google_trends_trending_now Automobilismo",
+        "credentials": {
+          "serpApi": {
+            "id": "o4HuNHTVVkpS8N8V",
+            "name": "SerpAPI account"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "jsCode": "const xmlString = $input.first().json.data;\nconst now = new Date();\nconst noticias = [];\n\n// Regex para capturar cada bloco <item>\nconst itemRegex = /<item>([\\s\\S]*?)<\\/item>/g;\nlet match;\n\nwhile ((match = itemRegex.exec(xmlString)) !== null) {\n  const itemContent = match[1];\n\n  // Função auxiliar para extrair tags XML (ignora CDATA automaticamente)\n  const extractTag = (tag) => {\n    const regex = new RegExp(`<${tag}[^>]*>(?:<!\\\\[CDATA\\\\[([\\\\s\\\\S]*?)\\\\]\\\\]>)?([\\\\s\\\\S]*?)<\\\\/${tag}>`, 'i');\n    const tagMatch = itemContent.match(regex);\n    if (!tagMatch) return '';\n    return (tagMatch[1] || tagMatch[2] || '').trim();\n  };\n\n  const title = extractTag('title');\n  const link = extractTag('link');\n  const pubDateStr = extractTag('pubDate');\n\n  let pubDate = new Date(pubDateStr);\n  let daysAgo = 999;\n  \n  if (!isNaN(pubDate)) {\n    // Calcula a diferença em dias (1000ms * 60s * 60m * 24h)\n    daysAgo = (now - pubDate) / (1000 * 60 * 60 * 24);\n  }\n\n  // Filtra APENAS notícias dos últimos 30 dias\n  if (daysAgo <= 30) {\n    noticias.push({\n      titulo: title,\n      link: link,\n      data_publicacao: pubDateStr\n    });\n  }\n}\n\n// Retorna os dados mastigados e organizados\nreturn [{\n  json: {\n    noticias_motogp: noticias,\n    total_encontrado: noticias.length\n  }\n}];"
+        },
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          368,
+          256
+        ],
+        "id": "23229c05-55b8-4b0c-921e-3bea1a5a859c",
+        "name": "parser motosport"
+      },
+      {
+        "parameters": {
+          "jsCode": "const dados = $input.first().json;\nconst tendencias = [];\n\n// Verifica se existe o array de buscas em alta\nif (dados.trending_searches) {\n    dados.trending_searches.forEach(item => {\n        tendencias.push({\n            termo_buscado: item.query,\n            volume_busca: item.search_volume,\n            crescimento: `${item.increase_percentage}%`\n        });\n    });\n}\n\n// Retorna os dados organizados na mesma estrutura do Motorsport\nreturn [{\n    json: {\n        tendencias_brasil: tendencias,\n        total_encontrado: tendencias.length\n    }\n}];"
+        },
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          368,
+          448
+        ],
+        "id": "9ee17f5f-e508-42a5-95de-3aa04060a716",
+        "name": "parser google trends"
+      },
+      {
+        "parameters": {
+          "jsCode": "const items = $input.all();\nlet newsData = [];\nlet linksVistos = new Set(); // Para evitar notícias duplicadas\n\nitems.forEach(item => {\n    // Verifica se o item possui a estrutura de resultados do Google News\n    if (item.json && item.json.news_results) {\n        \n        // Pega os 5 primeiros resultados de cada uma das 6 queries para não sobrecarregar a IA\n        let resultados = item.json.news_results.slice(0, 5);\n        \n        resultados.forEach(n => {\n            // Checa se a notícia já foi adicionada (evita repetições de pautas iguais)\n            if (!linksVistos.has(n.link)) {\n                linksVistos.add(n.link);\n                \n                newsData.push({\n                    titulo: n.title,\n                    fonte: n.source?.name || 'Desconhecido',\n                    link: n.link,\n                    data_publicacao: n.date\n                });\n            }\n        });\n    }\n});\n\n// Ordena as notícias da mais recente para a mais antiga (baseado na string de data do Google)\nnewsData.sort((a, b) => new Date(b.data_publicacao) - new Date(a.data_publicacao));\n\n// Retorna o payload estruturado para se juntar ao Merge final\nreturn [{\n    json: {\n        manchetes_google_news: newsData,\n        total_encontrado: newsData.length\n    }\n}];"
+        },
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          368,
+          64
+        ],
+        "id": "57a78544-635a-4d2c-ba78-d99f5e4f34f3",
+        "name": "parser para google news"
+      },
+      {
+        "parameters": {
+          "mode": "combine",
+          "combineBy": "combineByPosition",
+          "numberInputs": 3,
+          "options": {}
+        },
+        "type": "n8n-nodes-base.merge",
+        "typeVersion": 3.2,
+        "position": [
+          592,
+          240
+        ],
+        "id": "c03776ec-5f2f-4dfa-a63d-c61d85f59296",
+        "name": "Merge"
+      },
+      {
+        "parameters": {
+          "promptType": "define",
+          "text": "=Google News: {{ JSON.stringify($json.manchetes_google_news) }}\n\nTrending Now: {{ JSON.stringify($json.tendencias_brasil) }}\n\nMotoGP News: {{ JSON.stringify($json.noticias_motogp) }}\n\nGoogle Search & PAA: {{ JSON.stringify($json.pesquisa_profunda_google) }} use the google trends news to know",
+          "hasOutputParser": true,
+          "options": {
+            "systemMessage": "=You are the Autonomous Editor-in-Chief of the \"Moto na Prática\" portal.\nYour sole objective is to analyze a raw feed of news, select the absolute best topic for an article, and dispatch a research task. YOU DO NOT WRITE ARTICLES.\n\nCurrent year context: 2026. Always base your timeline, dates, and season references strictly on the current year 2026 and 2027, 2028 etc.\n\nEDITORIAL TONE & CRITERIA (MANDATORY):\n\nCore Focus & Intent Preservation: You must maintain the exact focus, tone, and format of the original article. Never force a drastic shift in the narrative angle. Mirror the source material's primary intent:\n\n    Reviews/Listicles: Focus strictly on evaluating the products or items.\n\n    Events: Center the narrative exclusively on the specific event details.\n\n    News: Stick directly to the factual reporting of the news.\n    Avoid diverging from the article's fundamental subject.\"\n\nO tom de voz do blog é \"papo reto\", amigável e com fascinação por 2 rodas. É uma conversa de amigos no posto de gasolina ou na oficina.\nO público-alvo é o motociclista real (ex: o cara que pega sua FZ25 ou moto naked média para ir trampar, pra faculdade ou pegar uma estrada no fim de semana).\nA pauta vencedora deve unir duas coisas: ALTO volume de busca atual E responder a uma dor/dúvida real do leitor (People Also Ask).\n\nTool Usage & Capabilities:\nYou have access to specialized tools and must use them strategically.\n\nCRITICAL TOOL EXECUTION PROTOCOL (MANDATORY ORDER):\nYou are STRICTLY FORBIDDEN from generating final content or calling tools out of order. Each tool can only be called EXACTLY ONCE and in this exact sequence:\n\nSTEP 1: Call 'Moto na pratica - Google Trends' (EXACTLY ONCE).\n    Read the user input (JSON with news, MotoGP, and general trends).\n    Formulate a diverse list of keywords covering the most interesting subjects from the input.\n    Call the tool to gather quantitative data about public interest, search volumes, PAA (People Also Ask), and top competitor titles. Wait for it to finish.\n    **CRITICAL:** You must identify at least 3 distinct candidate topics here to ensure you have backups in case of duplication.\n\nSTEP 2: Call 'Posts Ja Escritos' (EXACTLY ONCE).\n    Take your top candidate topics discovered in STEP 1 and query this tool to check the blog's archive.\n    **ANTI-DUPLICATION PROTOCOL (ABSOLUTE RULE):** You MUST cross-reference your candidates with existing articles. If the tool shows that a topic, a specific motorcycle review, or a core subject has ALREADY been covered on the blog, you MUST DISCARD IT IMMEDIATELY.\n    Do not try to invent a \"new angle\" for an old topic. The ONLY exception allowed is a brand-new model year launch (e.g., writing about the completely new 2027 model when the blog only has a post about the 2024 model). Otherwise, if there is a match, the topic is DEAD. Move to your next backup candidate.\n\nSTEP 3: Evaluate and Decide.\n    Analyze the data returned by the Trends tool AND the archive status from 'Posts Ja Escritos'.\n    Select the ONE Winning Pitch based on highest search trend and engaging PAA. \n    **VERIFICATION:** Before confirming, double-check: Is this topic 100% INÉDITO (unpublished) on the blog? If yes, proceed. If no, select your backup topic.\n\nSTEP 4: Call 'Moto na pratica - Deep Research' (EXACTLY ONCE).\n    Use the trends and PAA discovered in STEP 1 to construct your research queries for the confirmed, UNPUBLISHED winning pitch.\n    When calling the tool, use this exact structure:\n    {\n    \"tema\": \"The exact topic the writer needs to research, including specific PAA questions to cover and the exact angle/focus for the article.\"\n    }\n\nSTEP 5: Final Output & Justification.\n    After the Deep Research tool has been successfully triggered, output your final decision to the user.\n    You MUST provide a clear justification explaining WHY this specific topic was chosen (explicitly citing the search volume, the PAA questions that validated it, why it fits the blog's tone).\n    **MANDATORY STATEMENT:** You must explicitly state in your justification: \"I have verified the archive via 'Posts Ja Escritos', and I confirm this topic has NEVER been published on the blog.\"\n    Conclude your execution. DO NOT WRITE THE ARTICLE.\n\nO que mudou e por que vai funcionar melhor:\n\n    Step 1: Agora exige que a IA levante pelo menos 3 tópicos candidatos. Isso é crucial. Se ela tiver apenas um, e ele for repetido, a IA vai forçar a barra para aprová-lo porque não tem uma \"carta na manga\".\n\n    Step 2: Foi renomeado para ANTI-DUPLICATION PROTOCOL. Deixei claro que se houver colisão de tema, o tópico está MORTO (DEAD) e ela deve DESCARTAR IMEDIATAMENTE (DISCARD IT IMMEDIATELY). Removi a brecha do \"novo ângulo\" e deixei apenas a exceção para motos de anos novos, que é uma regra de negócio real.\n\n    Step 3: Adicionado um passo de VERIFICATION, forçando a IA a fazer uma auto-checagem mental antes de seguir.\n\n    Step 5: Adicionada a MANDATORY STATEMENT. Obrigar a IA a escrever com todas as letras \"eu verifiquei o arquivo e confirmo que nunca foi postado\" diminui drasticamente as chances de alucinação e repetição, pois força o modelo a alinhar sua saída de texto com os dados retornados pela ferramenta do Step 2."
+          }
+        },
+        "type": "@n8n/n8n-nodes-langchain.agent",
+        "typeVersion": 3.1,
+        "position": [
+          1232,
+          256
+        ],
+        "id": "1d8903d9-9e4d-451c-97c2-d1245cc9acb4",
+        "name": "Diretor SEO Escolhe a pauta a ser produzida",
+        "retryOnFail": true
+      },
+      {
+        "parameters": {
+          "assignments": {
+            "assignments": [
+              {
+                "id": "38af00c6-1832-48b3-80e6-15b46ada30d2",
+                "name": "manchetes_google_news",
+                "value": "={{ $json.manchetes_google_news }}",
+                "type": "array"
+              },
+              {
+                "id": "4dc2b942-7af6-4d0b-aa08-2867f21a6a5c",
+                "name": "noticias_motogp",
+                "value": "={{ $json.noticias_motogp }}",
+                "type": "array"
+              },
+              {
+                "id": "90cf8498-209e-4364-b37e-f55fda67fe85",
+                "name": "tendencias_brasil",
+                "value": "={{ $json.tendencias_brasil }}",
+                "type": "array"
+              },
+              {
+                "id": "945b31c8-1f71-4359-9a88-129b2f491822",
+                "name": "id_pesquisa",
+                "value": "={{ Math.floor(Math.random() * 1000000) }}",
+                "type": "string"
+              }
+            ]
+          },
+          "options": {}
+        },
+        "type": "n8n-nodes-base.set",
+        "typeVersion": 3.5,
+        "position": [
+          816,
+          256
+        ],
+        "id": "b6acc876-b42c-4c5b-861f-498491862c0c",
+        "name": "cria um id unico"
+      },
+      {
+        "parameters": {
+          "url": "https://myn8n.seommerce.shop/webhook/posts-slug",
+          "sendQuery": true,
+          "queryParameters": {
+            "parameters": [
+              {
+                "name": "action",
+                "value": "get_posts_ja_gerados"
+              }
+            ]
+          },
+          "options": {}
+        },
+        "type": "n8n-nodes-base.httpRequestTool",
+        "typeVersion": 4.4,
+        "position": [
+          1440,
+          496
+        ],
+        "id": "69deae3f-03cf-4ae9-b826-0744da572ac7",
+        "name": "Call 'Posts Ja Escritos'"
+      },
+      {
+        "parameters": {
+          "rule": {
+            "interval": [
+              {
+                "triggerAtHour": 6,
+                "triggerAtMinute": 10
+              }
+            ]
+          }
+        },
+        "type": "n8n-nodes-base.scheduleTrigger",
+        "typeVersion": 1.3,
+        "position": [
+          -304,
+          784
+        ],
+        "id": "0a177849-92bf-40f5-80f7-c64c12e2f78e",
+        "name": "noticias1"
+      },
+      {
+        "parameters": {
+          "url": "https://www.motorsport.com/rss/motogp/news",
+          "sendHeaders": true,
+          "headerParameters": {
+            "parameters": [
+              {
+                "name": "Accept",
+                "value": "application/rss+xml, application/xml, text/xml"
+              },
+              {
+                "name": "User-Agent",
+                "value": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
+              }
+            ]
+          },
+          "options": {}
+        },
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.4,
+        "position": [
+          -80,
+          784
+        ],
+        "id": "3ffc5627-7ece-42e6-a621-553549fbb4a7",
+        "name": "scrapping de motosport1"
+      },
+      {
+        "parameters": {
+          "jsCode": "const xmlString = $input.first().json.data;\nconst now = new Date();\nconst noticias = [];\n\n// Regex para capturar cada bloco <item>\nconst itemRegex = /<item>([\\s\\S]*?)<\\/item>/g;\nlet match;\n\nwhile ((match = itemRegex.exec(xmlString)) !== null) {\n  const itemContent = match[1];\n\n  // Função auxiliar para extrair tags XML (ignora CDATA automaticamente)\n  const extractTag = (tag) => {\n    const regex = new RegExp(`<${tag}[^>]*>(?:<!\\\\[CDATA\\\\[([\\\\s\\\\S]*?)\\\\]\\\\]>)?([\\\\s\\\\S]*?)<\\\\/${tag}>`, 'i');\n    const tagMatch = itemContent.match(regex);\n    if (!tagMatch) return '';\n    return (tagMatch[1] || tagMatch[2] || '').trim();\n  };\n\n  const title = extractTag('title');\n  const link = extractTag('link');\n  const pubDateStr = extractTag('pubDate');\n\n  let pubDate = new Date(pubDateStr);\n  let daysAgo = 999;\n  \n  if (!isNaN(pubDate)) {\n    // Calcula a diferença em dias (1000ms * 60s * 60m * 24h)\n    daysAgo = (now - pubDate) / (1000 * 60 * 60 * 24);\n  }\n\n  // Filtra APENAS notícias dos últimos 30 dias\n  if (daysAgo <= 30) {\n    noticias.push({\n      titulo: title,\n      link: link,\n      data_publicacao: pubDateStr\n    });\n  }\n}\n\n// Retorna os dados mastigados e organizados\nreturn [{\n  json: {\n    noticias_motogp: noticias,\n    total_encontrado: noticias.length\n  }\n}];"
+        },
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          144,
+          784
+        ],
+        "id": "81af0145-f0d4-4f48-a61e-ef8aa100fa6e",
+        "name": "parser motosport1"
+      },
+      {
+        "parameters": {
+          "jsonSchemaExample": "{\n  \"artigo_vencedor\": \"[Título direto, chamativo e otimizado para SEO da pauta escolhida com base nos dados]\",\n  \"keywords_validadas\": [\n    \"[palavra-chave principal extraída do Trends]\",\n    \"[termo secundário relevante]\",\n    \"[pergunta exata extraída do People Also Ask]\"\n  ],\n  \"justificativa\": \"[Explicação lógica detalhada de por que este tema venceu, citando o volume de buscas do Trends, a dor real mapeada no People Also Ask e a aderência ao tom de voz 'papo reto' do blog]\"\n}"
+        },
+        "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+        "typeVersion": 1.3,
+        "position": [
+          1120,
+          1008
+        ],
+        "id": "7fa92efc-a867-4ce2-94b3-166476ba1efc",
+        "name": "Structured Output Parser5"
+      },
+      {
+        "parameters": {
+          "model": {
+            "__rl": true,
+            "value": "vertex_ai/gemini-3.6-flash",
+            "mode": "list",
+            "cachedResultName": "vertex_ai/gemini-3.6-flash"
+          },
+          "responsesApiEnabled": false,
+          "options": {}
+        },
+        "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+        "typeVersion": 1.3,
+        "position": [
+          608,
+          1008
+        ],
+        "id": "0dc3470c-e956-41ae-824e-d5bf3322415d",
+        "name": "OpenAI Chat Model6",
+        "credentials": {
+          "openAiApi": {
+            "id": "ni5SGSoVdackq86c",
+            "name": "test"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "description": "Use this tool specifically to collect quantitative data about public interest via Google Trends. Trigger it when you need to analyze search volumes, compare relative popularity between keywords, or track trends over time. \n\n⚠️ CRITICAL LIMITATION: Google Trends fails and returns empty data for long-tail keywords or specific phrases. \n- You MUST NOT generate full questions, sentences, or highly specific long-tail phrases.\n- KEEP IT SHORT: You MUST strictly use broad, high-volume terms consisting of 1 to 3 words maximum per term.\n- WRONG EXAMPLES (DO NOT USE): \"como funciona consórcio de motos\", \"vantagens consórcio moto\".\n- CORRECT EXAMPLES (USE THESE): \"consórcio moto\", \"Yamaha FZ25\", \"Honda CG 160\", \"MotoGP\".\n- Limit the array to a maximum of 5 terms.\n\nJSON Example:\n\n[\n  {\n    \"keywords_to_search\": [\n      \"Yamaha FZ25\",\n      \"Fazer 250\",\n      \"Honda CB Twister\",\n      \"consórcio moto\"\n    ]\n  }\n]",
+          "workflowId": {
+            "__rl": true,
+            "value": "kzsJmLkAWtfy7d6k",
+            "mode": "list",
+            "cachedResultUrl": "/workflow/kzsJmLkAWtfy7d6k",
+            "cachedResultName": "moto na pratica tools"
+          },
+          "workflowInputs": {
+            "mappingMode": "defineBelow",
+            "value": {},
+            "matchingColumns": [],
+            "schema": [],
+            "attemptToConvertTypes": false,
+            "convertFieldsToString": false
+          }
+        },
+        "type": "@n8n/n8n-nodes-langchain.toolWorkflow",
+        "typeVersion": 2.2,
+        "position": [
+          736,
+          1008
+        ],
+        "id": "bb030526-7c13-4db5-88b4-c8c4ebfddc73",
+        "name": "Call 'Moto na pratica - Google Trends'2"
+      },
+      {
+        "parameters": {
+          "toolDescription": "Moto na pratica - Deep Research\nUse this tool specifically to search for qualitative, factual, and in-depth information on the web. Trigger it when you need to read multiple sources, extract complex narratives, investigate specific news, market rumors, contract changes, technical details, and synthesize dense texts into comprehensive analytical reports.\n\nJSON Example:\n\n{\n  \"tema\": \"The exact topic the writer needs to research\",\n  \"webhook_callback\": \"https://myn8n.seommerce.shop/webhook/deep-research-callback\"\n}",
+          "method": "POST",
+          "url": "https://myn8n.seommerce.shop/webhook/deep-research",
+          "sendQuery": true,
+          "queryParameters": {
+            "parameters": [
+              {
+                "name": "id",
+                "value": "={{ $('cria um id unico2').item.json.id_pesquisa }}"
+              }
+            ]
+          },
+          "sendHeaders": true,
+          "headerParameters": {
+            "parameters": [
+              {
+                "name": "x-apify-secret",
+                "value": "bowT7Vwgclr4bUcJd80xZXgyVmI2HzjQdCRYNKX8rjiq3TorPWyw3EiHezLK7hygLlsah6ZLvZmuZf2XIjFmwk6UrtWT26a8OnKGwwje9aDEGLiHMU9N6FYhcO04326B"
+              }
+            ]
+          },
+          "sendBody": true,
+          "bodyParameters": {
+            "parameters": [
+              {
+                "name": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('parameters0_Name', ``, 'string') }}",
+                "value": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('parameters0_Value', ``, 'string') }}"
+              },
+              {
+                "name": "callbackUrl",
+                "value": "https://myn8n.seommerce.shop/webhook/deep-research-callback"
+              }
+            ]
+          },
+          "options": {}
+        },
+        "type": "n8n-nodes-base.httpRequestTool",
+        "typeVersion": 4.4,
+        "position": [
+          864,
+          1008
+        ],
+        "id": "fcb18660-4cc3-4fb4-a7ff-799da75b55fc",
+        "name": "Call 'Moto na Pratica'2"
+      },
+      {
+        "parameters": {
+          "promptType": "define",
+          "text": "=MotoGP News: {{ JSON.stringify($json.noticias_motogp) }}\n",
+          "hasOutputParser": true,
+          "options": {
+            "systemMessage": "=You are the Autonomous Editor-in-Chief of the \"Moto na Prática\" portal.\nYour sole objective is to analyze a raw feed of news, select the absolute best topic for an article, and dispatch a research task. YOU DO NOT WRITE ARTICLES.\n\nCurrent year context: 2026. Always base your timeline, dates, and season references strictly on the current year 2026 and 2027, 2028 etc.\n\nEDITORIAL TONE & CRITERIA (MANDATORY):\n\nCore Focus & Intent Preservation: You must maintain the exact focus, tone, and format of the original article. Never force a drastic shift in the narrative angle. Mirror the source material's primary intent:\n\n    Reviews/Listicles: Focus strictly on evaluating the products or items.\n\n    Events: Center the narrative exclusively on the specific event details.\n\n    News: Stick directly to the factual reporting of the news.\n    Avoid diverging from the article's fundamental subject.\"\n\nO tom de voz do blog é \"papo reto\", amigável e com fascinação por 2 rodas. É uma conversa de amigos no posto de gasolina ou na oficina.\nO público-alvo é o motociclista real (ex: o cara que pega sua FZ25 ou moto naked média para ir trampar, pra faculdade ou pegar uma estrada no fim de semana).\nA pauta vencedora deve unir duas coisas: ALTO volume de busca atual E responder a uma dor/dúvida real do leitor (People Also Ask).\n\nTool Usage & Capabilities:\nYou have access to specialized tools and must use them strategically.\n\nCRITICAL TOOL EXECUTION PROTOCOL (MANDATORY ORDER):\nYou are STRICTLY FORBIDDEN from generating final content or calling tools out of order. Each tool can only be called EXACTLY ONCE and in this exact sequence:\n\nSTEP 1: Call 'Moto na pratica - Google Trends' (EXACTLY ONCE).\n    Read the user input (JSON with news, MotoGP, and general trends).\n    Formulate a diverse list of keywords covering the most interesting subjects from the input.\n    Call the tool to gather quantitative data about public interest, search volumes, PAA (People Also Ask), and top competitor titles. Wait for it to finish.\n    **CRITICAL:** You must identify at least 3 distinct candidate topics here to ensure you have backups in case of duplication.\n\nSTEP 2: Call 'Posts Ja Escritos' (EXACTLY ONCE).\n    Take your top candidate topics discovered in STEP 1 and query this tool to check the blog's archive.\n    **ANTI-DUPLICATION PROTOCOL (ABSOLUTE RULE):** You MUST cross-reference your candidates with existing articles. If the tool shows that a topic, a specific motorcycle review, or a core subject has ALREADY been covered on the blog, you MUST DISCARD IT IMMEDIATELY.\n    Do not try to invent a \"new angle\" for an old topic. The ONLY exception allowed is a brand-new model year launch (e.g., writing about the completely new 2027 model when the blog only has a post about the 2024 model). Otherwise, if there is a match, the topic is DEAD. Move to your next backup candidate.\n\nSTEP 3: Evaluate and Decide.\n    Analyze the data returned by the Trends tool AND the archive status from 'Posts Ja Escritos'.\n    Select the ONE Winning Pitch based on highest search trend and engaging PAA. \n    **VERIFICATION:** Before confirming, double-check: Is this topic 100% INÉDITO (unpublished) on the blog? If yes, proceed. If no, select your backup topic.\n\nSTEP 4: Call 'Moto na pratica - Deep Research' (EXACTLY ONCE).\n    Use the trends and PAA discovered in STEP 1 to construct your research queries for the confirmed, UNPUBLISHED winning pitch.\n    When calling the tool, use this exact structure:\n    {\n    \"tema\": \"The exact topic the writer needs to research, including specific PAA questions to cover and the exact angle/focus for the article.\"\n    }\n\nSTEP 5: Final Output & Justification.\n    After the Deep Research tool has been successfully triggered, output your final decision to the user.\n    You MUST provide a clear justification explaining WHY this specific topic was chosen (explicitly citing the search volume, the PAA questions that validated it, why it fits the blog's tone).\n    **MANDATORY STATEMENT:** You must explicitly state in your justification: \"I have verified the archive via 'Posts Ja Escritos', and I confirm this topic has NEVER been published on the blog.\"\n    Conclude your execution. DO NOT WRITE THE ARTICLE.\n\nO que mudou e por que vai funcionar melhor:\n\n    Step 1: Agora exige que a IA levante pelo menos 3 tópicos candidatos. Isso é crucial. Se ela tiver apenas um, e ele for repetido, a IA vai forçar a barra para aprová-lo porque não tem uma \"carta na manga\".\n\n    Step 2: Foi renomeado para ANTI-DUPLICATION PROTOCOL. Deixei claro que se houver colisão de tema, o tópico está MORTO (DEAD) e ela deve DESCARTAR IMEDIATAMENTE (DISCARD IT IMMEDIATELY). Removi a brecha do \"novo ângulo\" e deixei apenas a exceção para motos de anos novos, que é uma regra de negócio real.\n\n    Step 3: Adicionado um passo de VERIFICATION, forçando a IA a fazer uma auto-checagem mental antes de seguir.\n\n    Step 5: Adicionada a MANDATORY STATEMENT. Obrigar a IA a escrever com todas as letras \"eu verifiquei o arquivo e confirmo que nunca foi postado\" diminui drasticamente as chances de alucinação e repetição, pois força o modelo a alinhar sua saída de texto com os dados retornados pela ferramenta do Step 2."
+          }
+        },
+        "type": "@n8n/n8n-nodes-langchain.agent",
+        "typeVersion": 3.1,
+        "position": [
+          784,
+          784
+        ],
+        "id": "638954b3-a803-4eb4-8725-1e5badea4fa2",
+        "name": "Diretor SEO Escolhe a pauta a ser produzida2",
+        "retryOnFail": true
+      },
+      {
+        "parameters": {
+          "url": "https://myn8n.seommerce.shop/webhook/posts-slug",
+          "sendQuery": true,
+          "queryParameters": {
+            "parameters": [
+              {
+                "name": "action",
+                "value": "get_posts_ja_gerados"
+              }
+            ]
+          },
+          "options": {}
+        },
+        "type": "n8n-nodes-base.httpRequestTool",
+        "typeVersion": 4.4,
+        "position": [
+          992,
+          1008
+        ],
+        "id": "b25fd2a9-9c16-4b91-9579-08ea17f2fbf9",
+        "name": "Call 'Posts Ja Escritos'2"
+      },
+      {
+        "parameters": {
+          "assignments": {
+            "assignments": [
+              {
+                "id": "4dc2b942-7af6-4d0b-aa08-2867f21a6a5c",
+                "name": "noticias_motogp",
+                "value": "={{ $json.noticias_motogp }}",
+                "type": "array"
+              },
+              {
+                "id": "945b31c8-1f71-4359-9a88-129b2f491822",
+                "name": "id_pesquisa",
+                "value": "={{ Math.floor(Math.random() * 1000000) }}",
+                "type": "string"
+              }
+            ]
+          },
+          "options": {}
+        },
+        "type": "n8n-nodes-base.set",
+        "typeVersion": 3.5,
+        "position": [
+          368,
+          784
+        ],
+        "id": "edc83a16-05f1-40a4-8fac-b29f5c059724",
+        "name": "cria um id unico2"
+      }
+    ],
+    "connections": {
+      "noticias": {
+        "main": [
+          [
+            {
+              "node": "scrapping de motosport",
+              "type": "main",
+              "index": 0
+            },
+            {
+              "node": "queries para google news",
+              "type": "main",
+              "index": 0
+            },
+            {
+              "node": "Google_trends_trending_now Automobilismo",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "scrapping de motosport": {
+        "main": [
+          [
+            {
+              "node": "parser motosport",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Structured Output Parser1": {
+        "ai_outputParser": [
+          [
+            {
+              "node": "Diretor SEO Escolhe a pauta a ser produzida",
+              "type": "ai_outputParser",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "OpenAI Chat Model": {
+        "ai_languageModel": [
+          [
+            {
+              "node": "Diretor SEO Escolhe a pauta a ser produzida",
+              "type": "ai_languageModel",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Call 'Moto na pratica - Google Trends'": {
+        "ai_tool": [
+          [
+            {
+              "node": "Diretor SEO Escolhe a pauta a ser produzida",
+              "type": "ai_tool",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Call 'Moto na Pratica'": {
+        "ai_tool": [
+          [
+            {
+              "node": "Diretor SEO Escolhe a pauta a ser produzida",
+              "type": "ai_tool",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Google_news search": {
+        "main": [
+          [
+            {
+              "node": "parser para google news",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "queries para google news": {
+        "main": [
+          [
+            {
+              "node": "Google_news search",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Google_trends_trending_now Automobilismo": {
+        "main": [
+          [
+            {
+              "node": "parser google trends",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "parser motosport": {
+        "main": [
+          [
+            {
+              "node": "Merge",
+              "type": "main",
+              "index": 1
+            }
+          ]
+        ]
+      },
+      "parser google trends": {
+        "main": [
+          [
+            {
+              "node": "Merge",
+              "type": "main",
+              "index": 2
+            }
+          ]
+        ]
+      },
+      "parser para google news": {
+        "main": [
+          [
+            {
+              "node": "Merge",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Merge": {
+        "main": [
+          [
+            {
+              "node": "cria um id unico",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "cria um id unico": {
+        "main": [
+          [
+            {
+              "node": "Diretor SEO Escolhe a pauta a ser produzida",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Call 'Posts Ja Escritos'": {
+        "ai_tool": [
+          [
+            {
+              "node": "Diretor SEO Escolhe a pauta a ser produzida",
+              "type": "ai_tool",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "noticias1": {
+        "main": [
+          [
+            {
+              "node": "scrapping de motosport1",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "scrapping de motosport1": {
+        "main": [
+          [
+            {
+              "node": "parser motosport1",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "parser motosport1": {
+        "main": [
+          [
+            {
+              "node": "cria um id unico2",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Structured Output Parser5": {
+        "ai_outputParser": [
+          [
+            {
+              "node": "Diretor SEO Escolhe a pauta a ser produzida2",
+              "type": "ai_outputParser",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "OpenAI Chat Model6": {
+        "ai_languageModel": [
+          [
+            {
+              "node": "Diretor SEO Escolhe a pauta a ser produzida2",
+              "type": "ai_languageModel",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Call 'Moto na pratica - Google Trends'2": {
+        "ai_tool": [
+          [
+            {
+              "node": "Diretor SEO Escolhe a pauta a ser produzida2",
+              "type": "ai_tool",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Call 'Moto na Pratica'2": {
+        "ai_tool": [
+          [
+            {
+              "node": "Diretor SEO Escolhe a pauta a ser produzida2",
+              "type": "ai_tool",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Call 'Posts Ja Escritos'2": {
+        "ai_tool": [
+          [
+            {
+              "node": "Diretor SEO Escolhe a pauta a ser produzida2",
+              "type": "ai_tool",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "cria um id unico2": {
+        "main": [
+          [
+            {
+              "node": "Diretor SEO Escolhe a pauta a ser produzida2",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      }
+    },
+    "nodeGroups": [],
+    "authors": "eliezer vargas",
+    "name": "Version 8b70f683",
+    "description": "",
+    "autosaved": true,
+    "createdAt": "2026-09-23T17:10:17.173Z",
+    "updatedAt": "2026-09-23T17:10:48.495Z",
+    "workflowPublishHistory": [
+      {
+        "id": 3344,
+        "workflowId": "uaE0rGAbVVxkpD1o",
+        "versionId": "8b70f683-89b0-416f-b2fc-321c88b0caee",
+        "event": "activated",
+        "userId": "a8a2c9ad-2763-4a77-ba81-c27a1ac09067",
+        "createdAt": "2026-09-23T17:10:48.492Z"
+      }
+    ]
+  }
 }
