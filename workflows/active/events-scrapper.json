@@ -1,0 +1,14 @@
+{
+  "name": "Moto Na Pratica - Events Scrapper & Results",
+  "description": "Busca diária dos resultados dos eventos de MotoGP, podendo ser expandido para outros eventos do mundo motociclístico.",
+  "nodes": [],
+  "connections": {},
+  "settings": {
+    "executionOrder": "v1",
+    "callerPolicy": "workflowsFromSameOwner"
+  },
+  "tags": [
+    {"name": "Moto-Na-Pratica"}
+  ],
+  "staticData": null
+}

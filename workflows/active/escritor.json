@@ -1,0 +1,15 @@
+{
+  "name": "Moto Na Pratica - Escritor",
+  "description": "Este fluxo é quem escreve o artigo para ser publicado. Chamado diretamente pelo Deep Research com o dossiê completo.",
+  "nodes": [],
+  "connections": {},
+  "settings": {
+    "executionOrder": "v1",
+    "callerPolicy": "workflowsFromSameOwner"
+  },
+  "tags": [
+    {"name": "Moto-Na-Pratica"},
+    {"name": "escritor por scrapper"}
+  ],
+  "staticData": null
+}

@@ -1,0 +1,14 @@
+{
+  "name": "Moto Na Pratica - Diretores SEO",
+  "description": "Diretores SEO que decidem o que vai ser publicado. Encontram a melhor notícia e chamam o Deep Research via Tool Call.",
+  "nodes": [],
+  "connections": {},
+  "settings": {
+    "executionOrder": "v1",
+    "callerPolicy": "workflowsFromSameOwner"
+  },
+  "tags": [
+    {"name": "Moto-Na-Pratica"}
+  ],
+  "staticData": null
+}
